@@ -30,7 +30,7 @@ namespace Sigged.Compiling.Core
 
         public SyntaxTree Parse(string text, CSharpParseOptions options = null)
         {
-            var stringText = SourceText.From(text, Encoding.UTF8);
+            var stringText = SourceText.From(text ?? "", Encoding.UTF8);
             return SyntaxFactory.ParseSyntaxTree(stringText, options);
         }
 

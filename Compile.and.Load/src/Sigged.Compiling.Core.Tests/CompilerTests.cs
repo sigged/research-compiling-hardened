@@ -15,6 +15,20 @@ namespace Sigged.Compiling.Core.Tests
             compiler = new Compiler(netstandardRefsDirectory);
         }
 
+        [Fact]
+        public void Compiles_Null_Without_Errors()
+        {
+            //arange
+            string source = null;
+            string dllPath = Path.GetTempFileName().Replace(".tmp", ".dll");
+
+            //act
+            var result = compiler.Compile(source, dllPath);
+
+            //assert
+            Assert.True(result.Success);
+        }
+
         [Theory]
         [MemberData(nameof(TestSources.CompilingSources), MemberType = typeof(TestSources))]
         public void Compiles_To_Dll(string source)

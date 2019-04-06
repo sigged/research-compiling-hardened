@@ -9,22 +9,51 @@
         Title=".NET Framework C# REPL by Sigged" Height="450" Width="800">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="30"/>
-            <RowDefinition Height="2*"/>
-            <RowDefinition Height="10"/>
+            <RowDefinition Height="3*"/>
+            <RowDefinition Height="5"/>
             <RowDefinition Height="1*"/>
         </Grid.RowDefinitions>
-        <ToolBarTray Grid.Row="0">
-            <ToolBar>
-                <Button Command="{Binding Clear}" Content="Clear" />
-                <Button Command="{Binding Build}" Content="Build" />
-                <Button Command="{Binding BuildAndRun}" Content="Build &amp; Run" />
-            </ToolBar>
-        </ToolBarTray>
-        <syntaxBox:SyntaxHighlightBox Grid.Row="1" x:Name="txtSource"
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+                <ColumnDefinition Width="5"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Grid.RowSpan="2" 
+                       Background="Black"
+                       Text="{Binding ConsoleOutput}"/>
+            <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
+            <DockPanel Grid.Column="2">
+                <ToolBarTray DockPanel.Dock="Top" Height="50">
+                    <ToolBar>
+                        <Button Command="{Binding Clear}" Content="Clear" />
+                        <Button Command="{Binding Build}" Content="Build" />
+                        <Button Command="{Binding BuildAndRun}" Content="Build &amp; Run" />
+                    </ToolBar>
+                </ToolBarTray>
+                <syntaxBox:SyntaxHighlightBox x:Name="txtSource"
                                       Text="{Binding SourceCode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                       IsLineNumbersMarginVisible="True"
                                        />
-        <GridSplitter Grid.Row="2" />
+
+                <!--<Image Width="100" Height="100" Source="icons/warning.png"/>-->
+            </DockPanel>
+        </Grid>
+        <GridSplitter Grid.Row="1" Height="5" HorizontalAlignment="Stretch" />
+        <TabControl Grid.Row="2" TabStripPlacement="Bottom">
+            <TabItem>
+                <TabItem.Header>Build result</TabItem.Header>
+                <ListView ItemsSource="{Binding Diagnostics}">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <Image Width="18" Height="18" Margin="0,0,5,0" Source="{Binding Diagnostic.Severity, Converter={StaticResource SeverityToIcon}}" />
+                                <TextBlock VerticalAlignment="Center" Text="{Binding Message}"></TextBlock>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </TabItem>
+        </TabControl>
     </Grid>
 </Window>

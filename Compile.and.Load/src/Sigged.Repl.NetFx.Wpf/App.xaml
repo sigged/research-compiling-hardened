@@ -2,8 +2,9 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:Sigged.Repl.NetFx.Wpf"
+             xmlns:conv="clr-namespace:Sigged.Repl.NetFx.Wpf.Converters"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+        <conv:SeverityToIconConverter x:Key="SeverityToIcon" />
     </Application.Resources>
 </Application>
