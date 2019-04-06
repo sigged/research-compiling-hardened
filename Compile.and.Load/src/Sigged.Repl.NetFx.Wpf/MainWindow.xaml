@@ -3,10 +3,28 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:syntaxBox="clr-namespace:AurelienRibon.Ui.SyntaxHighlightBox;assembly=AurelienRibon.Ui.SyntaxHighlightBox"
         xmlns:local="clr-namespace:Sigged.Repl.NetFx.Wpf"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title=".NET Framework C# REPL by Sigged" Height="450" Width="800">
     <Grid>
-        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="2*"/>
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="1*"/>
+        </Grid.RowDefinitions>
+        <ToolBarTray Grid.Row="0">
+            <ToolBar>
+                <Button Command="{Binding Clear}" Content="Clear" />
+                <Button Command="{Binding Build}" Content="Build" />
+                <Button Command="{Binding BuildAndRun}" Content="Build &amp; Run" />
+            </ToolBar>
+        </ToolBarTray>
+        <syntaxBox:SyntaxHighlightBox Grid.Row="1" x:Name="txtSource"
+                                      Text="{Binding SourceCode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      IsLineNumbersMarginVisible="True"
+                                       />
+        <GridSplitter Grid.Row="2" />
     </Grid>
 </Window>
