@@ -49,7 +49,6 @@ namespace Sigged.Compiling.Core.Tests
             //arrange
             using (Stream stream = new MemoryStream())
             {
-
                 //act
                 var result = compiler.Compile(source, "testAssemblyName", stream);
 
