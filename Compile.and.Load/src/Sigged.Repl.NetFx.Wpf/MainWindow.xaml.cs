@@ -89,5 +89,17 @@ namespace Sigged.Repl.NetFx.Wpf
             }
             return ret;
         }
+
+        private void diagnosticsGrid_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            var vm = DataContext as MainWindowsViewModel;
+            if (vm.SelectedDiagnostic != null)
+            {
+                txtSource.CaretIndex = vm.SelectedDiagnostic.Diagnostic.Location.SourceSpan.Start;
+                if(!vm.SelectedDiagnostic.Diagnostic.Location.SourceSpan.IsEmpty)
+                    txtSource.Select(txtSource.CaretIndex, vm.SelectedDiagnostic.Diagnostic.Location.SourceSpan.End - txtSource.CaretIndex);
+                txtSource.Focus();
+            }
+        }
     }
 }

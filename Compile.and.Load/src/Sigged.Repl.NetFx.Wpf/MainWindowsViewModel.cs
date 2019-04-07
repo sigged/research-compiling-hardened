@@ -41,6 +41,42 @@ namespace Sigged.Repl.NetFx.Wpf
             }
         }
 
+        private bool isBuilding;
+        public bool IsBuilding
+        {
+            get { return isBuilding; }
+            set
+            {
+                isBuilding = value;
+                RaisePropertyChanged();
+                RaisePropertyChanged(nameof(Status));
+            }
+        }
+
+        private string status;
+        public string Status
+        {
+            get { return status; }
+            set
+            {
+                status = value;
+                RaisePropertyChanged();
+            }
+        }
+
+
+        private DiagnosticViewModel selectedDiagnostic;
+        public DiagnosticViewModel SelectedDiagnostic
+        {
+            get { return selectedDiagnostic; }
+            set
+            {
+                selectedDiagnostic = value;
+                RaisePropertyChanged();
+            }
+        }
+
+
         private ObservableCollection<DiagnosticViewModel> diagnostics;
         public ObservableCollection<DiagnosticViewModel> Diagnostics
         {
@@ -51,6 +87,15 @@ namespace Sigged.Repl.NetFx.Wpf
             }
         }
 
+
+        public ICommand JumpToDiagnosticSource => new RelayCommand(
+            () => {
+                
+                
+
+            }
+        );
+
         public ICommand Clear => new RelayCommand(
             () => {
                 SourceCode = "";
@@ -60,12 +105,17 @@ namespace Sigged.Repl.NetFx.Wpf
             }
         );
 
-        public ICommand Build => new RelayCommand(() => {
+        public ICommand Build => new RelayCommand(async  () => {
             using (var stream = new MemoryStream())
             {
-                EmitResult results = compiler.Compile(sourceCode, "REPLAssembly", stream);
+                Status = "Building...";
+                IsBuilding = true;
+                EmitResult results = await compiler.Compile(sourceCode, "REPLAssembly", stream);
                 Diagnostics = new ObservableCollection<DiagnosticViewModel>(results.Diagnostics
                                                 .Select(diag => new DiagnosticViewModel(diag)));
+                //Diagnostics[0].Diagnostic.Id
+                IsBuilding = false;
+                Status = results.Success ? "Build Success" : "Build Failed";
             }
         });
 
