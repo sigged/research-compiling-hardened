@@ -6,6 +6,8 @@
              StartupUri="MainWindow.xaml">
     <Application.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+        <conv:EnabledToOpacityConverter x:Key="EnabledToOpacity" />
+        <conv:InverseBooleanConverter x:Key="InverseBoolean" />
         <conv:SeverityToIconConverter x:Key="SeverityToIcon" />
 
         <Style x:Key="DiagnosticsCellStyle" TargetType="DataGridCell">

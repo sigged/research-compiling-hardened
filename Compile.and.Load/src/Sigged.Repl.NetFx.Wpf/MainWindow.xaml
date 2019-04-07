@@ -19,22 +19,54 @@
                 <ColumnDefinition Width="5"></ColumnDefinition>
                 <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
-            <ScrollViewer HorizontalScrollBarVisibility="Auto" Grid.Column="0" Grid.RowSpan="2">
-                <TextBlock x:Name="txtConsole"
+            <ScrollViewer x:Name="consoleScroller" HorizontalScrollBarVisibility="Auto" Grid.Column="0" Grid.RowSpan="2">
+                <DockPanel>
+                    <TextBox x:Name="txtConsoleIn" DockPanel.Dock="Bottom" Height="18.666667"
+                              FontFamily="Consolas" FontSize="14"
+                             AcceptsReturn="True"></TextBox>
+                    <TextBlock x:Name="txtConsoleOut"
                        FontFamily="Consolas" FontSize="14"
                        Padding="5"
                        Foreground="LightGray"
                        TextWrapping="NoWrap"
                        Background="Black"
                        Text="{Binding ConsoleOutput}"/>
+                </DockPanel>
             </ScrollViewer>
             <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
             <DockPanel Grid.Column="2">
-                <ToolBarTray DockPanel.Dock="Top" Height="25">
-                    <ToolBar >
-                        <Button Command="{Binding Clear}" Content="Clear" />
-                        <Button Command="{Binding Build}" Content="Build" />
-                        <Button Command="{Binding BuildAndRun}" Content="Build &amp; Run" />
+                <ToolBarTray DockPanel.Dock="Top" Height="35">
+                    <ToolBar>
+                        <Button Command="{Binding Build}" ToolTip="Build" 
+                                Opacity="{Binding Path=IsEnabled, RelativeSource={RelativeSource Self}, Converter={StaticResource EnabledToOpacity}}"
+                                Padding="3,0,3,0">
+                            <Button.Content>
+                                <StackPanel Orientation="Horizontal">
+                                    <Image Source="pack://application:,,,/icons/build.png" Width="25"></Image>
+                                    <TextBlock VerticalAlignment="Center">Build</TextBlock>
+                                </StackPanel>
+                            </Button.Content>
+                        </Button>
+                        <Button Command="{Binding BuildAndRun}" ToolTip="Build and run" 
+                                Opacity="{Binding Path=IsEnabled, RelativeSource={RelativeSource Self}, Converter={StaticResource EnabledToOpacity}}"
+                                Padding="3,0,3,0">
+                            <Button.Content>
+                                <StackPanel Orientation="Horizontal">
+                                    <Image Source="pack://application:,,,/icons/play.png" Width="25"></Image>
+                                    <TextBlock VerticalAlignment="Center">Run</TextBlock>
+                                </StackPanel>
+                            </Button.Content>
+                        </Button>
+                        <Button Command="{Binding Stop}" ToolTip="Stop execution" 
+                                Opacity="{Binding Path=IsEnabled, RelativeSource={RelativeSource Self}, Converter={StaticResource EnabledToOpacity}}"
+                                Padding="3,0,3,0">
+                            <Button.Content>
+                                <StackPanel Orientation="Horizontal">
+                                    <Image Source="pack://application:,,,/icons/stop.png" Width="25"></Image>
+                                    <TextBlock VerticalAlignment="Center">Stop</TextBlock>
+                                </StackPanel>
+                            </Button.Content>
+                        </Button>
                     </ToolBar>
                 </ToolBarTray>
                 <syntaxBox:SyntaxHighlightBox x:Name="txtSource"

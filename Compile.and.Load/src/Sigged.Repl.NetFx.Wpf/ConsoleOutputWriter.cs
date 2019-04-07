@@ -10,23 +10,29 @@ using System.Windows.Controls;
 
 namespace Sigged.Repl.NetFx.Wpf
 {
-    public class ConsoleRedirector : TextWriter
+    public class ConsoleOutputWriter : TextWriter
     {
         // The control where we will write text.
-        private TextBlock fakeConsole;
-        public ConsoleRedirector(TextBlock fakeConsole)
+        private TextBlock outputControl;
+        public ConsoleOutputWriter(TextBlock outputControl)
         {
-            this.fakeConsole = fakeConsole;
+            this.outputControl = outputControl;
         }
 
         public override void Write(char value)
         {
-            fakeConsole.Text += value;
+            outputControl.Dispatcher.Invoke(() =>
+            {
+                outputControl.Text += value;
+            });
         }
 
         public override void Write(string value)
         {
-            fakeConsole.Text += value;
+            outputControl.Dispatcher.Invoke(() =>
+            {
+                outputControl.Text += value;
+            });
         }
 
         public override Encoding Encoding

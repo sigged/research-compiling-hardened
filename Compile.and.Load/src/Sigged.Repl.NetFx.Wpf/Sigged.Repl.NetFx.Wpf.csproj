@@ -90,7 +90,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="ConsoleRedirector.cs" />
+    <Compile Include="ConsoleInputReader.cs" />
+    <Compile Include="ConsoleOutputWriter.cs" />
+    <Compile Include="Converters\EnabledToOpacityConverter.cs" />
+    <Compile Include="Converters\InverseBooleanConverter.cs" />
     <Compile Include="Converters\SeverityToIconConverter.cs" />
     <Compile Include="DiagnosticViewModel.cs" />
     <Compile Include="MainWindowsViewModel.cs" />
@@ -153,6 +156,11 @@
     <Resource Include="icons\error.png" />
     <Resource Include="icons\warning.png" />
     <Resource Include="icons\info.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="icons\build.png" />
+    <Resource Include="icons\play.png" />
+    <Resource Include="icons\stop.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

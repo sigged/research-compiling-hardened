@@ -8,6 +8,7 @@ using System.IO;
 using System.Reflection;
 using System.Resources;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -23,6 +24,8 @@ namespace Sigged.Repl.NetFx.Wpf
     {
         public MainWindow()
         {
+            Thread.CurrentThread.Name = "UI Thread";
+
             InitializeComponent();
             InitializeHighlighters();
             txtSource.CurrentHighlighter = HighlighterManager.Instance.Highlighters["CSharp"];
@@ -30,16 +33,16 @@ namespace Sigged.Repl.NetFx.Wpf
             DataContext = new MainWindowsViewModel();
 
             var dp = DependencyPropertyDescriptor.FromProperty(TextBlock.TextProperty, typeof(TextBlock));
-            dp.AddValueChanged(txtConsole, (sender, args) =>
+            dp.AddValueChanged(txtConsoleOut, (sender, args) =>
             {
-                (txtConsole.Parent as ScrollViewer).ScrollToBottom();
+                consoleScroller.ScrollToBottom();
             });
 
-            ConsoleRedirector redirector = new ConsoleRedirector(txtConsole);
-            Console.SetOut(redirector);
+            ConsoleOutputWriter outputRedirector = new ConsoleOutputWriter(txtConsoleOut);
+            ConsoleInputReader inputRedirector = new ConsoleInputReader(txtConsoleIn, txtConsoleOut);
+            Console.SetOut(outputRedirector);
+            Console.SetIn(inputRedirector);
         }
-
-
 
         private void InitializeHighlighters()
         {

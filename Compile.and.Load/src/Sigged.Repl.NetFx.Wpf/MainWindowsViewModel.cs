@@ -6,7 +6,9 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace Sigged.Repl.NetFx.Wpf
@@ -27,7 +29,23 @@ namespace Sigged.Repl.NetFx.Wpf
             string netstandardRefsDirectory = Path.Combine(new DirectoryInfo(Environment.CurrentDirectory).Parent.Parent.Parent.Parent.FullName, "libs", "netstandard2.0");
             compiler = new Compiler(netstandardRefsDirectory);
 
-            SourceCode = "dfsdf";
+            SourceCode =
+@"using System;
+
+namespace Test {
+
+    public class Program {
+    
+        public static void Main(string[] args) 
+        {
+            Console.WriteLine(""What is your name?"");
+            string input = Console.ReadLine();
+            Console.WriteLine($""Hello {input}"");
+        }
+
+    }
+
+}";
             consoleOutput =
 @"============================================
           .NET Framework C# REPL
@@ -50,7 +68,6 @@ Ready.
             set {
                 sourceCode = value;
                 RaisePropertyChanged();
-                RaisePropertyChanged(nameof(Clear));
             }
         }
 
@@ -74,6 +91,24 @@ Ready.
                 isBuilding = value;
                 RaisePropertyChanged();
                 RaisePropertyChanged(nameof(Status));
+                RaisePropertyChanged(nameof(Build));
+                RaisePropertyChanged(nameof(BuildAndRun));
+                RaisePropertyChanged(nameof(Stop));
+            }
+        }
+
+        private bool isRunning;
+        public bool IsRunning
+        {
+            get { return isRunning; }
+            set
+            {
+                isRunning = value;
+                RaisePropertyChanged();
+                RaisePropertyChanged(nameof(Status));
+                RaisePropertyChanged(nameof(Build));
+                RaisePropertyChanged(nameof(BuildAndRun));
+                RaisePropertyChanged(nameof(Stop));
             }
         }
 
@@ -108,35 +143,80 @@ Ready.
                 RaisePropertyChanged();
             }
         }
-        
-        public ICommand Clear => new RelayCommand(
-            () => {
-                SourceCode = "";
-            }, 
-            () => {
-                return SourceCode?.Length > 0;
+
+        public ICommand Build => new RelayCommand(
+            async () => {
+                using (var stream = new MemoryStream())
+                {
+                    Status = "Building...";
+                    IsBuilding = true;
+                    
+                    EmitResult results = await compiler.Compile(sourceCode, "REPLAssembly", stream);
+                    Diagnostics = new ObservableCollection<DiagnosticViewModel>(results.Diagnostics
+                                                    .Select(diag => new DiagnosticViewModel(diag)));
+                    IsBuilding = false;
+                    
+                    Status = results.Success ? "Build Success" : "Build Failed";
+                }
+            },
+            () =>
+            {
+                return !isRunning && !IsBuilding;
             }
         );
 
-        public ICommand Build => new RelayCommand(async  () => {
-            using (var stream = new MemoryStream())
-            {
-                Status = "Building...";
-                IsBuilding = true;
-                EmitResult results = await compiler.Compile(sourceCode, "REPLAssembly", stream);
-                Diagnostics = new ObservableCollection<DiagnosticViewModel>(results.Diagnostics
-                                                .Select(diag => new DiagnosticViewModel(diag)));
-                //Diagnostics[0].Diagnostic.Id
-                IsBuilding = false;
-                Status = results.Success ? "Build Success" : "Build Failed";
+        public ICommand BuildAndRun => new RelayCommand(
+            async () => {
+
+                await Task.Delay(0);
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                Task.Run(() =>
+                {   
+                    IsRunning = true;
+                    
+                    Console.WriteLine("What is your name ? ");
+                    char c = (char) Console.Read();
+                    //string input = Console.ReadLine();
+                    Console.WriteLine($"Hello { c }");
+
+                    IsRunning = false;
+                });
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+
+
+                //using (MemoryStream stream = new MemoryStream())
+                //{
+                //    var result = await compiler.Compile(sourceCode, "REPLAssembly", stream);
+                //    var assemly = Assembly.Load(stream.ToArray());
+                //    var type = assemly.GetType("Test.Program");
+                //    //var test = type.FindMembers(MemberTypes.Method, BindingFlags.Static | BindingFlags.Public, null, null);
+                //    try
+                //    {
+                //        type.InvokeMember("Main",
+                //                            BindingFlags.InvokeMethod | BindingFlags.Static | BindingFlags.Public,
+                //                            null, null,
+                //                            new object[] { new string[] { } });
+                //    }
+                //    catch (Exception ex)
+                //    {
+                //        System.Windows.MessageBox.Show(ex.Message);
+                //    }
+                //}
+
+            }, 
+            () => {
+                return !isRunning && !IsBuilding;
             }
-        });
-
-        public ICommand BuildAndRun => new RelayCommand(() => {
-
-            Console.WriteLine("Pwnage!!");
-
-        });
-
+        );
+        
+        public ICommand Stop => new RelayCommand(
+            async () => {
+                
+            },
+            () =>
+            {
+                return isRunning;
+            }
+        );
     }
 }
