@@ -20,18 +20,14 @@
                 <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
             <ScrollViewer x:Name="consoleScroller" HorizontalScrollBarVisibility="Auto" Grid.Column="0" Grid.RowSpan="2">
-                <DockPanel>
-                    <TextBox x:Name="txtConsoleIn" DockPanel.Dock="Bottom" Height="18.666667"
-                              FontFamily="Consolas" FontSize="14"
-                             AcceptsReturn="True"></TextBox>
-                    <TextBlock x:Name="txtConsoleOut"
-                       FontFamily="Consolas" FontSize="14"
-                       Padding="5"
-                       Foreground="LightGray"
-                       TextWrapping="NoWrap"
-                       Background="Black"
-                       Text="{Binding ConsoleOutput}"/>
-                </DockPanel>
+                <TextBox x:Name="txtConsoleOut"
+                    IsReadOnlyCaretVisible="False"
+                    FontFamily="Consolas" FontSize="14"
+                    Padding="5"
+                    Foreground="LightGray"
+                    TextWrapping="NoWrap"
+                    Background="Black"
+                    Text="{Binding ConsoleOutput}"/>
             </ScrollViewer>
             <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
             <DockPanel Grid.Column="2">

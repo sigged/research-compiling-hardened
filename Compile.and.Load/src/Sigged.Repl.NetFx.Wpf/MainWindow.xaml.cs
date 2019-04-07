@@ -39,7 +39,7 @@ namespace Sigged.Repl.NetFx.Wpf
             });
 
             ConsoleOutputWriter outputRedirector = new ConsoleOutputWriter(txtConsoleOut);
-            ConsoleInputReader inputRedirector = new ConsoleInputReader(txtConsoleIn, txtConsoleOut);
+            ConsoleInputReader inputRedirector = new ConsoleInputReader(txtConsoleOut);
             Console.SetOut(outputRedirector);
             Console.SetIn(inputRedirector);
         }
@@ -131,6 +131,11 @@ namespace Sigged.Repl.NetFx.Wpf
                 txtSource.CaretIndex = caretPosition + tabSize + 1;
                 e.Handled = true;
             }
+        }
+
+        private void TxtConsoleOut_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+
         }
     }
 }

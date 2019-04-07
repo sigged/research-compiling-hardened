@@ -13,8 +13,8 @@ namespace Sigged.Repl.NetFx.Wpf
     public class ConsoleOutputWriter : TextWriter
     {
         // The control where we will write text.
-        private TextBlock outputControl;
-        public ConsoleOutputWriter(TextBlock outputControl)
+        private TextBox outputControl;
+        public ConsoleOutputWriter(TextBox outputControl)
         {
             this.outputControl = outputControl;
         }

@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -24,10 +25,15 @@ namespace Sigged.Repl.NetFx.Wpf
 
         private Compiler compiler;
 
+        private Thread runThread;
+
+
         public MainWindowsViewModel()
         {
             string netstandardRefsDirectory = Path.Combine(new DirectoryInfo(Environment.CurrentDirectory).Parent.Parent.Parent.Parent.FullName, "libs", "netstandard2.0");
             compiler = new Compiler(netstandardRefsDirectory);
+
+            runThread = null;
 
             SourceCode =
 @"using System;
@@ -169,19 +175,28 @@ Ready.
             async () => {
 
                 await Task.Delay(0);
-#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-                Task.Run(() =>
-                {   
+
+                runThread = new Thread(new ThreadStart(() =>
+                {
                     IsRunning = true;
-                    
-                    Console.WriteLine("What is your name ? ");
-                    char c = (char) Console.Read();
-                    //string input = Console.ReadLine();
-                    Console.WriteLine($"Hello { c }");
+
+                    Console.Write("What is your name ? ");
+                    //char input = (char)Console.Read();
+                    string input = Console.ReadLine();
+                    Console.WriteLine($"Hello { input }");
 
                     IsRunning = false;
-                });
-#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                }));
+                runThread.Start();
+
+//#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+//                Task.Run(() =>
+//                {   
+                    
+//                },
+//                cancelTokenSource.Token);
+
+//#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 
 
                 //using (MemoryStream stream = new MemoryStream())
@@ -210,8 +225,23 @@ Ready.
         );
         
         public ICommand Stop => new RelayCommand(
-            async () => {
-                
+            () => {
+                if(runThread?.IsAlive == true)
+                {
+                    try
+                    {
+                        runThread.Abort();
+                    }
+                    catch(ThreadAbortException)
+                    {
+                        Console.WriteLine("Execution cancelled.");
+                    }
+                    finally
+                    {
+                        IsRunning = false;
+                    }
+                    
+                }
             },
             () =>
             {
