@@ -44,9 +44,10 @@ namespace Test {
     
         public static void Main(string[] args) 
         {
-            Console.WriteLine(""What is your name?"");
+            Console.Write(""What is your name ? "");
+            //char input = (char)Console.Read();
             string input = Console.ReadLine();
-            Console.WriteLine($""Hello {input}"");
+            Console.WriteLine($""Hello { input }"");
         }
 
     }
@@ -176,47 +177,43 @@ Ready.
 
                 await Task.Delay(0);
 
-                runThread = new Thread(new ThreadStart(() =>
+                runThread = new Thread(new ThreadStart(async () =>
                 {
                     IsRunning = true;
 
-                    Console.Write("What is your name ? ");
-                    //char input = (char)Console.Read();
-                    string input = Console.ReadLine();
-                    Console.WriteLine($"Hello { input }");
+                    using (MemoryStream stream = new MemoryStream())
+                    {
+                        Status = "Building...";
+                        IsBuilding = true;
+
+                        var result = await compiler.Compile(sourceCode, "REPLAssembly", stream);
+                        var assemly = Assembly.Load(stream.ToArray());
+                        var type = assemly.GetType("Test.Program");
+                        //var test = type.FindMembers(MemberTypes.Method, BindingFlags.Static | BindingFlags.Public, null, null);
+                        try
+                        {
+                            IsBuilding = false;
+                            Status = "Running";
+
+                            type.InvokeMember("Main",
+                                                BindingFlags.InvokeMethod | BindingFlags.Static | BindingFlags.Public,
+                                                null, null,
+                                                new object[] { new string[] { } });
+
+                            Status = "Application stopped";
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Windows.MessageBox.Show(ex.Message);
+                        }
+                    }
 
                     IsRunning = false;
                 }));
                 runThread.Start();
 
-//#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-//                Task.Run(() =>
-//                {   
-                    
-//                },
-//                cancelTokenSource.Token);
 
-//#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-
-
-                //using (MemoryStream stream = new MemoryStream())
-                //{
-                //    var result = await compiler.Compile(sourceCode, "REPLAssembly", stream);
-                //    var assemly = Assembly.Load(stream.ToArray());
-                //    var type = assemly.GetType("Test.Program");
-                //    //var test = type.FindMembers(MemberTypes.Method, BindingFlags.Static | BindingFlags.Public, null, null);
-                //    try
-                //    {
-                //        type.InvokeMember("Main",
-                //                            BindingFlags.InvokeMethod | BindingFlags.Static | BindingFlags.Public,
-                //                            null, null,
-                //                            new object[] { new string[] { } });
-                //    }
-                //    catch (Exception ex)
-                //    {
-                //        System.Windows.MessageBox.Show(ex.Message);
-                //    }
-                //}
+                
 
             }, 
             () => {
@@ -234,11 +231,11 @@ Ready.
                     }
                     catch(ThreadAbortException)
                     {
-                        Console.WriteLine("Execution cancelled.");
                     }
                     finally
                     {
                         IsRunning = false;
+                        Console.WriteLine("\n== Execution cancelled by user ==");
                     }
                     
                 }

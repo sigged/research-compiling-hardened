@@ -1,18 +1,20 @@
 ﻿using System;
 using System.Globalization;
 using System.Windows.Data;
+using System.Windows.Media;
 
 namespace Sigged.Repl.NetFx.Wpf.Converters
 {
-    public class InverseBooleanConverter : IValueConverter
+    public class BooleanToStatusColorConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is bool)
+            Color defaultColor = Colors.WhiteSmoke;
+            if (value is bool && parameter is Color)
             {
-                return !(bool)value;
+                return ((bool)value) ? (Color)parameter : defaultColor;
             }
-            return value;
+            return defaultColor;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
@@ -21,3 +23,4 @@ namespace Sigged.Repl.NetFx.Wpf.Converters
         }
     }
 }
+

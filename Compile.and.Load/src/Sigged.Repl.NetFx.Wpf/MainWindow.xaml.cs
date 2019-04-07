@@ -26,6 +26,7 @@ namespace Sigged.Repl.NetFx.Wpf
         {
             Thread.CurrentThread.Name = "UI Thread";
 
+
             InitializeComponent();
             InitializeHighlighters();
             txtSource.CurrentHighlighter = HighlighterManager.Instance.Highlighters["CSharp"];

@@ -104,7 +104,6 @@ namespace Sigged.Repl.NetFx.Wpf
             {
                 DisableInput = true;
             }
-            
         }
 
         public override string ReadLine()

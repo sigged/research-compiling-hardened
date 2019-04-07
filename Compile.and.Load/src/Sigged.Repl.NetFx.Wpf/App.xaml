@@ -9,7 +9,11 @@
         <conv:EnabledToOpacityConverter x:Key="EnabledToOpacity" />
         <conv:InverseBooleanConverter x:Key="InverseBoolean" />
         <conv:SeverityToIconConverter x:Key="SeverityToIcon" />
+        <conv:BooleanToStatusColorConverter x:Key="BooleanToStatusColor" />
 
+        <Color x:Key="RunningStatusColor">OrangeRed</Color>
+        <Color x:Key="BuildingStatusColor">LightBlue</Color>
+        
         <Style x:Key="DiagnosticsCellStyle" TargetType="DataGridCell">
             <Setter Property="Padding" Value="0" />
             <Setter Property="Margin" Value="2" />

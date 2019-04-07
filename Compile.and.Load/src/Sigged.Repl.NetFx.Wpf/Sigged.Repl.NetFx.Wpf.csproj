@@ -92,6 +92,7 @@
     </ApplicationDefinition>
     <Compile Include="ConsoleInputReader.cs" />
     <Compile Include="ConsoleOutputWriter.cs" />
+    <Compile Include="Converters\BooleanToStatusColorConverter.cs" />
     <Compile Include="Converters\EnabledToOpacityConverter.cs" />
     <Compile Include="Converters\InverseBooleanConverter.cs" />
     <Compile Include="Converters\SeverityToIconConverter.cs" />
