@@ -16,14 +16,14 @@ namespace Sigged.Compiling.Core.Tests
         }
 
         [Fact]
-        public void Compiles_Null_Without_Errors()
+        public async void Compiles_Null_Without_Errors()
         {
             //arange
             string source = null;
             string dllPath = Path.GetTempFileName().Replace(".tmp", ".dll");
 
             //act
-            var result = compiler.Compile(source, dllPath);
+            var result = await compiler.Compile(source, dllPath);
 
             //assert
             Assert.True(result.Success);
@@ -31,7 +31,7 @@ namespace Sigged.Compiling.Core.Tests
 
         [Theory]
         [MemberData(nameof(TestSources.CompilingSources), MemberType = typeof(TestSources))]
-        public void Compiles_To_Dll(string source)
+        public async void Compiles_To_Dll(string source)
         {
             string dllPath = "";
             try
@@ -40,7 +40,7 @@ namespace Sigged.Compiling.Core.Tests
                 dllPath = Path.GetTempFileName().Replace(".tmp", ".dll");
 
                 //act
-                var result = compiler.Compile(source, dllPath);
+                var result = await compiler.Compile(source, dllPath);
 
                 //assert
                 Assert.True(result.Success);
@@ -58,13 +58,13 @@ namespace Sigged.Compiling.Core.Tests
 
         [Theory]
         [MemberData(nameof(TestSources.CompilingSources), MemberType = typeof(TestSources))]
-        public void Compiles_To_Stream(string source)
+        public async void Compiles_To_Stream(string source)
         {
             //arrange
             using (Stream stream = new MemoryStream())
             {
                 //act
-                var result = compiler.Compile(source, "testAssemblyName", stream);
+                var result = await compiler.Compile(source, "testAssemblyName", stream);
 
                 //assert
                 Assert.True(result.Success);
@@ -75,7 +75,7 @@ namespace Sigged.Compiling.Core.Tests
 
         [Theory]
         [MemberData(nameof(TestSources.NonCompilingSources), MemberType = typeof(TestSources))]
-        public void Compile_Fails_On_Badcode(string source)
+        public async void Compile_Fails_On_Badcode(string source)
         {
             string dllPath = "";
             try
@@ -84,7 +84,7 @@ namespace Sigged.Compiling.Core.Tests
                 dllPath = Path.GetTempFileName().Replace(".tmp", ".dll");
 
                 //act
-                var result = compiler.Compile(source, dllPath);
+                var result = await compiler.Compile(source, dllPath);
 
                 //assert
                 Assert.False(result.Success);

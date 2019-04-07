@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Sigged.Compiling.Core
 {
@@ -34,7 +35,7 @@ namespace Sigged.Compiling.Core
             return SyntaxFactory.ParseSyntaxTree(stringText, options);
         }
 
-        public EmitResult Compile(
+        public async Task<EmitResult> Compile(
             string source,
             string assemblyName,
             Stream outputStream,
@@ -46,31 +47,33 @@ namespace Sigged.Compiling.Core
             Platform cpuPlatform = Platform.AnyCpu
         )
         {
-            //create c# parsing options
-            var parserOptions = CSharpParseOptions.Default
-                .WithLanguageVersion(languageVersion);
+            return await Task.Run(() => {
+                //create c# parsing options
+                var parserOptions = CSharpParseOptions.Default
+                    .WithLanguageVersion(languageVersion);
 
-            //create compiler options
-            var compilerOptions = new CSharpCompilationOptions(outputKind)
-                .WithOverflowChecks(true)
-                .WithOptimizationLevel(optimizationLevel)
-                .WithPlatform(cpuPlatform);
+                //create compiler options
+                var compilerOptions = new CSharpCompilationOptions(outputKind)
+                    .WithOverflowChecks(true)
+                    .WithOptimizationLevel(optimizationLevel)
+                    .WithPlatform(cpuPlatform);
 
-            //parse source code
-            var parsedSyntaxTree = Parse(source, options: parserOptions);
+                //parse source code
+                var parsedSyntaxTree = Parse(source, options: parserOptions);
 
-            //create assembly
-            var metaDataRefs = GetMetadataReferences().ToList();
-            var compilation = CSharpCompilation
-                .Create(assemblyName, new SyntaxTree[] { parsedSyntaxTree }, metaDataRefs, compilerOptions);
+                //create assembly
+                var metaDataRefs = GetMetadataReferences().ToList();
+                var compilation = CSharpCompilation
+                    .Create(assemblyName, new SyntaxTree[] { parsedSyntaxTree }, metaDataRefs, compilerOptions);
 
-            //compile and return results
-            return (outputPdbStream != null) ?
-                compilation.Emit(outputStream, outputPdbStream) :
-                compilation.Emit(outputStream);
+                //compile and return results
+                return (outputPdbStream != null) ?
+                    compilation.Emit(outputStream, outputPdbStream) :
+                    compilation.Emit(outputStream);
+            });
         }
 
-        public EmitResult Compile(
+        public async Task<EmitResult> Compile(
             string source,
             string outputFilepath,
             string outputPdbFilePath = null,
@@ -90,10 +93,10 @@ namespace Sigged.Compiling.Core
                 {
                     using (pdbFileStream = new FileStream(outputPdbFilePath, FileMode.OpenOrCreate, FileAccess.Write))
                     {
-                        return Compile(source, assemblyName, fileStream, pdbFileStream, languageVersion, generalDiagnosticOption, optimizationLevel, outputKind, cpuPlatform);
+                        return await Compile(source, assemblyName, fileStream, pdbFileStream, languageVersion, generalDiagnosticOption, optimizationLevel, outputKind, cpuPlatform);
                     }
                 }
-                return Compile(source, assemblyName, fileStream, null, languageVersion, generalDiagnosticOption, optimizationLevel, outputKind, cpuPlatform);
+                return await Compile(source, assemblyName, fileStream, null, languageVersion, generalDiagnosticOption, optimizationLevel, outputKind, cpuPlatform);
             }
         }
     }
