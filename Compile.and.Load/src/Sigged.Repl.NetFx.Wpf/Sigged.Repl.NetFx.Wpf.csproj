@@ -90,6 +90,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ConsoleRedirector.cs" />
     <Compile Include="Converters\SeverityToIconConverter.cs" />
     <Compile Include="DiagnosticViewModel.cs" />
     <Compile Include="MainWindowsViewModel.cs" />

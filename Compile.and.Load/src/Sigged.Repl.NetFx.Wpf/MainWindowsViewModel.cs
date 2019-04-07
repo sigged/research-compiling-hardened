@@ -28,6 +28,19 @@ namespace Sigged.Repl.NetFx.Wpf
             compiler = new Compiler(netstandardRefsDirectory);
 
             SourceCode = "dfsdf";
+            consoleOutput =
+@"============================================
+          .NET Framework C# REPL
+                       by Sigged
+============================================
+1. Enter C# code in the editor on the right
+2. Press Build and Run
+3. Watch Roslyn in action!
+============================================
+
+Ready.
+
+";
         }
 
         private string sourceCode;
@@ -38,6 +51,17 @@ namespace Sigged.Repl.NetFx.Wpf
                 sourceCode = value;
                 RaisePropertyChanged();
                 RaisePropertyChanged(nameof(Clear));
+            }
+        }
+
+        private string consoleOutput;
+        public string ConsoleOutput
+        {
+            get { return consoleOutput; }
+            set
+            {
+                consoleOutput = value;
+                RaisePropertyChanged();
             }
         }
 
@@ -64,7 +88,6 @@ namespace Sigged.Repl.NetFx.Wpf
             }
         }
 
-
         private DiagnosticViewModel selectedDiagnostic;
         public DiagnosticViewModel SelectedDiagnostic
         {
@@ -76,7 +99,6 @@ namespace Sigged.Repl.NetFx.Wpf
             }
         }
 
-
         private ObservableCollection<DiagnosticViewModel> diagnostics;
         public ObservableCollection<DiagnosticViewModel> Diagnostics
         {
@@ -86,16 +108,7 @@ namespace Sigged.Repl.NetFx.Wpf
                 RaisePropertyChanged();
             }
         }
-
-
-        public ICommand JumpToDiagnosticSource => new RelayCommand(
-            () => {
-                
-                
-
-            }
-        );
-
+        
         public ICommand Clear => new RelayCommand(
             () => {
                 SourceCode = "";
@@ -120,6 +133,8 @@ namespace Sigged.Repl.NetFx.Wpf
         });
 
         public ICommand BuildAndRun => new RelayCommand(() => {
+
+            Console.WriteLine("Pwnage!!");
 
         });
 

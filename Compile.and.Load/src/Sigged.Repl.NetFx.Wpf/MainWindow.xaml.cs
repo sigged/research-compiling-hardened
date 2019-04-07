@@ -2,12 +2,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Resources;
 using System.Text.RegularExpressions;
 using System.Windows;
+using System.Windows.Controls;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Schema;
@@ -25,7 +27,18 @@ namespace Sigged.Repl.NetFx.Wpf
             txtSource.CurrentHighlighter = HighlighterManager.Instance.Highlighters["CSharp"];
 
             DataContext = new MainWindowsViewModel();
+
+            var dp = DependencyPropertyDescriptor.FromProperty(TextBlock.TextProperty, typeof(TextBlock));
+            dp.AddValueChanged(txtConsole, (sender, args) =>
+            {
+                (txtConsole.Parent as ScrollViewer).ScrollToBottom();
+            });
+
+            ConsoleRedirector redirector = new ConsoleRedirector(txtConsole);
+            Console.SetOut(redirector);
         }
+
+
 
         private void InitializeHighlighters()
         {
