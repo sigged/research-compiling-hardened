@@ -30,14 +30,15 @@
             </ScrollViewer>
             <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
             <DockPanel Grid.Column="2">
-                <ToolBarTray DockPanel.Dock="Top" Height="50">
-                    <ToolBar>
+                <ToolBarTray DockPanel.Dock="Top" Height="25">
+                    <ToolBar >
                         <Button Command="{Binding Clear}" Content="Clear" />
                         <Button Command="{Binding Build}" Content="Build" />
                         <Button Command="{Binding BuildAndRun}" Content="Build &amp; Run" />
                     </ToolBar>
                 </ToolBarTray>
                 <syntaxBox:SyntaxHighlightBox x:Name="txtSource"
+                                      PreviewKeyDown="TxtSource_PreviewKeyDown"
                                       Text="{Binding SourceCode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                       IsLineNumbersMarginVisible="True"
                                        />
@@ -114,16 +115,6 @@
                             </DataGridTemplateColumn>
                         </DataGrid.Columns>
                     </DataGrid>
-                    <!--<ListView ItemsSource="{Binding Diagnostics}">
-                        <ListView.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal">
-                                    <Image Width="18" Height="18" Margin="0,0,5,0" Source="{Binding Diagnostic.Severity, Converter={StaticResource SeverityToIcon}}" />
-                                    <TextBlock VerticalAlignment="Center" Text="{Binding Message}"></TextBlock>
-                                </StackPanel>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>-->
                 </TabItem>
             </TabControl>
         </DockPanel>

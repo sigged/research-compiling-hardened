@@ -10,6 +10,7 @@ using System.Resources;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Schema;
@@ -112,6 +113,20 @@ namespace Sigged.Repl.NetFx.Wpf
                 if(!vm.SelectedDiagnostic.Diagnostic.Location.SourceSpan.IsEmpty)
                     txtSource.Select(txtSource.CaretIndex, vm.SelectedDiagnostic.Diagnostic.Location.SourceSpan.End - txtSource.CaretIndex);
                 txtSource.Focus();
+            }
+        }
+
+
+        private void TxtSource_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == Key.Tab)
+            {
+                int tabSize = 4;
+                string tab = new string(' ', tabSize);
+                int caretPosition = txtSource.CaretIndex;
+                txtSource.Text = txtSource.Text.Insert(caretPosition, tab);
+                txtSource.CaretIndex = caretPosition + tabSize + 1;
+                e.Handled = true;
             }
         }
     }
