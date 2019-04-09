@@ -1,0 +1,64 @@
+﻿@{
+    Layout = null;
+}<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Code View - Sigged.Repl.NetCore.Web</title>
+    <script src="~/js/codemirror/codemirror-bundle.js"></script>
+    <link href="~/css/codeview-bundle.min.css" rel="stylesheet" />
+    <link href="~/js/codemirror/theme/ssms.css" rel="stylesheet" />
+    <link href="~/js/codemirror/theme/eclipse.css" rel="stylesheet" />
+</head>
+<body>
+<textarea id="source-input">
+/* C demo code */
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Sigged.Repl.NetCore.Web.Models;
+
+namespace Sigged.Repl.NetCore.Web.Controllers
+{
+    public class HomeController : Controller
+    {
+        public IActionResult Index()
+        {
+            return View();
+        }
+        
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error()
+        {
+            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+    }
+}
+</textarea>
+    <script>
+
+        var cEditor = CodeMirror.fromTextArea(document.getElementById("source-input"), {
+            mode: 'text/x-csharp',
+            theme: 'eclipse',
+            lineNumbers: true,
+            matchBrackets: true
+        });
+
+        function changeCodeStyle() {
+            cEditor.setOption('theme', themeselect.value);
+        }
+
+    </script>
+    <select id="themeselect" onchange="changeCodeStyle();" style="position:fixed; top:0;right:0;z-index:100000;">
+        @foreach(var theme in ViewBag.Themes)
+        {
+            <option value="@theme">@theme</option>
+        }
+    </select>
+</body>
+</html>
+

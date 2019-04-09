@@ -1,0 +1,16 @@
+[
+  {
+    "outputFile": "wwwroot/css/repl.css",
+    "inputFile": "assets/css/repl.scss",
+    "includeInProject": true,
+    "minify": { "enabled": true },
+    "options": { "sourceMap": true }
+  },
+  {
+    "outputFile": "assets/css/codeview.css",
+    "inputFile": "assets/css/codeview.scss",
+    "includeInProject": true,
+    "minify": { "enabled": true },
+    "options": { "sourceMap": true }
+  }
+]

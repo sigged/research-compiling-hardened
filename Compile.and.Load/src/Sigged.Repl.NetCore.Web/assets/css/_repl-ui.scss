@@ -1,0 +1,91 @@
+﻿
+
+.repl-wrapper {
+    height: 100vh;
+    display: grid;
+    grid-gap: 0;
+    grid-template-rows: 50px auto;
+
+    @media only screen and (min-width: 768px) {
+        grid-template-rows: 57px auto;
+    }
+}
+
+.repl-header {
+}
+
+.repl-main {
+    background-color: yellow;
+}
+
+.repl-main-ide {
+    height: 100%;
+    background-color: lightblue;
+    display: grid;
+    grid-gap: 0;
+    grid-template-areas:
+        "console hsplitter source"
+        "vsplitter-err vsplitter-err vsplitter-err"
+        "errors errors errors"
+        "vsplitter-st vsplitter-st vsplitter-st"
+        "status status status"
+}
+
+.repl-main-ide-console {
+    grid-area: console;
+    background-color: #000;
+    color:#ddd;
+}
+
+.repl-main-ide-source {
+    grid-area: source;
+    background-color: #fff;
+    display: flex;
+
+    iframe {
+        flex-grow: 1;
+        border: none;
+    }
+}
+
+
+.repl-main-ide-errors {
+    grid-area: errors;
+    background-color: bisque;
+}
+
+.repl-main-ide-status {
+    grid-area:status;
+    background-color: rebeccapurple;
+}
+
+
+.gridsplitter-control-h {
+    border-left: outset 2px #ddd;
+    border-right: outset 2px #ddd;
+    background-color: #ccc;
+    cursor: col-resize;
+}
+
+.gridsplitter-control-v {
+    border-top: outset 2px #ddd;
+    border-bottom: outset 2px #ddd;
+    background-color: #ccc;
+    cursor: row-resize;
+}
+
+.repl-main-ide-splitter-h {
+    grid-area: hsplitter;
+    
+    //cursor:col-resize;
+}
+
+.repl-main-ide-splitter-v-err {
+    grid-area: vsplitter-err;
+    //
+}
+
+.repl-main-ide-splitter-v-st {
+    grid-area: vsplitter-st;
+    //cursor: row-resize;
+}

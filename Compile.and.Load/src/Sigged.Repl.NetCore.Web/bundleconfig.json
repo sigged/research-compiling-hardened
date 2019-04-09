@@ -1,0 +1,78 @@
+﻿[ // this section bundles Jquery and Bootstrap into one script
+  {
+    "inputFiles": [
+      "node_modules/jquery/dist/jquery.js", // jquery must be loaded before bootstrap
+      "node_modules/bootstrap/dist/js/bootstrap.bundle.js" // append bootstrap
+    ],
+    "outputFileName": "wwwroot/js/bootstrap.jq.bundle.js", // this comes out
+    "minify": {
+      "enabled": true,
+      "commentMode": "all"
+    },
+    "includeInProject": true,
+    "sourceMap": true
+  },
+  {
+    "inputFiles": [
+      "assets/js/repl.js"
+    ],
+    "outputFileName": "wwwroot/js/replbundle.js",
+    "minify": {
+      "enabled": true,
+      "commentMode": "all"
+    },
+    "includeInProject": true,
+    "sourceMap": true
+  },
+  //{
+  //  "inputFiles": [
+  //    "assets/js/gridsplitter.js"
+  //  ],
+  //  "outputFileName": "wwwroot/js/gridsplitter.js",
+  //  "minify": {
+  //    "enabled": true,
+  //    "commentMode": "all"
+  //  },
+  //  "includeInProject": true,
+  //  "sourceMap": true
+  //}
+  {
+    "inputFiles": [
+      "node_modules/split-grid/dist/split-grid.js"
+    ],
+    "outputFileName": "wwwroot/js/split-grid.js",
+    "minify": {
+      "enabled": true,
+      "commentMode": "all"
+    },
+    "includeInProject": true,
+    "sourceMap": true
+  },
+  {
+    "inputFiles": [
+      "node_modules/codemirror/lib/codemirror.js",
+      "node_modules/codemirror/mode/clike/clike.js"
+    ],
+    "outputFileName": "wwwroot/js/codemirror/codemirror-bundle.js",
+    "minify": {
+      "enabled": true,
+      "commentMode": "all"
+    },
+    "includeInProject": true,
+    "sourceMap": true
+  },
+  {
+    "inputFiles": [
+      "node_modules/codemirror/lib/codemirror.css",
+      "node_modules/codemirror/theme/ssms.css",
+      "assets/css/codeview.css"
+    ],
+    "outputFileName": "wwwroot/css/codeview-bundle.css",
+    "minify": {
+      "enabled": true,
+      "commentMode": "all"
+    },
+    "includeInProject": true,
+    "sourceMap": true
+  }
+]

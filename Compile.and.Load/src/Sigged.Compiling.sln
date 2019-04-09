@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sigged.Compiling.Core.Tests
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sigged.Repl.NetFx.Wpf", "Sigged.Repl.NetFx.Wpf\Sigged.Repl.NetFx.Wpf.csproj", "{7D53C020-9DDD-48ED-A51F-1D78B2F1389E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sigged.Repl.NetCore.Web", "Sigged.Repl.NetCore.Web\Sigged.Repl.NetCore.Web.csproj", "{C534FD44-C74E-4694-9B93-9E37A5136114}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{7D53C020-9DDD-48ED-A51F-1D78B2F1389E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7D53C020-9DDD-48ED-A51F-1D78B2F1389E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7D53C020-9DDD-48ED-A51F-1D78B2F1389E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C534FD44-C74E-4694-9B93-9E37A5136114}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C534FD44-C74E-4694-9B93-9E37A5136114}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C534FD44-C74E-4694-9B93-9E37A5136114}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C534FD44-C74E-4694-9B93-9E37A5136114}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,0 +1,56 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+@*<div class="text-center">
+        <h1 class="display-4">Welcome</h1>
+        <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    </div>*@
+
+<div class="repl-main-ide" id="repl-main-ide"
+     style="grid-template-columns: 1fr 10px 2fr; grid-template-rows: 3fr 10px 1fr 10px 30px;">
+    <div class="repl-main-ide-console">
+        REPL
+    </div>
+    <div class="repl-main-ide-splitter-h gridsplitter-control-h"></div>
+    <div class="repl-main-ide-source">
+        <iframe style="width:100%;height:100%" src="~/Home/CodeView">
+        </iframe>
+    </div>
+    <div class="repl-main-ide-splitter-v-err gridsplitter-control-v"></div>
+    <div class="repl-main-ide-errors">
+        Errors
+    </div>
+    <div class="repl-main-ide-splitter-v-st gridsplitter-control-v"></div>
+    <div class="repl-main-ide-errors">
+        Errors
+    </div>
+</div>
+
+
+@section head{
+    <script src="~/js/split-grid.min.js"></script>
+}
+<script>
+    const split = Split({ // gutters specified in options
+        columnGutters: [{
+            track: 1,
+            element: document.querySelector('.repl-main-ide-splitter-h'),
+        }],
+        rowGutters: [{
+            track: 1,
+            element: document.querySelector('.repl-main-ide-splitter-v-err'),
+        },
+        {
+            track: 3,
+            element: document.querySelector('.repl-main-ide-splitter-v-st'),
+        }],
+        columnMinSizes: {
+            0: 100,
+            2: 30
+        }
+        //rowMinSize: 100
+    })
+    
+
+</script>
