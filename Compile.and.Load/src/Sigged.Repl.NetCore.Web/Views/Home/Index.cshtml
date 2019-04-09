@@ -8,22 +8,39 @@
     </div>*@
 
 <div class="repl-main-ide" id="repl-main-ide"
-     style="grid-template-columns: 1fr 10px 2fr; grid-template-rows: 3fr 10px 1fr 10px 30px;">
+     style="grid-template-columns: 1fr 10px 2fr; grid-template-rows: 3fr 10px 1fr 0px 30px;">
     <div class="repl-main-ide-console">
         REPL
     </div>
     <div class="repl-main-ide-splitter-h gridsplitter-control-h"></div>
     <div class="repl-main-ide-source">
-        <iframe style="width:100%;height:100%" src="~/Home/CodeView">
-        </iframe>
+        <div class="repl-main-ide-toolbar">
+            <button class="btn btn-info"><img src="~/images/build.png" />Build</button>
+            <button class="btn btn-success"><img src="~/images/play.png" />Run</button>
+            <button class="btn btn-danger" disabled="disabled"><img src="~/images/stop.png" />Stop</button>
+        </div>
+        <iframe src="~/Home/CodeView"></iframe>
     </div>
     <div class="repl-main-ide-splitter-v-err gridsplitter-control-v"></div>
     <div class="repl-main-ide-errors">
-        Errors
+        <table>
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Id</th>
+                    <th>Location</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tr>
+                <td><img src="~/images/error.png" /></td>
+                <td>Error</td><td>Error</td><td>Error</td>
+            </tr>
+        </table>
     </div>
-    <div class="repl-main-ide-splitter-v-st gridsplitter-control-v"></div>
-    <div class="repl-main-ide-errors">
-        Errors
+    <div></div><!-- empty gutter -->
+    <div class="repl-main-ide-status">
+        Ready for action!
     </div>
 </div>
 
@@ -40,16 +57,15 @@
         rowGutters: [{
             track: 1,
             element: document.querySelector('.repl-main-ide-splitter-v-err'),
-        },
-        {
-            track: 3,
-            element: document.querySelector('.repl-main-ide-splitter-v-st'),
         }],
         columnMinSizes: {
             0: 100,
             2: 30
+        },
+        rowMinSizes: {
+            0: 100,
+            2: 45
         }
-        //rowMinSize: 100
     })
     
 
