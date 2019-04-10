@@ -52,6 +52,12 @@ namespace Sigged.Repl.NetCore.Web.Controllers
             cEditor.setOption('theme', themeselect.value);
         }
 
+
+        function updateTextArea() {
+            cEditor.save();
+        }
+        cEditor.on('change', updateTextArea);
+
     </script>
     <select id="themeselect" onchange="changeCodeStyle();" style="position:fixed; top:0;right:0;z-index:100000;">
         @foreach(var theme in ViewBag.Themes)

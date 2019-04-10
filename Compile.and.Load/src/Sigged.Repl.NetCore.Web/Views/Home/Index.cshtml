@@ -15,11 +15,11 @@
     <div class="repl-main-ide-splitter-h gridsplitter-control-h"></div>
     <div class="repl-main-ide-source">
         <div class="repl-main-ide-toolbar">
-            <button class="btn btn-info"><img src="~/images/build.png" />Build</button>
-            <button class="btn btn-success"><img src="~/images/play.png" />Run</button>
-            <button class="btn btn-danger" disabled="disabled"><img src="~/images/stop.png" />Stop</button>
+            <button class="btn btn-info" v-on:click="buildSource" v-bind:disabled="isRunning || isBuilding === true"><img src="~/images/build.png" />Build</button>
+            <button class="btn btn-success" v-on:click="buildAndRunSource" v-bind:disabled="isRunning || isBuilding === true"><img src="~/images/play.png" />Run</button>
+            <button class="btn btn-danger" v-on:click="stopAll" v-bind:disabled="!(isRunning || isBuilding === true)"><img src="~/images/stop.png" />Stop</button>
         </div>
-        <iframe src="~/Home/CodeView"></iframe>
+        <iframe src="~/Home/CodeView" onload="iframeLoaded()"></iframe>
     </div>
     <div class="repl-main-ide-splitter-v-err gridsplitter-control-v"></div>
     <div class="repl-main-ide-errors">
@@ -32,41 +32,64 @@
                     <th>Description</th>
                 </tr>
             </thead>
-            <tr>
-                <td><img src="~/images/error.png" /></td>
-                <td>Error</td><td>Error</td><td>Error</td>
+            <tr v-cloak v-for="err in builderrors">
+                <td><img v-bind:src="'/images/' + err.severity + '.png'" /></td>
+                <td>{{ err.id }}</td>
+                <td>{{ err.location }}</td>
+                <td>{{ err.description }}</td>
             </tr>
         </table>
     </div>
     <div></div><!-- empty gutter -->
     <div class="repl-main-ide-status">
-        Ready for action!
+        <div class="repl-main-ide-status-progressbar progress" v-if="isBuilding === true"><div class="indeterminate"></div></div>
+        <div class="repl-main-ide-status-label" v-cloak>{{ statusText }}</div>
     </div>
 </div>
-
 
 @section head{
     <script src="~/js/split-grid.min.js"></script>
 }
+<script src="~/js/replbundle.min.js"></script>
 <script>
-    const split = Split({ // gutters specified in options
-        columnGutters: [{
-            track: 1,
-            element: document.querySelector('.repl-main-ide-splitter-h'),
-        }],
-        rowGutters: [{
-            track: 1,
-            element: document.querySelector('.repl-main-ide-splitter-v-err'),
-        }],
-        columnMinSizes: {
-            0: 100,
-            2: 30
-        },
-        rowMinSizes: {
-            0: 100,
-            2: 45
-        }
-    })
-    
+    let sourceInput = null;
+    function iframeLoaded() {
+        console.log("Iframe loaded");
+        sourceInput = document.querySelector(".repl-main-ide-source iframe")
+            .contentWindow.document.getElementById("source-input");
+    }
 
+    document.addEventListener("DOMContentLoaded", function () {
+        const split = Split({ // gutters specified in options
+            columnGutters: [{
+                track: 1,
+                element: document.querySelector(".repl-main-ide-splitter-h"),
+            }],
+            rowGutters: [{
+                track: 1,
+                element: document.querySelector(".repl-main-ide-splitter-v-err"),
+            }],
+            columnMinSizes: {
+                0: 100,
+                2: 30
+            },
+            rowMinSizes: {
+                0: 100,
+                2: 45
+            }
+        });
+
+        //const toolbarButtons = document.querySelectorAll(".repl-main-ide-toolbar button")
+        //const toolbarButtons = document.querySelectorAll(".repl-main-ide-toolbar button")
+
+        //const replSvc = replService.init(
+        //    document.querySelector(".repl-main-ide-console"),
+        //    document.querySelector(".repl-main-ide-console"),
+        //    document.querySelector(".repl-main-ide-errors"),
+        //    document.querySelector(".repl-main-ide-status"),
+        //    toolbarButtons[0],
+        //    toolbarButtons[1],
+        //    toolbarButtons[2]
+        //);
+    });
 </script>

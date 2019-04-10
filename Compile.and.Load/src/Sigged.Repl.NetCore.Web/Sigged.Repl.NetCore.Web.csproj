@@ -20,6 +20,8 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="3.0.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.0.0" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.2.0" />
   </ItemGroup>
 
@@ -28,6 +30,16 @@
     <None Include="bundleconfig.json" />
     <None Include="wwwroot\js\bs.jq.bundle.min.js" />
     <None Include="wwwroot\js\bs.jq.bundle.min.js.map" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <ProjectReference Include="..\Sigged.Compiling.Core\Sigged.Compiling.Core.csproj" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <Folder Include="_libs\" />
   </ItemGroup>
 
 </Project>
