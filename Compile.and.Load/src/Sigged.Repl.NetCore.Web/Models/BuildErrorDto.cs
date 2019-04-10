@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Text;
 
 namespace Sigged.Repl.NetCore.Web.Models
 {
@@ -9,7 +7,8 @@ namespace Sigged.Repl.NetCore.Web.Models
     {
         public string Severity { get; set; }
         public string Id { get; set; }
-        public string Location { get; set; }
+        public LinePosition StartPosition { get; set; }
+        public LinePosition EndPosition { get; set; }
         public string Description { get; set; }
     }
 }

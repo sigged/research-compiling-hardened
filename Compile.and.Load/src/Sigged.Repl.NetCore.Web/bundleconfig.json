@@ -12,14 +12,38 @@
     "includeInProject": true,
     "sourceMap": true
   },
+  //{
+  //  "inputFiles": [
+  //    "node_modules/vue/dist/vue.js",
+  //    "assets/js/repl.js"
+  //  ],
+  //  "outputFileName": "wwwroot/js/replbundle.js",
+  //  "minify": {
+  //    "enabled": true,
+  //    "commentMode": "all"
+  //  },
+  //  "includeInProject": true,
+  //  "sourceMap": true
+  //},
   {
     "inputFiles": [
-      "node_modules/vue/dist/vue.js",
       "assets/js/repl.js"
     ],
-    "outputFileName": "wwwroot/js/replbundle.js",
+    "outputFileName": "wwwroot/js/repl.js",
     "minify": {
-      "enabled": true,
+      "enabled": false,
+      "commentMode": "all"
+    },
+    "includeInProject": true,
+    "sourceMap": true
+  },
+  {
+    "inputFiles": [
+      "node_modules/vue/dist/vue.js"
+    ],
+    "outputFileName": "wwwroot/js/vue.js",
+    "minify": {
+      "enabled": false,
       "commentMode": "all"
     },
     "includeInProject": true,

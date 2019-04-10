@@ -1,4 +1,4 @@
-﻿/**
+/**
  * REPL Service
  * @copyright SpruceBit 2019
  * @license MIT

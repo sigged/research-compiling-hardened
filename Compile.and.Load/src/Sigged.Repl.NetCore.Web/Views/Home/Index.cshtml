@@ -35,7 +35,7 @@
             <tr v-cloak v-for="err in builderrors">
                 <td><img v-bind:src="'/images/' + err.severity + '.png'" /></td>
                 <td>{{ err.id }}</td>
-                <td>{{ err.location }}</td>
+                <td>ln {{ (err.startPosition) ? err.startPosition.line : '' }}, ch {{ (err.startPosition) ? err.startPosition.character : '' }}</td>
                 <td>{{ err.description }}</td>
             </tr>
         </table>
@@ -50,13 +50,20 @@
 @section head{
     <script src="~/js/split-grid.min.js"></script>
 }
-<script src="~/js/replbundle.min.js"></script>
+<environment include="Development">
+    <script src="~/js/vue.js"></script>
+    <script src="~/js/repl.js"></script>
+</environment>
+<environment exclude="Development">
+    <script src="~/js/replbundle.min.js"></script>
+</environment>
+
 <script>
-    let sourceInput = null;
+    let cEditor = null;
     function iframeLoaded() {
         console.log("Iframe loaded");
-        sourceInput = document.querySelector(".repl-main-ide-source iframe")
-            .contentWindow.document.getElementById("source-input");
+        cEditor = document.querySelector(".repl-main-ide-source iframe")
+            .contentWindow.cEditor;
     }
 
     document.addEventListener("DOMContentLoaded", function () {

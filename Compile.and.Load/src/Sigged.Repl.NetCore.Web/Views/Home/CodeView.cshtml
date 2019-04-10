@@ -6,10 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Code View - Sigged.Repl.NetCore.Web</title>
-    <script src="~/js/codemirror/codemirror-bundle.js"></script>
-    <link href="~/css/codeview-bundle.min.css" rel="stylesheet" />
-    <link href="~/js/codemirror/theme/ssms.css" rel="stylesheet" />
-    <link href="~/js/codemirror/theme/eclipse.css" rel="stylesheet" />
+    <partial name="_CodeEditorPartial" />
 </head>
 <body>
 <textarea id="source-input">
@@ -39,7 +36,7 @@ namespace Sigged.Repl.NetCore.Web.Controllers
     }
 }
 </textarea>
-    <script>
+    @*<script>
 
         var cEditor = CodeMirror.fromTextArea(document.getElementById("source-input"), {
             mode: 'text/x-csharp',
@@ -64,7 +61,7 @@ namespace Sigged.Repl.NetCore.Web.Controllers
         {
             <option value="@theme">@theme</option>
         }
-    </select>
+    </select>*@
 </body>
 </html>
 

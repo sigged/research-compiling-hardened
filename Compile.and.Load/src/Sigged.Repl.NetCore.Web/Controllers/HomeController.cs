@@ -57,7 +57,8 @@ namespace Sigged.Repl.NetCore.Web.Controllers
                         Id = d.Id,
                         Severity = d.Severity.ToString()?.ToLower(),
                         Description = d.GetMessage(),
-                        Location = GetCodeLocation(d.Location)
+                        StartPosition = d.Location.GetLineSpan().StartLinePosition,
+                        EndPosition = d.Location.GetLineSpan().EndLinePosition
                     }
                 );
                 result.IsSuccess = results.Success;

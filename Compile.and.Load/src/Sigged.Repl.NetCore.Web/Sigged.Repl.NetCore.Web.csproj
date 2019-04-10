@@ -7,13 +7,7 @@
 
   <ItemGroup>
     <Content Remove="bundleconfig.json" />
-    <Content Remove="wwwroot\js\bs.jq.bundle.min.js" />
-    <Content Remove="wwwroot\js\bs.jq.bundle.min.js.map" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <_ContentIncludedByDefault Remove="wwwroot\js\bs.jq.bundle.min.js" />
-    <_ContentIncludedByDefault Remove="wwwroot\js\bs.jq.bundle.min.js.map" />
+    <Content Remove="Views\Shared\_CodeEditorPartial.cshtml" />
   </ItemGroup>
 
 
@@ -28,8 +22,7 @@
 
   <ItemGroup>
     <None Include="bundleconfig.json" />
-    <None Include="wwwroot\js\bs.jq.bundle.min.js" />
-    <None Include="wwwroot\js\bs.jq.bundle.min.js.map" />
+    <None Include="Views\Shared\_CodeEditorPartial.cshtml" />
   </ItemGroup>
 
 
