@@ -7,8 +7,10 @@ namespace Sigged.Repl.NetCore.Web.Models
 {
     public class BuildResultDto
     {
-        public bool IsSuccess { get; set; }
+        public string SessionId { get; set; }
 
+        public bool IsSuccess { get; set; }
+        
         public IEnumerable<BuildErrorDto> BuildErrors { get; set; }
     }
 }

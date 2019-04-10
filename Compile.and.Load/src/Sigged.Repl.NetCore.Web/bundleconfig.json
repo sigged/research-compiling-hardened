@@ -49,6 +49,17 @@
     "includeInProject": true,
     "sourceMap": true
   },
+  {
+    "inputFiles": [
+      "node_modules/@aspnet/signalr/dist/browser/signalr.min.js"
+    ],
+    "outputFileName": "wwwroot/js/signalr.min.js",
+    "minify": {
+      "enabled": false,
+    },
+    "includeInProject": true,
+    "sourceMap": false
+  },
   //{
   //  "inputFiles": [
   //    "assets/js/gridsplitter.js"

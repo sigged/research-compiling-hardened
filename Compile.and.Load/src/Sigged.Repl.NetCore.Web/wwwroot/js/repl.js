@@ -4,12 +4,50 @@
  * @license MIT
  */
 
-
-
 let replService = (function () {
-    
+
+    const hubconnection = new signalR.HubConnectionBuilder()
+        .withUrl("/codeHub")
+        .configureLogging(signalR.LogLevel.Information)
+        .build();
+
+    async function connectToHub() {
+        try {
+            await hubconnection.start();
+            console.log("connected to codehub");
+        } catch (err) {
+            console.log(err);
+            setTimeout(() => connectToHub(), 5000);
+        }
+    };
+
+    hubconnection.onclose(async () => {
+        await connectToHub();
+    });
+
+    hubconnection.on('BuildComplete', function(result){
+        console.log("build complete", result);
+        if(result.isSuccess){
+            replApp.$buildSuccess();
+        }else{
+            replApp.$buildFailed(result.buildErrors);
+        }
+    });
+
+    hubconnection.on('ApplicationRunning', function(result){
+        console.log("App running", result);
+        if(result)
+            replApp.$appRunning();
+    });
+
+
     const replApp = new Vue({
         el: "#repl-main-ide",
+        mounted:  function () {
+            this.$nextTick(async function () {
+                await connectToHub();
+            });
+        },
         data: {
             isBuilding: false,
             isRunning: false,
@@ -28,25 +66,12 @@ let replService = (function () {
             buildSource: async function (event) {
                 this.isBuilding = true;
                 this.statusText = "Building...";
-                let result = await this.$submitCodeForBuilding(cEditor.getTextArea().value);
-                if (result.isSuccess) {
-                    this.$buildSuccess();
-                } else {
-                    this.$buildFailed(result.buildErrors);
-                }
+                await this.$requestBuild(cEditor.getTextArea().value);
             },
             buildAndRunSource: async function (event) {
                 this.isBuilding = true;
-                this.statusText = "Building...";
-                let result = await this.$submitCodeForBuilding(cEditor.getTextArea().value);
-                if (result.isSuccess) {
-                    this.$buildSuccess();
-
-
-
-                } else {
-                    this.$buildFailed(result.buildErrors);
-                }
+                this.statusText = "Running...";
+                await this.$requestRun(cEditor.getTextArea().value);
             },
             stopAll: function (event) {
                 this.isBuilding = false;
@@ -83,48 +108,61 @@ let replService = (function () {
                     }
                 }
             },
-            $submitCodeForBuilding: function (code) {
+            $appRunning: function () {
+                this.isBuilding = false;
+                this.isRunning = true;
+                this.statusText = "Application is running...";
+            },
+            $requestBuild: function (code) {
                 let app = this;
 
                 return new Promise(function (resolve, reject) {
-                    let xhr = new XMLHttpRequest();
-                    xhr.onload = function () {
-                        if (xhr.status !== 200) { // HTTP error?
-                            // handle error
-                            console.err('HTTP error while submitting code', xhr.status);
-                            reject();
-                            return;
-                        }
 
-                        let response = xhr.response;
-                        let result = JSON.parse(response);
-                        resolve(result);
-                    };
-
-                    xhr.onerror = function (event) {
-                        console.err('Generic error while submitting code', xhr.event);
-                    };
-
-                    xhr.onprogress = function (event) {
-                        // report progress
-
-                    };
-
-                    let json = JSON.stringify({
+                    hubconnection.invoke("Build", {
+                        codingSessionId: '',
                         sourceCode: code
-                    });
+                    }).catch(err => console.error(err.toString()));
 
-                    xhr.open("POST", '/Home/Build');
-                    xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');
+                    //let xhr = new XMLHttpRequest();
+                    //xhr.onload = function () {
+                    //    if (xhr.status !== 200) { // HTTP error?
+                    //        // handle error
+                    //        console.error('HTTP error while submitting code', xhr.status);
+                    //        console.error(xhr.response);
+                    //        reject();
+                    //        this.$buildFailed(errors);
+                    //        return;
+                    //    }
 
-                    xhr.send(json);
+                    //    let response = xhr.response;
+                    //    let result = JSON.parse(response);
+                    //    resolve(result);
+                    //};
+
+                    //xhr.onerror = function (event) {
+                    //    console.err('Generic error while submitting code', xhr.event);
+                    //};
+
+                    //let json = JSON.stringify({
+                    //    sourceCode: code
+                    //});
+
+                    //xhr.open("POST", '/Home/Build');
+                    //xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');
+
+                    //xhr.send(json);
                 });
             },
-            $submitRunRequest: function () {
+            $requestRun: function (code) {
                 console.log("Running..");
                 this.statusText = "Running...";
                 this.isBuilding = false;
                 this.isRunning = true;
+
+                hubconnection.invoke("RunCode", {
+                    codingSessionId: '',
+                    sourceCode: code
+                }).catch(err => console.error(err.toString()));
             },
         }
     });
