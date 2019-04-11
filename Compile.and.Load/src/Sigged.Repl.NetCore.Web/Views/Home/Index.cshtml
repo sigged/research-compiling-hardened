@@ -2,11 +2,6 @@
     ViewData["Title"] = "Home Page";
 }
 
-@*<div class="text-center">
-        <h1 class="display-4">Welcome</h1>
-        <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-    </div>*@
-
 <div class="repl-main-ide" id="repl-main-ide"
      style="grid-template-columns: 1fr 10px 2fr; grid-template-rows: 3fr 10px 1fr 0px 30px;">
     <div class="repl-main-ide-console">
@@ -41,7 +36,13 @@
         </table>
     </div>
     <div></div><!-- empty gutter -->
-    <div class="repl-main-ide-status">
+    <div class="repl-main-ide-status" v-cloak 
+        v-bind:class="{ 
+         'status-error': statusCode === 'error',
+         'status-success': statusCode === 'success',
+         'status-busy': statusCode === 'busy',
+         'status-default': statusCode === ''
+         }">
         <div class="repl-main-ide-status-progressbar progress" v-if="isBuilding === true"><div class="indeterminate"></div></div>
         <div class="repl-main-ide-status-label" v-cloak>{{ statusText }}</div>
     </div>

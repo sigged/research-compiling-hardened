@@ -15,6 +15,13 @@ let replService = (function () {
         ENDED: 100
     }
 
+    const STATUSCODE = {
+        DEFAULT: '',
+        BUSY: 'busy',
+        ERROR: 'error',
+        SUCCESS: 'success'
+    }
+
     const hubconnection = new signalR.HubConnectionBuilder()
         .withUrl("/codeHub")
         .configureLogging(signalR.LogLevel.Information)
@@ -69,14 +76,15 @@ let replService = (function () {
         data: {
             isBuilding: false,
             isRunning: false,
+            statusCode: STATUSCODE.DEFAULT,
             statusText: "Ready for action...",
             builderrors: [
-                {
-                    severity: 'error',
-                    id: 'CS 00000',
-                    location: 'Line 15, Col 4',
-                    description: 'Totally bogus error for testing purproses'
-                },
+                // {
+                //     severity: 'error',
+                //     id: 'CS 00000',
+                //     location: 'Line 15, Col 4',
+                //     description: 'Totally bogus error for testing purproses'
+                // },
             ]
         },
         // define methods under the `methods` object
@@ -84,28 +92,33 @@ let replService = (function () {
             buildSource: async function (event) {
                 this.isBuilding = true;
                 this.statusText = "Building...";
+                this.statusCode = STATUSCODE.BUSY;
                 await this.$requestBuild(cEditor.getTextArea().value);
             },
             buildAndRunSource: async function (event) {
                 this.isBuilding = true;
                 this.statusText = "Running...";
+                this.statusCode = STATUSCODE.BUSY;
                 await this.$requestRun(cEditor.getTextArea().value);
             },
             stopAll: function (event) {
                 this.isBuilding = false;
                 this.isRunning = false;
+                this.statusCode = STATUSCODE.DEFAULT;
                 this.statusText = "User cancelled";
             },
             $buildSuccess: function () {
                 this.isBuilding = false;
                 this.isRunning = false;
                 this.builderrors = null;
+                this.statusCode = STATUSCODE.SUCCESS;
                 this.statusText = "Build succeeded";
             },
             $buildFailed: function (errors) {
                 this.isBuilding = false;
                 this.isRunning = false;
                 this.builderrors = errors;
+                this.statusCode = STATUSCODE.ERROR;
                 this.statusText = "Build failed";
                 //mark errors
                 if (this.builderrors.length > 0) {
@@ -124,16 +137,19 @@ let replService = (function () {
             $appRunning: function () {
                 this.isBuilding = false;
                 this.isRunning = true;
+                this.statusCode = STATUSCODE.BUSY;
                 this.statusText = "Application is running...";
             },
             $appStopped: function () {
                 this.isBuilding = false;
                 this.isRunning = false;
+                this.statusCode = STATUSCODE.DEFAULT;
                 this.statusText = "Application ended";
             },
             $appCrashed: function (exceptionInfo) {
                 this.isBuilding = false;
                 this.isRunning = false;
+                this.statusCode = STATUSCODE.ERROR;
                 this.statusText = "Application crashed";
                 this.builderrors = [
                     {
