@@ -10,17 +10,21 @@ namespace Sigged.Repl.NetCore.Web.Sockets
 {
     public class CodeHub : Hub
     {
-        private RemoteCodeSessionManager remoteCodeSessionMgr;
+        private RemoteCodeSessionManager _rcsm;
+        //private IHubContext<CodeHub> _hubContext;
 
-        public CodeHub(RemoteCodeSessionManager rcsm)
+        public CodeHub(/*IHubContext<CodeHub> hubContext,*/ RemoteCodeSessionManager rcsm)
         {
-            remoteCodeSessionMgr = rcsm;
+            //_hubContext = hubContext;
+            _rcsm = rcsm;
+            _rcsm.AppStateChanged += RemoteCodeSessionMgr_AppStateChanged;
         }
+
 
         private async Task<BuildResultDto> BuildCore(BuildRequestDto buildRequest)
         {
             BuildResultDto result = new BuildResultDto();
-            EmitResult results = await remoteCodeSessionMgr.Compile(buildRequest.CodingSessionId, buildRequest.SourceCode);
+            EmitResult results = await _rcsm.Compile(buildRequest.CodingSessionId, buildRequest.SourceCode);
             result.BuildErrors = results.Diagnostics.Select(d =>
                 new BuildErrorDto
                 {
@@ -35,50 +39,47 @@ namespace Sigged.Repl.NetCore.Web.Sockets
             return result;
         }
 
-        private async Task<bool> RunCore(BuildRequestDto buildRequest)
+        private void RunCore(BuildRequestDto buildRequest)
         {
-            return await remoteCodeSessionMgr.RunLastCompilation(buildRequest.CodingSessionId);
+            _rcsm.RunLastCompilation(buildRequest.CodingSessionId);
         }
 
         public async Task Build(BuildRequestDto buildRequest)
         {
-            var session = remoteCodeSessionMgr.GetSession(buildRequest.CodingSessionId);
+            var session = _rcsm.GetSession(buildRequest.CodingSessionId);
             if (session == null)
             {
-                session = remoteCodeSessionMgr.CreateSession();
+                session = _rcsm.CreateSession();
                 buildRequest.CodingSessionId = session.SessionId;
             }
             BuildResultDto result = await BuildCore(buildRequest);
             await Clients.Caller.SendAsync("BuildComplete", result);
         }
 
-        public async Task RunCode(BuildRequestDto buildRequest)
+        public async Task BuildAndRunCode(BuildRequestDto buildRequest)
         {
-            var session = remoteCodeSessionMgr.GetSession(buildRequest.CodingSessionId);
+            var session = _rcsm.GetSession(buildRequest.CodingSessionId);
             if (session == null)
             {
-                session = remoteCodeSessionMgr.CreateSession();
+                session = _rcsm.CreateSession();
                 buildRequest.CodingSessionId = session.SessionId;
-
-                if(session.LastResult == null || session.LastAssembly == null)
-                {
-                    //should compile first
-                    BuildResultDto result = await BuildCore(buildRequest);
-                    await Clients.Caller.SendAsync("BuildComplete", result);
-                }
-                
             }
 
+            //build code
+            BuildResultDto result = await BuildCore(buildRequest);
+            await Clients.Caller.SendAsync("BuildComplete", result);
+
+            //run code when good build
             if (session.LastResult.Success)
             {
-                //run code
-                bool ok = await RunCore(buildRequest);
-                await Clients.Caller.SendAsync("ApplicationRunning", ok);
-            }
-            else
-            {
-                await Clients.Caller.SendAsync("ApplicationRunning", false);
+                RunCore(buildRequest);
             }
         }
+
+        private async void RemoteCodeSessionMgr_AppStateChanged(RemoteCodeSession session, RemoteExecutionState state)
+        {
+            await Clients.Caller.SendAsync("ApplicationStateChanged", session.SessionId, state);
+        }
+
     }
 }

@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.CodeAnalysis.Emit;
@@ -14,6 +17,8 @@ namespace Sigged.Repl.NetCore.Web.Services
         protected List<RemoteCodeSession> sessions;
         protected Compiler compiler;
         protected IHostingEnvironment env;
+
+        public event RemoteApplicationStateChangedHandler AppStateChanged;
 
         public RemoteCodeSessionManager(IHostingEnvironment henv)
         {
@@ -71,34 +76,100 @@ namespace Sigged.Repl.NetCore.Web.Services
             {
                 throw new InvalidOperationException($"Can't build for non-existing session {sessionid}");
             }
-
-            EmitResult results = null;
-            byte[] assembly = null;
-            using (var stream = new MemoryStream())
+            try
             {
-                results = await compiler.Compile(code, sessionid.ToString(), stream);
-                assembly = stream.ToArray();
+                session.IsBuilding = true;
+                EmitResult results = null;
+                byte[] assembly = null;
+                using (var stream = new MemoryStream())
+                {
+                    results = await compiler.Compile(code, sessionid.ToString(), stream);
+                    assembly = stream.ToArray();
+                }
+                lock (session)
+                {
+                    session.LastResult = results;
+                    session.LastAssembly = assembly;
+                    session.LastActivity = DateTimeOffset.Now;
+                }
+                return results;
             }
-            lock (session)
+            finally
             {
-                session.LastResult = results;
-                session.LastAssembly = assembly;
-                session.LastActivity = DateTimeOffset.Now;
+                session.IsBuilding = false;
             }
-            return results;
+            
         }
 
-        public async Task<bool> RunLastCompilation(string sessionid)
+        public void RunLastCompilation(string sessionid)
         {
             var session = GetSession(sessionid);
-            if (session == null || session.LastAssembly == null)
+            if (session == null)
+                throw new InvalidOperationException($"Can't build for non-existing session {sessionid}");
+            if (session.LastAssembly == null || session.LastResult == null)
+                throw new InvalidOperationException($"Code for session {sessionid} has not been built yet");
+
+            session.IsRunning = true;
+            //cancel any previous threads, just to be absolutely sure
+            if (session.ExecutionThread?.IsAlive == true)
             {
-                throw new InvalidOperationException($"Can't run for non-existing session {sessionid}");
+                Trace.TraceWarning($"Warning! Session {session.SessionId} runs new thread while old thread still running. Disposing old thread...");
+                try
+                {
+                    session.ExecutionThread.Abort();
+                }
+                catch (ThreadAbortException tae)
+                {
+                    Trace.TraceWarning($"Warning! Disposed of old thread for session {session.SessionId} ");
+                }
             }
-            else
+
+            session.ExecutionThread = new Thread(new ParameterizedThreadStart((object sessionObj) =>
             {
-                return true;
-            }
+                var execSession = (RemoteCodeSession)sessionObj;
+                execSession.IsRunning = true;
+
+                var assemly = Assembly.Load(execSession.LastAssembly);
+                var type = assemly.GetType("Test.Program");
+                //var test = type.FindMembers(MemberTypes.Method, BindingFlags.Static | BindingFlags.Public, null, null);
+                try
+                {
+                    RaiseAppChanged(execSession, new RemoteExecutionState
+                    {
+                        State = RemoteAppState.Running
+                    });
+
+                    type.InvokeMember("Main",
+                                        BindingFlags.InvokeMethod | BindingFlags.Static | BindingFlags.Public,
+                                        null, null,
+                                        new object[] { new string[] { } });
+
+                    RaiseAppChanged(execSession, new RemoteExecutionState
+                    {
+                        State = RemoteAppState.Ended
+                    });
+                }
+                catch (Exception ex)
+                {
+                    RaiseAppChanged(execSession, new RemoteExecutionState
+                    {
+                        State = RemoteAppState.Crashed
+                    });
+                }
+                finally
+                {
+                    execSession.IsRunning = false;
+                }
+            }));
+            session.ExecutionThread.Start(session);
+            
         }
+
+
+        private void RaiseAppChanged(RemoteCodeSession session, RemoteExecutionState state)
+        {
+            AppStateChanged?.Invoke(session, state);
+        }
+
     }
 }

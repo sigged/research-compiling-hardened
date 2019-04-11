@@ -11,6 +11,8 @@ namespace Sigged.Repl.NetCore.Web.Services
     /// </summary>
     public interface IRemoteCodeSessionManager
     {
+        event RemoteApplicationStateChangedHandler AppStateChanged;
+
         IEnumerable<RemoteCodeSession> Sessions { get; }
 
         void CleanupIdleSessions();
@@ -21,6 +23,6 @@ namespace Sigged.Repl.NetCore.Web.Services
 
         Task<EmitResult> Compile(string sessionid, string code);
 
-        Task<bool> RunLastCompilation(string sessionid);
+        void RunLastCompilation(string sessionid);
     }
 }

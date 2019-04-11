@@ -17,16 +17,12 @@ namespace Sigged.Repl.NetCore.Web.Controllers
     public class HomeController : Controller
     {
         private IHostingEnvironment env;
-        //private Compiler compiler;
         private RemoteCodeSessionManager remoteCodeSessionMgr;
 
         public HomeController(IHostingEnvironment henv, RemoteCodeSessionManager rcsm)
         {
             env = henv;
             remoteCodeSessionMgr = rcsm;
-
-            //string netstandardRefsDirectory = Path.Combine(env.ContentRootPath, "_libs", "netstandard2.0");
-            //compiler = new Compiler(netstandardRefsDirectory);
         }
 
         public IActionResult Index()

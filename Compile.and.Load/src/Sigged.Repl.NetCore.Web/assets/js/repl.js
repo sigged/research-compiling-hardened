@@ -34,10 +34,10 @@ let replService = (function () {
         }
     });
 
-    hubconnection.on('ApplicationRunning', function(result){
-        console.log("App running", result);
-        if(result)
-            replApp.$appRunning();
+    hubconnection.on('ApplicationStateChanged', function(sessionid, state){
+        console.log("App State Changed", state);
+        // if(result)
+        //     replApp.$appRunning();
     });
 
 
@@ -159,7 +159,7 @@ let replService = (function () {
                 this.isBuilding = false;
                 this.isRunning = true;
 
-                hubconnection.invoke("RunCode", {
+                hubconnection.invoke("BuildAndRunCode", {
                     codingSessionId: '',
                     sourceCode: code
                 }).catch(err => console.error(err.toString()));

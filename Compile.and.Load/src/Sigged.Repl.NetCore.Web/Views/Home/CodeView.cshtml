@@ -9,31 +9,24 @@
     <partial name="_CodeEditorPartial" />
 </head>
 <body>
-<textarea id="source-input">
-/* C demo code */
+    <textarea id="source-input">
+/* C# demo code */
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Sigged.Repl.NetCore.Web.Models;
 
-namespace Sigged.Repl.NetCore.Web.Controllers
-{
-    public class HomeController : Controller
-    {
-        public IActionResult Index()
+namespace Test {
+
+    public class Program {
+    
+        public static void Main(string[] args) 
         {
-            return View();
+            Console.Write("What is your name ? ");
+            //char input = (char)Console.Read();
+            //string input = Console.ReadLine();
+            //Console.WriteLine($"Hello { input }");
         }
-        
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        }
+
     }
+
 }
 </textarea>
     @*<script>

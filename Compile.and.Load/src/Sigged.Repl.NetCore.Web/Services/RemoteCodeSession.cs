@@ -1,9 +1,6 @@
 ﻿using Microsoft.CodeAnalysis.Emit;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
+using System.Threading;
 
 namespace Sigged.Repl.NetCore.Web.Services
 {
@@ -12,6 +9,9 @@ namespace Sigged.Repl.NetCore.Web.Services
         public string SessionId { get; set; }
         public EmitResult LastResult { get; set; }
         public byte[] LastAssembly { get; set; }
+        public Thread ExecutionThread { get; set; }
         public DateTimeOffset LastActivity { get; set; }
+        public bool IsBuilding { get; set; }
+        public bool IsRunning { get; set; }
     }
 }
