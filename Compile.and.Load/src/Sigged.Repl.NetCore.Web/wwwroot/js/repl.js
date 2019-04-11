@@ -56,10 +56,18 @@ let replService = (function () {
             case APPSTATE.RUNNING:
                 replApp.$appRunning();
                 break;
+            case APPSTATE.WRITEOUTPUT:
+                replApp.$appWritesOutput(appStatus);
+                break;
+            case APPSTATE.WAITFORINPUT:
+                
+                break;
             case APPSTATE.ENDED:
                 replApp.$appStopped();
+                break;
             case APPSTATE.CRASHED:
                 replApp.$appCrashed(appStatus.exception);
+                break;
             default:
                 break;
         }
@@ -76,6 +84,7 @@ let replService = (function () {
         data: {
             isBuilding: false,
             isRunning: false,
+            consoleText: 'Welcome!\nREPL\n<script></script>',
             statusCode: STATUSCODE.DEFAULT,
             statusText: "Ready for action...",
             builderrors: [
@@ -89,19 +98,19 @@ let replService = (function () {
         },
         // define methods under the `methods` object
         methods: {
-            buildSource: async function (event) {
+            buildSource: async function () {
                 this.isBuilding = true;
                 this.statusText = "Building...";
                 this.statusCode = STATUSCODE.BUSY;
                 await this.$requestBuild(cEditor.getTextArea().value);
             },
-            buildAndRunSource: async function (event) {
+            buildAndRunSource: async function () {
                 this.isBuilding = true;
                 this.statusText = "Running...";
                 this.statusCode = STATUSCODE.BUSY;
                 await this.$requestRun(cEditor.getTextArea().value);
             },
-            stopAll: function (event) {
+            stopAll: function () {
                 this.isBuilding = false;
                 this.isRunning = false;
                 this.statusCode = STATUSCODE.DEFAULT;
@@ -139,6 +148,12 @@ let replService = (function () {
                 this.isRunning = true;
                 this.statusCode = STATUSCODE.BUSY;
                 this.statusText = "Application is running...";
+            },
+            $appWritesOutput: function (appState) {
+                this.isRunning = true;
+                this.statusCode = STATUSCODE.BUSY;
+                this.statusText = "Application is running...";
+                this.consoleText += appState.output.replace("\n","<br />");;
             },
             $appStopped: function () {
                 this.isBuilding = false;

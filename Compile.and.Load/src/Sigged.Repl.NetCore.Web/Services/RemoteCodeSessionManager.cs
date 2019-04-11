@@ -54,7 +54,7 @@ namespace Sigged.Repl.NetCore.Web.Services
         {
             //string sessionid = Guid.NewGuid().ToString();
             string sessionid = uniqueSessionId;
-            var session = new RemoteCodeSession
+            var session = new RemoteCodeSession(remoteExecutionCallback)
             {
                 SessionId = sessionid,
                 LastActivity = DateTimeOffset.Now,
@@ -142,10 +142,15 @@ namespace Sigged.Repl.NetCore.Web.Services
                         State = RemoteAppState.Running
                     });
 
+                    Console.SetOut(session.consoleOutputRedirector);
+
                     type.InvokeMember("Main",
                                         BindingFlags.InvokeMethod | BindingFlags.Static | BindingFlags.Public,
                                         null, null,
                                         new object[] { new string[] { } });
+
+                    //reset console redirection
+                    Console.SetOut(new StreamWriter(Console.OpenStandardError()) { AutoFlush = true });
 
                     remoteExecutionCallback.SendExecutionStateChanged(session, new RemoteExecutionState
                     {

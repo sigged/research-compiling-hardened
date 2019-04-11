@@ -10,6 +10,7 @@ namespace Sigged.Repl.NetCore.Web.Services
     {
         public RemoteAppState State { get; set; }
         public ExceptionDescriptor Exception { get; set; }
+        public string Output { get; set; }
         
     }
 

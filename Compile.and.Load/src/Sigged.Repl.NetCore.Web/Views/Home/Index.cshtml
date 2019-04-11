@@ -4,9 +4,7 @@
 
 <div class="repl-main-ide" id="repl-main-ide"
      style="grid-template-columns: 1fr 10px 2fr; grid-template-rows: 3fr 10px 1fr 0px 30px;">
-    <div class="repl-main-ide-console">
-        REPL
-    </div>
+    <div class="repl-main-ide-console" v-html="consoleText"></div>
     <div class="repl-main-ide-splitter-h gridsplitter-control-h"></div>
     <div class="repl-main-ide-source">
         <div class="repl-main-ide-toolbar">
@@ -36,8 +34,8 @@
         </table>
     </div>
     <div></div><!-- empty gutter -->
-    <div class="repl-main-ide-status" v-cloak 
-        v-bind:class="{ 
+    <div class="repl-main-ide-status" v-cloak
+         v-bind:class="{
          'status-error': statusCode === 'error',
          'status-success': statusCode === 'success',
          'status-busy': statusCode === 'busy',
@@ -49,6 +47,7 @@
 </div>
 
 @section head{
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Mono" rel="stylesheet">
     <script src="~/js/split-grid.min.js"></script>
     <script src="~/js/signalr.min.js"></script>
 }
