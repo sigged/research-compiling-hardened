@@ -12,18 +12,14 @@ namespace Sigged.Repl.NetCore.Web.Sockets
     public class CodeHub : Hub
     {
         private RemoteCodeSessionManager _rcsm;
-        //private HubConnection _hubClientConnection;
 
         public CodeHub(RemoteCodeSessionManager rcsm)
         {
-            //_hubContext = hubContext;
             _rcsm = rcsm;
-            _rcsm.AppStateChanged += RemoteCodeSessionMgr_AppStateChanged;
         }
 
         protected override void Dispose(bool disposing)
         {
-            _rcsm.AppStateChanged -= RemoteCodeSessionMgr_AppStateChanged;
             base.Dispose(disposing);
         }
 
@@ -90,17 +86,6 @@ namespace Sigged.Repl.NetCore.Web.Sockets
         public async Task DispatchAppStateToRemoteClient(string targetConnectionId, RemoteExecutionState state)
         {
             await Clients.Client(targetConnectionId).SendAsync("ApplicationStateChanged", targetConnectionId, state);
-        }
-
-        private async void RemoteCodeSessionMgr_AppStateChanged(RemoteCodeSession session, RemoteExecutionState state)
-        {
-            //use a server-side client to connect to the hub endpoint an send the message
-            var hubClientConnection = new HubConnectionBuilder().WithUrl("https://localhost:44341/codeHub").Build();
-            await hubClientConnection.StartAsync();
-
-            //call hub endpoint and tell it to dispatch app state to remote client
-            await hubClientConnection.InvokeAsync(nameof(DispatchAppStateToRemoteClient), session.SessionId, state);
-            //await Clients.Caller.SendAsync("ApplicationStateChanged", session.SessionId, state);
         }
 
     }

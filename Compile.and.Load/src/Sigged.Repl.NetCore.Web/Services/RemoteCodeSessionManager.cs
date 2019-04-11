@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.CodeAnalysis.Emit;
 using Sigged.Compiling.Core;
 
@@ -17,12 +18,12 @@ namespace Sigged.Repl.NetCore.Web.Services
         protected List<RemoteCodeSession> sessions;
         protected Compiler compiler;
         protected IHostingEnvironment env;
-
-        public event RemoteApplicationStateChangedHandler AppStateChanged;
-
-        public RemoteCodeSessionManager(IHostingEnvironment henv)
+        protected IRemoteExecutionCallback remoteExecutionCallback;
+            
+        public RemoteCodeSessionManager(IHostingEnvironment henv, IRemoteExecutionCallback executionCaller)
         {
             env = henv;
+            remoteExecutionCallback = executionCaller;
             string netstandardRefsDirectory = Path.Combine(env.ContentRootPath, "_libs", "netstandard2.0");
             compiler = new Compiler(netstandardRefsDirectory);
             sessions = new List<RemoteCodeSession>();
@@ -99,7 +100,6 @@ namespace Sigged.Repl.NetCore.Web.Services
             {
                 session.IsBuilding = false;
             }
-            
         }
 
         public void RunLastCompilation(string sessionid)
@@ -135,7 +135,7 @@ namespace Sigged.Repl.NetCore.Web.Services
                 //var test = type.FindMembers(MemberTypes.Method, BindingFlags.Static | BindingFlags.Public, null, null);
                 try
                 {
-                    RaiseAppChanged(execSession, new RemoteExecutionState
+                    remoteExecutionCallback.SendExecutionStateChanged(session, new RemoteExecutionState
                     {
                         State = RemoteAppState.Running
                     });
@@ -145,14 +145,14 @@ namespace Sigged.Repl.NetCore.Web.Services
                                         null, null,
                                         new object[] { new string[] { } });
 
-                    RaiseAppChanged(execSession, new RemoteExecutionState
+                    remoteExecutionCallback.SendExecutionStateChanged(session, new RemoteExecutionState
                     {
                         State = RemoteAppState.Ended
                     });
                 }
                 catch (Exception ex)
                 {
-                    RaiseAppChanged(execSession, new RemoteExecutionState
+                    remoteExecutionCallback.SendExecutionStateChanged(session, new RemoteExecutionState
                     {
                         State = RemoteAppState.Crashed
                     });
@@ -165,12 +165,6 @@ namespace Sigged.Repl.NetCore.Web.Services
             session.ExecutionThread.Start(session);
             
         }
-
-
-        private void RaiseAppChanged(RemoteCodeSession session, RemoteExecutionState state)
-        {
-            AppStateChanged?.Invoke(session, state);
-        }
-
+        
     }
 }

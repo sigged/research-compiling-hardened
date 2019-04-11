@@ -48,6 +48,10 @@ let replService = (function () {
             case APPSTATE.RUNNING:
                 replApp.$appRunning();
                 break;
+            case APPSTATE.ENDED:
+                replApp.$appStopped();
+            case APPSTATE.CRASHED:
+                replApp.$appStopped();
             default:
                 break;
         }
@@ -91,11 +95,6 @@ let replService = (function () {
                 this.isRunning = false;
                 this.statusText = "User cancelled";
             },
-            $appStopped: function (event) {
-                this.isBuilding = false;
-                this.isRunning = false;
-                this.statusText = "Application ended";
-            },
             $buildSuccess: function () {
                 this.isBuilding = false;
                 this.isRunning = false;
@@ -126,6 +125,11 @@ let replService = (function () {
                 this.isRunning = true;
                 this.statusText = "Application is running...";
             },
+            $appStopped: function (event) {
+                this.isBuilding = false;
+                this.isRunning = false;
+                this.statusText = "Application ended";
+            },
             $requestBuild: function (code) {
                 let app = this;
 
@@ -135,35 +139,6 @@ let replService = (function () {
                         codingSessionId: '',
                         sourceCode: code
                     }).catch(err => console.error(err.toString()));
-
-                    //let xhr = new XMLHttpRequest();
-                    //xhr.onload = function () {
-                    //    if (xhr.status !== 200) { // HTTP error?
-                    //        // handle error
-                    //        console.error('HTTP error while submitting code', xhr.status);
-                    //        console.error(xhr.response);
-                    //        reject();
-                    //        this.$buildFailed(errors);
-                    //        return;
-                    //    }
-
-                    //    let response = xhr.response;
-                    //    let result = JSON.parse(response);
-                    //    resolve(result);
-                    //};
-
-                    //xhr.onerror = function (event) {
-                    //    console.err('Generic error while submitting code', xhr.event);
-                    //};
-
-                    //let json = JSON.stringify({
-                    //    sourceCode: code
-                    //});
-
-                    //xhr.open("POST", '/Home/Build');
-                    //xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');
-
-                    //xhr.send(json);
                 });
             },
             $requestRun: function (code) {

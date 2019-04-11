@@ -23,38 +23,14 @@ namespace Test {
             //char input = (char)Console.Read();
             //string input = Console.ReadLine();
             //Console.WriteLine($"Hello { input }");
+            int i = 0, j = 1;
+            i = j / i;
         }
 
     }
 
 }
 </textarea>
-    @*<script>
-
-        var cEditor = CodeMirror.fromTextArea(document.getElementById("source-input"), {
-            mode: 'text/x-csharp',
-            theme: 'eclipse',
-            lineNumbers: true,
-            matchBrackets: true
-        });
-
-        function changeCodeStyle() {
-            cEditor.setOption('theme', themeselect.value);
-        }
-
-
-        function updateTextArea() {
-            cEditor.save();
-        }
-        cEditor.on('change', updateTextArea);
-
-    </script>
-    <select id="themeselect" onchange="changeCodeStyle();" style="position:fixed; top:0;right:0;z-index:100000;">
-        @foreach(var theme in ViewBag.Themes)
-        {
-            <option value="@theme">@theme</option>
-        }
-    </select>*@
 </body>
 </html>
 

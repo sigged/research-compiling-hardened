@@ -33,8 +33,14 @@ namespace Sigged.Repl.NetCore.Web
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
+            //add httpcontext middleware so it can be injected
+            services.AddHttpContextAccessor();
+
+            //add websocket server
             services.AddSignalR();
 
+            //custom services
+            services.AddTransient<IRemoteExecutionCallback, SignalRRemoteExecutionCallback>();
             services.AddSingleton<RemoteCodeSessionManager>();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
