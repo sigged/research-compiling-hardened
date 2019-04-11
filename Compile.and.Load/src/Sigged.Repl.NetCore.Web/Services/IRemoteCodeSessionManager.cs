@@ -17,7 +17,7 @@ namespace Sigged.Repl.NetCore.Web.Services
 
         void CleanupIdleSessions();
 
-        RemoteCodeSession CreateSession();
+        RemoteCodeSession CreateSession(string uniqueSessionId);
         
         RemoteCodeSession GetSession(string sessionid);
 

@@ -6,6 +6,14 @@
 
 let replService = (function () {
 
+    const APPSTATE = {
+        NOTRUNNING: 0,
+        RUNNING: 1,
+        WAITFORINPUT: 2,
+        CRASHED: 3,
+        ENDED: 4
+    }
+
     const hubconnection = new signalR.HubConnectionBuilder()
         .withUrl("/codeHub")
         .configureLogging(signalR.LogLevel.Information)
@@ -34,10 +42,15 @@ let replService = (function () {
         }
     });
 
-    hubconnection.on('ApplicationStateChanged', function(sessionid, state){
-        console.log("App State Changed", state);
-        // if(result)
-        //     replApp.$appRunning();
+    hubconnection.on('ApplicationStateChanged', function(sessionid, appStatus){
+        console.log("App State Changed", appStatus);
+        switch(appStatus.state){
+            case APPSTATE.RUNNING:
+                replApp.$appRunning();
+                break;
+            default:
+                break;
+        }
     });
 
 

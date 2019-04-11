@@ -12,7 +12,7 @@ using Sigged.Compiling.Core;
 
 namespace Sigged.Repl.NetCore.Web.Services
 {
-    public class RemoteCodeSessionManager : IRemoteCodeSessionManager
+    public class RemoteCodeSessionManager 
     {
         protected List<RemoteCodeSession> sessions;
         protected Compiler compiler;
@@ -47,9 +47,10 @@ namespace Sigged.Repl.NetCore.Web.Services
             }
         }
 
-        public RemoteCodeSession CreateSession()
+        public RemoteCodeSession CreateSession(string uniqueSessionId)
         {
-            string sessionid = Guid.NewGuid().ToString();
+            //string sessionid = Guid.NewGuid().ToString();
+            string sessionid = uniqueSessionId;
             var session = new RemoteCodeSession
             {
                 SessionId = sessionid,

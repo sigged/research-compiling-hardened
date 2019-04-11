@@ -17,18 +17,14 @@ namespace Sigged.Repl.NetCore.Web.Controllers
     public class HomeController : Controller
     {
         private IHostingEnvironment env;
-        private RemoteCodeSessionManager remoteCodeSessionMgr;
 
-        public HomeController(IHostingEnvironment henv, RemoteCodeSessionManager rcsm)
+        public HomeController(IHostingEnvironment henv)
         {
             env = henv;
-            remoteCodeSessionMgr = rcsm;
         }
 
         public IActionResult Index()
         {
-            var session = remoteCodeSessionMgr.CreateSession();
-            ViewBag.CodingSession = session;
             return View();
         }
 
