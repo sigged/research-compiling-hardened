@@ -79,6 +79,15 @@ namespace Sigged.Repl.NetCore.Web.Sockets
             }
         }
 
+        public async Task ClientInput(string input)
+        {
+            var session = _rcsm.GetSession(Context.ConnectionId);
+            if(session != null)
+            {
+                session.consoleInputRedirector.ReceiveInput(input);
+            }
+        }
+
         /// <summary>
         /// Should only be used from the server side
         /// </summary>

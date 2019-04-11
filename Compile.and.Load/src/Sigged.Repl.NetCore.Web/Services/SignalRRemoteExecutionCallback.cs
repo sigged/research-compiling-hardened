@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR.Client;
 using Sigged.Repl.NetCore.Web.Sockets;
+using System;
 using System.Threading.Tasks;
 
 namespace Sigged.Repl.NetCore.Web.Services
@@ -26,5 +27,6 @@ namespace Sigged.Repl.NetCore.Web.Services
             //call hub endpoint and tell it to dispatch app state to remote client
             await hubClientConnection.InvokeAsync(nameof(CodeHub.DispatchAppStateToRemoteClient), session.SessionId, state);
         }
+
     }
 }

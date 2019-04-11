@@ -4,7 +4,9 @@
 
 <div class="repl-main-ide" id="repl-main-ide"
      style="grid-template-columns: 1fr 10px 2fr; grid-template-rows: 3fr 10px 1fr 0px 30px;">
-    <div class="repl-main-ide-console" v-html="consoleText"></div>
+    <div class="repl-main-ide-console" id="console"
+         v-on:click="consoleFocus()"
+         v-html="consoleText"></div>
     <div class="repl-main-ide-splitter-h gridsplitter-control-h"></div>
     <div class="repl-main-ide-source">
         <div class="repl-main-ide-toolbar">

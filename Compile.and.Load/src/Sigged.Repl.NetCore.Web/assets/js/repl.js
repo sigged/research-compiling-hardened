@@ -6,11 +6,19 @@
 
 let replService = (function () {
 
+    const consoleDomMutationObserver = new MutationObserver(function(mutations){
+        mutations.forEach(function(mutation) {
+            console.log('Console Mutation!', mutation);
+            replApp.consoleFocus();
+          });
+    });
+
     const APPSTATE = {
         NOTRUNNING: 0,
         RUNNING: 1,
         WRITEOUTPUT: 10,
         WAITFORINPUT: 11,
+        WAITFORINPUTLINE: 12,
         CRASHED: 20,
         ENDED: 100
     }
@@ -60,7 +68,10 @@ let replService = (function () {
                 replApp.$appWritesOutput(appStatus);
                 break;
             case APPSTATE.WAITFORINPUT:
-                
+                replApp.$appRequestsInput(appStatus, false);
+                break;
+            case APPSTATE.WAITFORINPUTLINE:
+                replApp.$appRequestsInput(appStatus, true);
                 break;
             case APPSTATE.ENDED:
                 replApp.$appStopped();
@@ -79,6 +90,11 @@ let replService = (function () {
         mounted:  function () {
             this.$nextTick(async function () {
                 await connectToHub();
+
+                var console = document.getElementById("console");
+                consoleDomMutationObserver.observe(
+                    console, 
+                    { attributes: true, childList: true, characterData: true });
             });
         },
         data: {
@@ -153,7 +169,15 @@ let replService = (function () {
                 this.isRunning = true;
                 this.statusCode = STATUSCODE.BUSY;
                 this.statusText = "Application is running...";
-                this.consoleText += appState.output.replace("\n","<br />");;
+                this.consoleText += appState.output.replace("\n","<br />");
+            },
+            $appRequestsInput: function (appState, requestLine) {
+                this.isRunning = true;
+                this.statusCode = STATUSCODE.BUSY;
+                this.statusText = "App is waiting for input...";
+
+                this.consoleText += '<div class="consoleInputBox"></div>'
+                this.$handleConsoleInput(requestLine);
             },
             $appStopped: function () {
                 this.isBuilding = false;
@@ -197,6 +221,43 @@ let replService = (function () {
                     sourceCode: code
                 }).catch(err => console.error(err.toString()));
             },
+            consoleFocus: function(){
+                var cons = document.getElementById('console');
+                var inputDiv = cons.querySelector('.consoleInputBox');
+                if(inputDiv)
+                    inputDiv.focus();
+            },
+            $handleConsoleInput: function(requestLine){
+                this.$nextTick(function () {
+                    var cons = document.getElementById('console');
+                    var inputDiv = cons.querySelector('.consoleInputBox');
+                    inputDiv.setAttribute('contenteditable', 'true');
+                    var input = null;
+
+                    inputDiv.addEventListener('keyup', function(kbdEvent){
+                        if(requestLine){
+                            if(kbdEvent.key == "Enter"){
+                                input = inputDiv.innerText;
+                            }
+                        }
+                        else{
+                            inputDiv.removeAttribute('contenteditable');
+                            input = kbdEvent.key;
+                        }
+                        console.log("Keypress in input", kbdEvent);
+                    });
+
+                    //wait for enter before sumitting
+                    setInterval(function(){
+                        if(input !== null){
+                            inputDiv.remove();
+                            replApp.consoleText = cons.innerHTML + input;
+                            hubconnection.invoke("ClientInput", input).catch(err => console.error(err.toString()));
+                            input = null;
+                        }
+                    },100);
+                });
+            }
         }
     });
 

@@ -20,6 +20,7 @@ namespace Sigged.Repl.NetCore.Web.Services
         Running = 1,
         WriteOutput = 10,
         WaitForInput = 11,
+        WaitForInputLine = 12,
         Crashed = 20,
         Ended = 100
     }

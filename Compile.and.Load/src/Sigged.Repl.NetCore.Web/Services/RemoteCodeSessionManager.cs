@@ -142,7 +142,9 @@ namespace Sigged.Repl.NetCore.Web.Services
                         State = RemoteAppState.Running
                     });
 
+                    //redirect console
                     Console.SetOut(session.consoleOutputRedirector);
+                    Console.SetIn(session.consoleInputRedirector);
 
                     type.InvokeMember("Main",
                                         BindingFlags.InvokeMethod | BindingFlags.Static | BindingFlags.Public,
@@ -150,7 +152,8 @@ namespace Sigged.Repl.NetCore.Web.Services
                                         new object[] { new string[] { } });
 
                     //reset console redirection
-                    Console.SetOut(new StreamWriter(Console.OpenStandardError()) { AutoFlush = true });
+                    Console.SetOut(new StreamWriter(Console.OpenStandardOutput()) { AutoFlush = true });
+                    Console.SetIn(new StreamReader(Console.OpenStandardInput()));
 
                     remoteExecutionCallback.SendExecutionStateChanged(session, new RemoteExecutionState
                     {
