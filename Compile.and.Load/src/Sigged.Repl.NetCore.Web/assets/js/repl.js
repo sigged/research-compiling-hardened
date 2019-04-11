@@ -9,9 +9,10 @@ let replService = (function () {
     const APPSTATE = {
         NOTRUNNING: 0,
         RUNNING: 1,
-        WAITFORINPUT: 2,
-        CRASHED: 3,
-        ENDED: 4
+        WRITEOUTPUT: 10,
+        WAITFORINPUT: 11,
+        CRASHED: 20,
+        ENDED: 100
     }
 
     const hubconnection = new signalR.HubConnectionBuilder()
@@ -51,7 +52,7 @@ let replService = (function () {
             case APPSTATE.ENDED:
                 replApp.$appStopped();
             case APPSTATE.CRASHED:
-                replApp.$appStopped();
+                replApp.$appCrashed(appStatus.exception);
             default:
                 break;
         }
@@ -125,10 +126,23 @@ let replService = (function () {
                 this.isRunning = true;
                 this.statusText = "Application is running...";
             },
-            $appStopped: function (event) {
+            $appStopped: function () {
                 this.isBuilding = false;
                 this.isRunning = false;
                 this.statusText = "Application ended";
+            },
+            $appCrashed: function (exceptionInfo) {
+                this.isBuilding = false;
+                this.isRunning = false;
+                this.statusText = "Application crashed";
+                this.builderrors = [
+                    {
+                        severity: 'error',
+                        id: exceptionInfo.name,
+                        location: null,
+                        description: exceptionInfo.message
+                    },
+                ]
             },
             $requestBuild: function (code) {
                 let app = this;

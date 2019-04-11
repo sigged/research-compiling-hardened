@@ -35,7 +35,7 @@
             <tr v-cloak v-for="err in builderrors">
                 <td><img v-bind:src="'/images/' + err.severity + '.png'" /></td>
                 <td>{{ err.id }}</td>
-                <td>ln {{ (err.startPosition) ? err.startPosition.line : '' }}, ch {{ (err.startPosition) ? err.startPosition.character : '' }}</td>
+                <td>{{ (err.startPosition) ? 'ln' + err.startPosition.line + ', ch' + err.startPosition.character : '' }}</td>
                 <td>{{ err.description }}</td>
             </tr>
         </table>

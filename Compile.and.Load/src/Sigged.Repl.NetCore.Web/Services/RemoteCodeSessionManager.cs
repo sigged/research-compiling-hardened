@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.CodeAnalysis.Emit;
 using Sigged.Compiling.Core;
+using Sigged.Repl.NetCore.Web.Extensions;
+using Sigged.Repl.NetCore.Web.Models;
 
 namespace Sigged.Repl.NetCore.Web.Services
 {
@@ -154,7 +156,8 @@ namespace Sigged.Repl.NetCore.Web.Services
                 {
                     remoteExecutionCallback.SendExecutionStateChanged(session, new RemoteExecutionState
                     {
-                        State = RemoteAppState.Crashed
+                        State = RemoteAppState.Crashed,
+                        Exception = ExceptionDescriptor.FromException(ex)
                     });
                 }
                 finally
