@@ -143,6 +143,8 @@
     color: #fff;
     padding: 5px;
     font-size: 0.9em;
+    transition-property: background-color;
+    transition-duration: 0.5s;
 
     &.status-default {
         background-color: #0072c3;
