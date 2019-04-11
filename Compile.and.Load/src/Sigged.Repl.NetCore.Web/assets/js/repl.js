@@ -169,7 +169,7 @@ let replService = (function () {
                 this.isRunning = true;
                 this.statusCode = STATUSCODE.BUSY;
                 this.statusText = "Application is running...";
-                this.consoleText += appState.output.replace("\n","<br />");
+                this.consoleText += appState.output; //.replace("\n","<br />");
             },
             $appRequestsInput: function (appState, requestLine) {
                 this.isRunning = true;
@@ -250,10 +250,16 @@ let replService = (function () {
                     //wait for enter before sumitting
                     setInterval(function(){
                         if(input !== null){
-                            inputDiv.remove();
-                            replApp.consoleText = cons.innerHTML + input;
-                            hubconnection.invoke("ClientInput", input).catch(err => console.error(err.toString()));
+                            var inputToSend = input.replace('\n','');
                             input = null;
+                            inputDiv.remove();
+                            replApp.consoleText = cons.innerHTML + inputToSend;
+                            hubconnection.invoke("ClientInput", inputToSend)
+                                .then(function(){
+                                    console.log("Sent Input: " + inputToSend);
+                                })
+                                .catch(err => console.error(err.toString()));
+                            
                         }
                     },100);
                 });
