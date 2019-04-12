@@ -37,7 +37,10 @@ namespace Sigged.Repl.NetCore.Web
             services.AddHttpContextAccessor();
 
             //add websocket server
-            services.AddSignalR();
+            services.AddSignalR(hubOptions => {
+                hubOptions.KeepAliveInterval = TimeSpan.FromMinutes(2);     //default 15s
+                hubOptions.ClientTimeoutInterval = TimeSpan.FromMinutes(4); //default 30s, recommended the double of the keepalive
+            });
 
             //custom services
             services.AddTransient<IRemoteExecutionCallback, SignalRRemoteExecutionCallback>();
@@ -60,10 +63,14 @@ namespace Sigged.Repl.NetCore.Web
                 app.UseHsts();
             }
 
-            app.UseSignalR(route =>
-            {
-                route.MapHub<CodeHub>("/codeHub");
+            app.UseSignalR((configure) => {
+                configure.MapHub<CodeHub>("/codeHub");
             });
+                
+            //    route =>
+            //{
+            //    route.MapHub<CodeHub>("/codeHub");
+            //});
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();

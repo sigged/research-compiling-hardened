@@ -87,7 +87,7 @@ namespace Sigged.Repl.NetCore.Web.Services
                 byte[] assembly = null;
                 using (var stream = new MemoryStream())
                 {
-                    results = await compiler.Compile(code, sessionid.ToString(), stream);
+                    results = await compiler.Compile(code, sessionid.ToString(), stream, outputKind: Microsoft.CodeAnalysis.OutputKind.ConsoleApplication);
                     assembly = stream.ToArray();
                 }
                 lock (session)
@@ -104,6 +104,125 @@ namespace Sigged.Repl.NetCore.Web.Services
             }
         }
 
+        //public void RunLastCompilation_PROCESS(string sessionid)
+        //{
+        //    var session = GetSession(sessionid);
+        //    if (session == null)
+        //        throw new InvalidOperationException($"Can't build for non-existing session {sessionid}");
+        //    if (session.LastAssembly == null || session.LastResult == null)
+        //        throw new InvalidOperationException($"Code for session {sessionid} has not been built yet");
+
+        //    session.IsRunning = true;
+        //    //cancel any previous threads, just to be absolutely sure
+        //    if (session.Process?.HasExited == false)
+        //    {
+        //        Trace.TraceWarning($"Warning! Session {session.SessionId} started a new process while old process still running. Disposing old process...");
+        //        session.Process.Kill();
+        //    }
+
+        //    session.IsRunning = true;
+
+        //    string assemblyDir = Path.Combine(env.ContentRootPath, "_assemblytmp");
+        //    string assemblyFilename = Path.Combine(assemblyDir, Path.GetFileNameWithoutExtension(Path.GetTempFileName()));
+        //    string assemblyConfigFileName = assemblyFilename + ".runtimeconfig.json";
+        //    assemblyFilename += ".dll";
+
+        //    try
+        //    {
+        //        //write assembly file and copy runtimeconfig
+        //        using (var fs = new FileStream(assemblyFilename, FileMode.Create, FileAccess.Write))
+        //        {
+        //            fs.Write(session.LastAssembly, 0, session.LastAssembly.Length);
+        //        }
+        //        File.Copy(Path.Combine(assemblyDir, "templates", "_template_.runtimeconfig.json"), assemblyConfigFileName);
+
+        //        //notify client of running state
+        //        remoteExecutionCallback.SendExecutionStateChanged(session, new RemoteExecutionState
+        //        {
+        //            State = RemoteAppState.Running
+        //        });
+
+        //        //start process
+        //        Process process = new Process();
+        //        process.EnableRaisingEvents = true;
+        //        process.OutputDataReceived += (object sender, DataReceivedEventArgs e) => { process_OutputDataReceived(session, e); };
+        //        process.ErrorDataReceived += (object sender, DataReceivedEventArgs e) => { process_ErrorDataReceived(session, e); }; ;
+        //        process.Exited += (object sender, EventArgs e) => { process_Exited(session, e); }; ;
+
+        //        process.StartInfo = new ProcessStartInfo
+        //        {
+        //            FileName = "dotnet",
+        //            Arguments = assemblyFilename,
+        //            UseShellExecute = false,
+        //            RedirectStandardError = true,
+        //            RedirectStandardOutput = true
+        //        };
+
+        //        process.Start();
+        //        process.BeginOutputReadLine();
+        //        process.BeginErrorReadLine();
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        remoteExecutionCallback.SendExecutionStateChanged(session, new RemoteExecutionState
+        //        {
+        //            State = RemoteAppState.Crashed,
+        //            Exception = ExceptionDescriptor.FromException(ex)
+        //        });
+        //        session.IsRunning = false;
+        //        try
+        //        {
+        //            File.Delete(assemblyFilename);
+        //            File.Delete(assemblyConfigFileName);
+        //        }
+        //        catch (Exception fileDelEx)
+        //        {
+        //            Console.WriteLine($"Error while deleting generated assembly file: {ex.Message}");
+        //        }
+        //    }
+        //    finally
+        //    {
+
+
+        //    }
+
+        //}
+
+        //private void process_Exited(object sender, EventArgs e)
+        //{
+        //    var session = (RemoteCodeSession)sender;
+        //    remoteExecutionCallback.SendExecutionStateChanged(session, new RemoteExecutionState
+        //    {
+        //        State = RemoteAppState.Ended,
+        //    });
+        //    session.IsRunning = false;
+        //}
+
+        //private void process_ErrorDataReceived(object sender, DataReceivedEventArgs e)
+        //{
+        //    if (e.Data == null) return;
+        //    var session = (RemoteCodeSession)sender;
+        //    remoteExecutionCallback.SendExecutionStateChanged(session, new RemoteExecutionState
+        //    {
+        //        State = RemoteAppState.Crashed,
+        //        Exception = ExceptionDescriptor.FromException(new Exception(e.Data))
+        //    });
+        //}
+
+        //private void process_OutputDataReceived(object sender, DataReceivedEventArgs e)
+        //{
+        //    if (e.Data == null) return;
+        //    var session = (RemoteCodeSession)sender;
+        //    lock (session)
+        //    {
+        //        remoteExecutionCallback.SendExecutionStateChanged(session, new RemoteExecutionState
+        //        {
+        //            State = RemoteAppState.WriteOutput,
+        //            Output = e.Data
+        //        });
+        //    }
+        //}
+
         public void RunLastCompilation(string sessionid)
         {
             var session = GetSession(sessionid);
@@ -119,9 +238,9 @@ namespace Sigged.Repl.NetCore.Web.Services
                 Trace.TraceWarning($"Warning! Session {session.SessionId} runs new thread while old thread still running. Disposing old thread...");
                 try
                 {
-                    session.ExecutionThread.Abort();
+                    //session.ExecutionThread.Abort();
                 }
-                catch (ThreadAbortException tae)
+                catch (Exception tae)
                 {
                     Trace.TraceWarning($"Warning! Disposed of old thread for session {session.SessionId} ");
                 }
@@ -174,8 +293,8 @@ namespace Sigged.Repl.NetCore.Web.Services
                 }
             }));
             session.ExecutionThread.Start(session);
-            
+
         }
-        
+
     }
 }

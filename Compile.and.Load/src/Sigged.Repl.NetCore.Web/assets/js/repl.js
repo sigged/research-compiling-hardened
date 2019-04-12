@@ -1,6 +1,6 @@
 ﻿/**
  * REPL Service
- * @copyright SpruceBit 2019
+ * @copyright Siegfried Derdeyn 2019
  * @license MIT
  */
 
@@ -8,7 +8,7 @@ let replService = (function () {
 
     const consoleDomMutationObserver = new MutationObserver(function(mutations){
         mutations.forEach(function(mutation) {
-            console.log('Console Mutation!', mutation);
+            //console.log('Console Mutation!', mutation);
             replApp.consoleFocus();
           });
     });
@@ -34,6 +34,9 @@ let replService = (function () {
         .withUrl("/codeHub")
         .configureLogging(signalR.LogLevel.Information)
         .build();
+    
+    //for debugging
+    hubconnection.serverTimeoutInMilliseconds = 1000 * 60 * 10; // 10 min timeout!!
 
     async function connectToHub() {
         try {

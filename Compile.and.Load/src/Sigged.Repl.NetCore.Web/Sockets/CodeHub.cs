@@ -27,6 +27,7 @@ namespace Sigged.Repl.NetCore.Web.Sockets
         private async Task<BuildResultDto> BuildCore(BuildRequestDto buildRequest)
         {
             BuildResultDto result = new BuildResultDto();
+            result.SessionId = Context.ConnectionId;
             EmitResult results = await _rcsm.Compile(Context.ConnectionId, buildRequest.SourceCode);
             result.BuildErrors = results.Diagnostics.Select(d =>
                 new BuildErrorDto
@@ -94,6 +95,7 @@ namespace Sigged.Repl.NetCore.Web.Sockets
         /// <returns></returns>
         public async Task DispatchAppStateToRemoteClient(string targetConnectionId, RemoteExecutionState state)
         {
+            state.SessionId = targetConnectionId;
             await Clients.Client(targetConnectionId).SendAsync("ApplicationStateChanged", targetConnectionId, state);
         }
 
