@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -65,12 +66,11 @@ namespace Sigged.Repl.NetCore.Web
 
             app.UseSignalR((configure) => {
                 configure.MapHub<CodeHub>("/codeHub");
+                configure.MapHub<WorkerHub>("/workerHub", (options) =>
+                {
+                    options.Transports = HttpTransportType.WebSockets;
+                });
             });
-                
-            //    route =>
-            //{
-            //    route.MapHub<CodeHub>("/codeHub");
-            //});
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();

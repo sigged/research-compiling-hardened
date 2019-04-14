@@ -26,6 +26,7 @@
 
 
   <ItemGroup>
+    <ProjectReference Include="..\Sigged.CodeHost.Core\Sigged.CodeHost.Core.csproj" />
     <ProjectReference Include="..\Sigged.Compiling.Core\Sigged.Compiling.Core.csproj" />
   </ItemGroup>
 

@@ -21,7 +21,7 @@ namespace Sigged.Repl.NetCore.Web.Services
         protected Compiler compiler;
         protected IHostingEnvironment env;
         protected IRemoteExecutionCallback remoteExecutionCallback;
-            
+        
         public RemoteCodeSessionManager(IHostingEnvironment henv, IRemoteExecutionCallback executionCaller)
         {
             env = henv;
@@ -104,125 +104,6 @@ namespace Sigged.Repl.NetCore.Web.Services
             }
         }
 
-        //public void RunLastCompilation_PROCESS(string sessionid)
-        //{
-        //    var session = GetSession(sessionid);
-        //    if (session == null)
-        //        throw new InvalidOperationException($"Can't build for non-existing session {sessionid}");
-        //    if (session.LastAssembly == null || session.LastResult == null)
-        //        throw new InvalidOperationException($"Code for session {sessionid} has not been built yet");
-
-        //    session.IsRunning = true;
-        //    //cancel any previous threads, just to be absolutely sure
-        //    if (session.Process?.HasExited == false)
-        //    {
-        //        Trace.TraceWarning($"Warning! Session {session.SessionId} started a new process while old process still running. Disposing old process...");
-        //        session.Process.Kill();
-        //    }
-
-        //    session.IsRunning = true;
-
-        //    string assemblyDir = Path.Combine(env.ContentRootPath, "_assemblytmp");
-        //    string assemblyFilename = Path.Combine(assemblyDir, Path.GetFileNameWithoutExtension(Path.GetTempFileName()));
-        //    string assemblyConfigFileName = assemblyFilename + ".runtimeconfig.json";
-        //    assemblyFilename += ".dll";
-
-        //    try
-        //    {
-        //        //write assembly file and copy runtimeconfig
-        //        using (var fs = new FileStream(assemblyFilename, FileMode.Create, FileAccess.Write))
-        //        {
-        //            fs.Write(session.LastAssembly, 0, session.LastAssembly.Length);
-        //        }
-        //        File.Copy(Path.Combine(assemblyDir, "templates", "_template_.runtimeconfig.json"), assemblyConfigFileName);
-
-        //        //notify client of running state
-        //        remoteExecutionCallback.SendExecutionStateChanged(session, new RemoteExecutionState
-        //        {
-        //            State = RemoteAppState.Running
-        //        });
-
-        //        //start process
-        //        Process process = new Process();
-        //        process.EnableRaisingEvents = true;
-        //        process.OutputDataReceived += (object sender, DataReceivedEventArgs e) => { process_OutputDataReceived(session, e); };
-        //        process.ErrorDataReceived += (object sender, DataReceivedEventArgs e) => { process_ErrorDataReceived(session, e); }; ;
-        //        process.Exited += (object sender, EventArgs e) => { process_Exited(session, e); }; ;
-
-        //        process.StartInfo = new ProcessStartInfo
-        //        {
-        //            FileName = "dotnet",
-        //            Arguments = assemblyFilename,
-        //            UseShellExecute = false,
-        //            RedirectStandardError = true,
-        //            RedirectStandardOutput = true
-        //        };
-
-        //        process.Start();
-        //        process.BeginOutputReadLine();
-        //        process.BeginErrorReadLine();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        remoteExecutionCallback.SendExecutionStateChanged(session, new RemoteExecutionState
-        //        {
-        //            State = RemoteAppState.Crashed,
-        //            Exception = ExceptionDescriptor.FromException(ex)
-        //        });
-        //        session.IsRunning = false;
-        //        try
-        //        {
-        //            File.Delete(assemblyFilename);
-        //            File.Delete(assemblyConfigFileName);
-        //        }
-        //        catch (Exception fileDelEx)
-        //        {
-        //            Console.WriteLine($"Error while deleting generated assembly file: {ex.Message}");
-        //        }
-        //    }
-        //    finally
-        //    {
-
-
-        //    }
-
-        //}
-
-        //private void process_Exited(object sender, EventArgs e)
-        //{
-        //    var session = (RemoteCodeSession)sender;
-        //    remoteExecutionCallback.SendExecutionStateChanged(session, new RemoteExecutionState
-        //    {
-        //        State = RemoteAppState.Ended,
-        //    });
-        //    session.IsRunning = false;
-        //}
-
-        //private void process_ErrorDataReceived(object sender, DataReceivedEventArgs e)
-        //{
-        //    if (e.Data == null) return;
-        //    var session = (RemoteCodeSession)sender;
-        //    remoteExecutionCallback.SendExecutionStateChanged(session, new RemoteExecutionState
-        //    {
-        //        State = RemoteAppState.Crashed,
-        //        Exception = ExceptionDescriptor.FromException(new Exception(e.Data))
-        //    });
-        //}
-
-        //private void process_OutputDataReceived(object sender, DataReceivedEventArgs e)
-        //{
-        //    if (e.Data == null) return;
-        //    var session = (RemoteCodeSession)sender;
-        //    lock (session)
-        //    {
-        //        remoteExecutionCallback.SendExecutionStateChanged(session, new RemoteExecutionState
-        //        {
-        //            State = RemoteAppState.WriteOutput,
-        //            Output = e.Data
-        //        });
-        //    }
-        //}
-
         public void RunLastCompilation(string sessionid)
         {
             var session = GetSession(sessionid);
@@ -233,68 +114,243 @@ namespace Sigged.Repl.NetCore.Web.Services
 
             session.IsRunning = true;
             //cancel any previous threads, just to be absolutely sure
-            if (session.ExecutionThread?.IsAlive == true)
+            if (session.Process?.HasExited == false)
             {
-                Trace.TraceWarning($"Warning! Session {session.SessionId} runs new thread while old thread still running. Disposing old thread...");
-                try
-                {
-                    //session.ExecutionThread.Abort();
-                }
-                catch (Exception tae)
-                {
-                    Trace.TraceWarning($"Warning! Disposed of old thread for session {session.SessionId} ");
-                }
+                Trace.TraceWarning($"Warning! Session {session.SessionId} started a new process while old process still running. Disposing old process...");
+                session.Process.Kill();
             }
 
-            session.ExecutionThread = new Thread(new ParameterizedThreadStart((object sessionObj) =>
-            {
-                var execSession = (RemoteCodeSession)sessionObj;
-                execSession.IsRunning = true;
+            session.IsRunning = true;
 
-                var assemly = Assembly.Load(execSession.LastAssembly);
-                var type = assemly.GetType("Test.Program");
-                //var test = type.FindMembers(MemberTypes.Method, BindingFlags.Static | BindingFlags.Public, null, null);
+            string assemblyDir = Path.Combine(env.ContentRootPath, "_assemblytmp");
+            string assemblyFilename = Path.Combine(assemblyDir, Path.GetFileNameWithoutExtension(Path.GetTempFileName()));
+            string assemblyConfigFileName = assemblyFilename + ".runtimeconfig.json";
+            assemblyFilename += ".dll";
+
+            try
+            {
+                //write assembly file and copy runtimeconfig
+                using (var fs = new FileStream(assemblyFilename, FileMode.Create, FileAccess.Write))
+                {
+                    fs.Write(session.LastAssembly, 0, session.LastAssembly.Length);
+                }
+                File.Copy(Path.Combine(assemblyDir, "templates", "_template_.runtimeconfig.json"), assemblyConfigFileName);
+
+                //notify client of running state
+                remoteExecutionCallback.SendExecutionStateChanged(session, new RemoteExecutionState
+                {
+                    State = RemoteAppState.Running
+                });
+
+                //start process
+                session.Process = new Process();
+                session.Process.EnableRaisingEvents = true;
+                //process.OutputDataReceived += (object sender, DataReceivedEventArgs e) => { process_OutputDataReceived(session, e); };
+                //process.ErrorDataReceived += (object sender, DataReceivedEventArgs e) => { process_ErrorDataReceived(session, e); }; ;
+                session.Process.Exited += (object sender, EventArgs e) => { process_Exited(session, e); }; ;
+
+                session.Process.StartInfo = new ProcessStartInfo
+                {
+                    FileName = "dotnet",
+                    Arguments = assemblyFilename,
+                    UseShellExecute = false,
+                    RedirectStandardError = true,
+                    RedirectStandardOutput = true
+                    
+                };
+
+                
+                Thread tOutputter = new Thread(new ParameterizedThreadStart((object parm) => {
+                    RemoteCodeSession execSession = (RemoteCodeSession)parm;
+                    while (true)
+                    {
+                        if (execSession.Process.StandardOutput.EndOfStream)
+                        {
+                            Debug.WriteLine($"Stdout closed");
+                        }
+                        else
+                        {
+                            char c = (char)execSession.Process.StandardOutput.Read();
+                            Debug.WriteLine($"Detected stdout: {c}");
+                        }
+                        
+                    }
+                }));
+
+                Thread tInputter = new Thread(new ParameterizedThreadStart((object parm) => {
+                    RemoteCodeSession execSession = (RemoteCodeSession)parm;
+                    while (!execSession.Process.HasExited)
+                    {
+                        List<ProcessThread> threads = new List<ProcessThread>();
+                        for (int i = 0; i < execSession.Process.Threads.Count; i++)
+                        {
+                            threads.Add(execSession.Process.Threads[i]);
+                        }
+
+
+                        FieldInfo threadInfoField = threads[0].GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance)
+                            .FirstOrDefault(fi => fi.Name == "_threadInfo");
+
+                        object threadInfo = threadInfoField?.GetValue(threads[0]);
+
+                        FieldInfo threadWaitReasonField = threadInfo.GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance)
+                            .FirstOrDefault(fi => fi.Name == "_threadWaitReason");
+
+                        object threadWaitReasonObj = threadWaitReasonField?.GetValue(threadInfo);
+                        ThreadWaitReason waitReason = ThreadWaitReason.Executive;
+                        if (threadWaitReasonObj.GetType().Name == "ThreadWaitReason")
+                            waitReason = (ThreadWaitReason)threadWaitReasonObj;
+
+                        if(waitReason == ThreadWaitReason.UserRequest)
+                        {
+                            //Debug.WriteLine(waitReason);
+                        }
+                        Debug.WriteLine(waitReason);
+                    }
+                }));
+
+                session.Process.Start();
+                //tOutputter.Start(session);
+                tInputter.Start(session);
+
+
+                //process.StandardI
+                //process.BeginOutputReadLine();
+                //process.BeginErrorReadLine();
+            }
+            catch (Exception ex)
+            {
+                remoteExecutionCallback.SendExecutionStateChanged(session, new RemoteExecutionState
+                {
+                    State = RemoteAppState.Crashed,
+                    Exception = ExceptionDescriptor.FromException(ex)
+                });
+                session.IsRunning = false;
                 try
                 {
-                    remoteExecutionCallback.SendExecutionStateChanged(session, new RemoteExecutionState
-                    {
-                        State = RemoteAppState.Running
-                    });
-
-                    //redirect console
-                    Console.SetOut(session.consoleOutputRedirector);
-                    Console.SetIn(session.consoleInputRedirector);
-
-                    type.InvokeMember("Main",
-                                        BindingFlags.InvokeMethod | BindingFlags.Static | BindingFlags.Public,
-                                        null, null,
-                                        new object[] { new string[] { } });
-
-                    //reset console redirection
-                    Console.SetOut(new StreamWriter(Console.OpenStandardOutput()) { AutoFlush = true });
-                    Console.SetIn(new StreamReader(Console.OpenStandardInput()));
-
-                    remoteExecutionCallback.SendExecutionStateChanged(session, new RemoteExecutionState
-                    {
-                        State = RemoteAppState.Ended
-                    });
+                    File.Delete(assemblyFilename);
+                    File.Delete(assemblyConfigFileName);
                 }
-                catch (Exception ex)
+                catch (Exception fileDelEx)
                 {
-                    remoteExecutionCallback.SendExecutionStateChanged(session, new RemoteExecutionState
-                    {
-                        State = RemoteAppState.Crashed,
-                        Exception = ExceptionDescriptor.FromException(ex)
-                    });
+                    Console.WriteLine($"Error while deleting generated assembly file: {ex.Message}");
                 }
-                finally
-                {
-                    execSession.IsRunning = false;
-                }
-            }));
-            session.ExecutionThread.Start(session);
+            }
+            finally
+            {
+
+
+            }
 
         }
+
+        private void process_Exited(object sender, EventArgs e)
+        {
+            var session = (RemoteCodeSession)sender;
+            remoteExecutionCallback.SendExecutionStateChanged(session, new RemoteExecutionState
+            {
+                State = RemoteAppState.Ended,
+            });
+            session.IsRunning = false;
+        }
+
+        private void process_ErrorDataReceived(object sender, DataReceivedEventArgs e)
+        {
+            if (e.Data == null) return;
+            var session = (RemoteCodeSession)sender;
+            remoteExecutionCallback.SendExecutionStateChanged(session, new RemoteExecutionState
+            {
+                State = RemoteAppState.Crashed,
+                Exception = ExceptionDescriptor.FromException(new Exception(e.Data))
+            });
+        }
+
+        private void process_OutputDataReceived(object sender, DataReceivedEventArgs e)
+        {
+            if (e.Data == null) return;
+            var session = (RemoteCodeSession)sender;
+            lock (session)
+            {
+                remoteExecutionCallback.SendExecutionStateChanged(session, new RemoteExecutionState
+                {
+                    State = RemoteAppState.WriteOutput,
+                    Output = e.Data
+                });
+            }
+        }
+
+        //public void RunLastCompilation_THREADS(string sessionid)
+        //{
+        //    var session = GetSession(sessionid);
+        //    if (session == null)
+        //        throw new InvalidOperationException($"Can't build for non-existing session {sessionid}");
+        //    if (session.LastAssembly == null || session.LastResult == null)
+        //        throw new InvalidOperationException($"Code for session {sessionid} has not been built yet");
+
+        //    session.IsRunning = true;
+        //    //cancel any previous threads, just to be absolutely sure
+        //    if (session.ExecutionThread?.IsAlive == true)
+        //    {
+        //        Trace.TraceWarning($"Warning! Session {session.SessionId} runs new thread while old thread still running. Disposing old thread...");
+        //        try
+        //        {
+        //            //session.ExecutionThread.Abort();
+        //        }
+        //        catch (Exception tae)
+        //        {
+        //            Trace.TraceWarning($"Warning! Disposed of old thread for session {session.SessionId} ");
+        //        }
+        //    }
+
+        //    session.ExecutionThread = new Thread(new ParameterizedThreadStart((object sessionObj) =>
+        //    {
+        //        var execSession = (RemoteCodeSession)sessionObj;
+        //        execSession.IsRunning = true;
+
+        //        var assemly = Assembly.Load(execSession.LastAssembly);
+        //        var type = assemly.GetType("Test.Program");
+        //        //var test = type.FindMembers(MemberTypes.Method, BindingFlags.Static | BindingFlags.Public, null, null);
+        //        try
+        //        {
+        //            remoteExecutionCallback.SendExecutionStateChanged(session, new RemoteExecutionState
+        //            {
+        //                State = RemoteAppState.Running
+        //            });
+
+        //            //redirect console
+        //            Console.SetOut(session.consoleOutputRedirector);
+        //            Console.SetIn(session.consoleInputRedirector);
+
+        //            type.InvokeMember("Main",
+        //                                BindingFlags.InvokeMethod | BindingFlags.Static | BindingFlags.Public,
+        //                                null, null,
+        //                                new object[] { new string[] { } });
+
+        //            //reset console redirection
+        //            Console.SetOut(new StreamWriter(Console.OpenStandardOutput()) { AutoFlush = true });
+        //            Console.SetIn(new StreamReader(Console.OpenStandardInput()));
+
+        //            remoteExecutionCallback.SendExecutionStateChanged(session, new RemoteExecutionState
+        //            {
+        //                State = RemoteAppState.Ended
+        //            });
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            remoteExecutionCallback.SendExecutionStateChanged(session, new RemoteExecutionState
+        //            {
+        //                State = RemoteAppState.Crashed,
+        //                Exception = ExceptionDescriptor.FromException(ex)
+        //            });
+        //        }
+        //        finally
+        //        {
+        //            execSession.IsRunning = false;
+        //        }
+        //    }));
+        //    session.ExecutionThread.Start(session);
+
+        //}
 
     }
 }

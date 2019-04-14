@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis.Emit;
 using Sigged.Repl.NetCore.Web.Models;
 using Sigged.Repl.NetCore.Web.Services;
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -96,6 +97,7 @@ namespace Sigged.Repl.NetCore.Web.Sockets
         public async Task DispatchAppStateToRemoteClient(string targetConnectionId, RemoteExecutionState state)
         {
             state.SessionId = targetConnectionId;
+            Debug.WriteLine($"Sending Appstate to {targetConnectionId} -- {state.State}");
             await Clients.Client(targetConnectionId).SendAsync("ApplicationStateChanged", targetConnectionId, state);
         }
 
