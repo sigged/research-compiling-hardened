@@ -6,6 +6,20 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Models\BuildErrorDto.cs" />
+    <Compile Remove="Models\BuildRequestDto.cs" />
+    <Compile Remove="Models\BuildResultDto.cs" />
+    <Compile Remove="Models\ExceptionDto.cs" />
+    <Compile Remove="Services\ConsoleInputService.cs" />
+    <Compile Remove="Services\ConsoleOutputService.cs" />
+    <Compile Remove="Services\IRemoteCodeSessionManager.cs" />
+    <Compile Remove="Services\IRemoteExecutionCallback.cs" />
+    <Compile Remove="Services\RemoteApplicationStateChangedHandler.cs" />
+    <Compile Remove="Services\RemoteExecutionState.cs" />
+    <Compile Remove="Services\SignalRRemoteExecutionCallback.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Remove="bundleconfig.json" />
     <Content Remove="Views\Shared\_CodeEditorPartial.cshtml" />
   </ItemGroup>
@@ -32,7 +46,7 @@
 
 
   <ItemGroup>
-    <Folder Include="_libs\" />
+    <Folder Include="_workerProcess\worker\buildlibs\" />
   </ItemGroup>
 
 </Project>

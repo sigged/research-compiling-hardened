@@ -1,18 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.IO.Pipes;
 using System.Linq;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Emit;
 using ProtoBuf;
 using Sigged.CodeHost.Core.Dto;
-using Sigged.CodeHost.Core.Serialization;
 using Sigged.Compiling.Core;
 
 namespace Sigged.CodeHost.Worker
@@ -20,7 +16,6 @@ namespace Sigged.CodeHost.Worker
     class Program
     {
 
-        static WorkerClient client;
         static Compiler compiler;
         static Thread execThread;
 
@@ -39,40 +34,18 @@ namespace Sigged.CodeHost.Worker
             }
         }
 
-        //static void Main(string[] args)
-        //{
-        //    //gather arguments
-        //    string huburl = "https://localhost:5001/workerHub"; //args[0];
-        //    string sessionid = "bogus-session-id"; //args[1];
-
-        //    compiler = new Compiler(@"D:\BaTi\Thesis\Projects\Sigged.Compiling\Compile.and.Load\src\Sigged.Repl.NetCore.Web\_libs\netstandard2.0");
-
-        //    client = new WorkerClient(huburl, sessionid, compiler);
-        //    try
-        //    {
-        //        Task.Delay(5000).Wait();
-        //        client.Connect().Wait();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Console.WriteLine($"Error: {ex.Message}");
-        //    }
-
-        //}
-
         static void Main(string[] args)
         {
             //gather arguments
-            //string sessionid = "bogus-session-id";//args[0];
-            //string pipeName = "codehost21.pipe"; //args[1];
-            string host = "localhost"; //args[0];
-            int port = 2000; //args[1];
-            string sessionid = "bogus-session-id"; //args[2];
+            string host = args[0]; // "localhost"; //args[0];
+            int port = int.Parse(args[1]); // 2000; //args[1];
+            string sessionid = args[2]; // "bogus-session-id"; //args[2];
 
-            Compiler compiler = new Compiler(@"D:\BaTi\Thesis\Projects\Sigged.Compiling\Compile.and.Load\src\Sigged.Repl.NetCore.Web\_libs\netstandard2.0");
+            //Console.Write($"Press enter to connect to {host}:{port} as {sessionid}");
+            //Console.ReadLine();
 
-
-            
+            string netstandardLibs = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "buildlibs", "netstandard2.0");
+            Compiler compiler = new Compiler(netstandardLibs);
 
             TcpClient client = null;
             NetworkStream networkStream = null;
@@ -84,7 +57,13 @@ namespace Sigged.CodeHost.Worker
 
                     using (networkStream = client.GetStream())
                     {
-                        Debug.WriteLine("CLIENT: waiting for server...");
+                        Console.WriteLine("CLIENT: identifying with server...");
+                        networkStream.WriteByte((byte)MessageType.ClientIdentification);
+                        Serializer.SerializeWithLengthPrefix(networkStream, new IdentificationDto {
+                            SessionId = sessionid
+                        }, PrefixStyle.Fixed32);
+
+                        Console.WriteLine("CLIENT: waiting for server...");
 
                         stopClient = false;
                         while (!stopClient)
@@ -100,7 +79,7 @@ namespace Sigged.CodeHost.Worker
                                     case MessageType.ServerBuildRequest:
                                         //build shit
                                         var buildrequest = Serializer.DeserializeWithLengthPrefix<BuildRequestDto>(networkStream, PrefixStyle.Fixed32);
-                                        Debug.WriteLine("CLIENT: received BuildRequestDto");
+                                        Console.WriteLine("CLIENT: received BuildRequestDto");
 
                                         EmitResult results = null;
                                         byte[] assemblyBytes = null;
@@ -111,7 +90,7 @@ namespace Sigged.CodeHost.Worker
 
                                             assemblyBytes = assemblyStream.ToArray();
                                         }
-                                        Debug.WriteLine("CLIENT: built source code");
+                                        Console.WriteLine("CLIENT: built source code");
 
                                         BuildResultDto result = new BuildResultDto();
                                         result.SessionId = buildrequest.SessionId;
@@ -129,85 +108,26 @@ namespace Sigged.CodeHost.Worker
 
                                         networkStream.WriteByte((byte)MessageType.ClientBuildResult);
                                         Serializer.SerializeWithLengthPrefix(networkStream, result, PrefixStyle.Fixed32);
-                                        Debug.WriteLine("CLIENT: sent buid result");
+                                        Console.WriteLine("CLIENT: sent buid result");
 
                                         if(buildrequest.RunOnSuccess && result.IsSuccess)
                                         {
                                             RunApplication(sessionid, client, assemblyBytes);
+                                            
                                         }
+
+                                        //done processing the server request
+                                        stopClient = true;
 
                                         break;
                                     default:
-                                        Debug.WriteLine($"Unknown server message header: {msgHeader}");
+                                        Console.WriteLine($"Unknown server message header: {msgHeader}");
                                         break;
                                 }
                             }
                             
                         }
                     }
-
-                    //networkStream = client.GetStream();
-
-                    //Console.WriteLine("CLIENT: awaiting BuildRequestDto");
-                    //var buildrequest = Serializer.DeserializeWithLengthPrefix<BuildRequestDto>(networkStream, PrefixStyle.Fixed32);
-                    //Console.WriteLine("CLIENT: received BuildRequestDto");
-
-                    //EmitResult results = null;
-                    //byte[] assemblyBytes = null;
-                    //using (var assemblyStream = new MemoryStream())
-                    //{
-                    //    results = compiler.Compile(buildrequest.SourceCode, buildrequest.SessionId, assemblyStream,
-                    //        outputKind: OutputKind.ConsoleApplication).Result;
-
-                    //    assemblyBytes = assemblyStream.ToArray();
-                    //}
-
-                    //Console.WriteLine("CLIENT: built source code");
-
-                    //BuildResultDto result = new BuildResultDto();
-                    //result.SessionId = buildrequest.SessionId;
-                    //result.BuildErrors = results.Diagnostics.Select(d =>
-                    //    new BuildErrorDto
-                    //    {
-                    //        Id = d.Id,
-                    //        Severity = d.Severity.ToString()?.ToLower(),
-                    //        Description = d.GetMessage(),
-                    //        StartPosition = LinePositionDto.FromLinePosition(d.Location.GetLineSpan().StartLinePosition),
-                    //        EndPosition = LinePositionDto.FromLinePosition(d.Location.GetLineSpan().EndLinePosition),
-                    //    }).ToList();
-
-                    //result.IsSuccess = results.Success;
-
-                    //Serializer.SerializeWithLengthPrefix(networkStream, result, PrefixStyle.Fixed32);
-                    //Console.WriteLine("CLIENT: sent build result");
-
-
-
-                    //if (result.IsSuccess)
-                    //{
-                    //    IsRunning = true;
-                    //    RunApplication(sessionid, networkStream, assemblyBytes);
-                    //    IsRunning = false;
-                    //}
-                    //else
-                    //{
-                    //    //notify end of work
-                    //    var execState = new ExecutionStateDto
-                    //    {
-                    //        SessionId = sessionid,
-                    //        State = RemoteAppState.NotRunning
-                    //    };
-                    //    Serializer.SerializeWithLengthPrefix(networkStream, execState, PrefixStyle.Fixed32);
-                    //}
-
-                    //while (IsRunning)
-                    //{
-                    //    Task.Delay(100).Wait();
-                    //    var remoteInput = Serializer.DeserializeWithLengthPrefix<RemoteInputDto>(networkStream, PrefixStyle.Fixed32);
-                    //}
-
-                    //Console.WriteLine(Environment.NewLine + "client: shutting down");
-
                 }
             }
             finally
@@ -216,9 +136,11 @@ namespace Sigged.CodeHost.Worker
                 networkStream?.Dispose();
                 client?.Close();
                 client?.Dispose();
+
+                //Console.ReadLine();
             }
 
-            Console.ReadLine();
+            
         }
 
         static void RunApplication(string sessionid, TcpClient client, byte[] assemblyBytes)

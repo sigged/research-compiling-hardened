@@ -44,7 +44,7 @@ namespace Sigged.Repl.NetCore.Web
             });
 
             //custom services
-            services.AddTransient<IRemoteExecutionCallback, SignalRRemoteExecutionCallback>();
+            services.AddTransient<IClientService, SignalRClientService>();
             services.AddSingleton<RemoteCodeSessionManager>();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
@@ -66,10 +66,6 @@ namespace Sigged.Repl.NetCore.Web
 
             app.UseSignalR((configure) => {
                 configure.MapHub<CodeHub>("/codeHub");
-                configure.MapHub<WorkerHub>("/workerHub", (options) =>
-                {
-                    options.Transports = HttpTransportType.WebSockets;
-                });
             });
 
             app.UseHttpsRedirection();

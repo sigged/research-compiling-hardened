@@ -6,9 +6,10 @@ namespace Sigged.CodeHost.Core.Dto
 {
     public enum MessageType : byte
     {
-        ServerBuildRequest = 1,
-        ClientBuildResult = 2,
-        ClientExectionState = 3,
-        ServerRemoteInput = 4
+        ClientIdentification = 1,
+        ServerBuildRequest = 2,
+        ServerRemoteInput = 3,
+        ClientBuildResult = 4,
+        ClientExectionState = 5,
     }
 }

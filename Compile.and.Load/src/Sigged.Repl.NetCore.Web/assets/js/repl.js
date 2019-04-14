@@ -61,7 +61,7 @@ let replService = (function () {
         }
     });
 
-    hubconnection.on('ApplicationStateChanged', function(sessionid, appStatus){
+    hubconnection.on('ApplicationStateChanged', function(appStatus){
         console.log("App State Changed", appStatus);
         switch(appStatus.state){
             case APPSTATE.RUNNING:
@@ -209,7 +209,8 @@ let replService = (function () {
 
                     hubconnection.invoke("Build", {
                         codingSessionId: '',
-                        sourceCode: code
+                        sourceCode: code,
+                        runOnSuccess: false
                     }).catch(err => console.error(err.toString()));
                 });
             },
@@ -219,9 +220,10 @@ let replService = (function () {
                 this.isBuilding = false;
                 this.isRunning = true;
 
-                hubconnection.invoke("BuildAndRunCode", {
+                hubconnection.invoke("Build", {
                     codingSessionId: '',
-                    sourceCode: code
+                    sourceCode: code,
+                    runOnSuccess: true //instructs to run after good build
                 }).catch(err => console.error(err.toString()));
             },
             consoleFocus: function(){

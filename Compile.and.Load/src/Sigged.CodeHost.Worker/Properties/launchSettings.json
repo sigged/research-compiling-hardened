@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Sigged.CodeHost.Worker": {
+      "commandName": "Project",
+      "commandLineArgs": "localhost 2000 MYSESSION"
+    }
+  }
+}
