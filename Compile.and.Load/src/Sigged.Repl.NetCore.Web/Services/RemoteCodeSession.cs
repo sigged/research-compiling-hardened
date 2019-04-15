@@ -14,7 +14,6 @@ namespace Sigged.Repl.NetCore.Web.Services
         //    this.consoleOutputRedirector = new ConsoleOutputService(this, executionCallback);
         //    this.consoleInputRedirector = new ConsoleInputService(this, executionCallback);
         //}
-        public string SignalRConnectionId { get; set; }
         public string SessionId { get; set; }
         public BuildRequestDto LastBuildRequest { get; set; }
         public EmitResult LastResult { get; set; }

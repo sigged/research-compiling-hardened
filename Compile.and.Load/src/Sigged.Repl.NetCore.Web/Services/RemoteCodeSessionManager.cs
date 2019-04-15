@@ -165,6 +165,37 @@ namespace Sigged.Repl.NetCore.Web.Services
         }
 
         /// <summary>
+        /// Cancels any active operations for a given session
+        /// </summary>
+        /// <returns></returns>
+        public void CancelSessionActions(string sessionid)
+        {
+            var session = GetSession(sessionid);
+            if (session != null)
+            {
+                try
+                {
+                    //shutdown communication channel
+                    session.WorkerClient?.Close();
+                    session.WorkerClient?.Dispose();
+                }
+                finally
+                {
+                    try
+                    {
+                        session.WorkerProcess?.Kill();
+                    }
+                    finally
+                    {
+                        session.WorkerClient = null;
+                        session.WorkerProcess = null;
+                    }
+                }
+            }
+
+        }
+
+        /// <summary>
         /// Forwards user's console input to worker process
         /// </summary>
         /// <returns></returns>

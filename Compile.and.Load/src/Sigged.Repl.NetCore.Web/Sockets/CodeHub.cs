@@ -52,6 +52,19 @@ namespace Sigged.Repl.NetCore.Web.Sockets
         }
 
         /// <summary>
+        /// Cancels all actions for this sessio,n
+        /// </summary>
+        /// <param name="buildRequest"></param>
+        /// <returns></returns>
+        public async Task StopAll()
+        {
+            await Task.Run(() =>
+            {
+                _rcsm.CancelSessionActions(Context.ConnectionId);
+            });
+        }
+
+        /// <summary>
         /// Should only be used from the server side
         /// </summary>
         /// <returns></returns>
