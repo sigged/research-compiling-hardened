@@ -56,13 +56,13 @@ namespace Sigged.CodeHost.Worker
 
                     using (networkStream = client.GetStream())
                     {
-                        Logger.AppendLogFile("CLIENT: identifying with server...");
+                        Logger.LogLine("CLIENT: identifying with server...");
                         networkStream.WriteByte((byte)MessageType.WorkerIdentification);
                         Serializer.SerializeWithLengthPrefix(networkStream, new IdentificationDto {
                             SessionId = sessionid
                         }, PrefixStyle.Fixed32);
 
-                        Logger.AppendLogFile("CLIENT: waiting for server...");
+                        Logger.LogLine("CLIENT: waiting for server...");
 
                         stopClient = false;
                         while (!stopClient)
@@ -78,7 +78,7 @@ namespace Sigged.CodeHost.Worker
                                     case MessageType.ServerBuildRequest:
                                         //build shit
                                         var buildrequest = Serializer.DeserializeWithLengthPrefix<BuildRequestDto>(networkStream, PrefixStyle.Fixed32);
-                                        Logger.AppendLogFile("CLIENT: received BuildRequestDto");
+                                        Logger.LogLine("CLIENT: received BuildRequestDto");
 
                                         EmitResult results = null;
                                         byte[] assemblyBytes = null;
@@ -89,7 +89,7 @@ namespace Sigged.CodeHost.Worker
 
                                             assemblyBytes = assemblyStream.ToArray();
                                         }
-                                        Logger.AppendLogFile("CLIENT: built source code");
+                                        Logger.LogLine("CLIENT: built source code");
 
                                         BuildResultDto result = new BuildResultDto();
                                         result.SessionId = buildrequest.SessionId;
@@ -107,7 +107,7 @@ namespace Sigged.CodeHost.Worker
 
                                         networkStream.WriteByte((byte)MessageType.WorkerBuildResult);
                                         Serializer.SerializeWithLengthPrefix(networkStream, result, PrefixStyle.Fixed32);
-                                        Logger.AppendLogFile("CLIENT: sent buid result");
+                                        Logger.LogLine("CLIENT: sent buid result");
 
                                         if(buildrequest.RunOnSuccess && result.IsSuccess)
                                         {
@@ -120,7 +120,7 @@ namespace Sigged.CodeHost.Worker
 
                                         break;
                                     default:
-                                        Logger.AppendLogFile($"Unknown server message header: {msgHeader}");
+                                        Logger.LogLine($"Unknown server message header: {msgHeader}");
                                         break;
                                 }
                             }
@@ -160,7 +160,7 @@ namespace Sigged.CodeHost.Worker
                 };
                 networkStream.WriteByte((byte)MessageType.WorkerExecutionState);
                 Serializer.SerializeWithLengthPrefix(networkStream, execState, PrefixStyle.Fixed32);
-                Logger.AppendLogFile($"CLIENT: sent execution state {execState.State}");
+                Logger.LogLine($"CLIENT: sent execution state {execState.State}");
 
 
                 //redirect console
@@ -183,12 +183,12 @@ namespace Sigged.CodeHost.Worker
                 };
                 networkStream.WriteByte((byte)MessageType.WorkerExecutionState);
                 Serializer.SerializeWithLengthPrefix(networkStream, execState, PrefixStyle.Fixed32);
-                Logger.AppendLogFile($"CLIENT: sent execution state {execState.State}");
+                Logger.LogLine($"CLIENT: sent execution state {execState.State}");
 
             }
             catch (SocketException socketEx)
             {
-                Logger.AppendLogFile($"CLIENT Error: {socketEx.Message}");
+                Logger.LogLine($"CLIENT Error: {socketEx.Message}");
             }
             catch (Exception ex)
             {

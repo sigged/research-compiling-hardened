@@ -48,7 +48,7 @@ namespace Sigged.CodeHost.Worker
                 };
                 networkStream.WriteByte((byte)MessageType.WorkerExecutionState);
                 Serializer.SerializeWithLengthPrefix(networkStream, execState, PrefixStyle.Fixed32);
-                Logger.AppendLogFile($"CLIENT: sent remote inputline request");
+                Logger.LogLine($"CLIENT: sent remote inputline request");
 
                 while (receivedInput == null)
                 {
@@ -61,11 +61,11 @@ namespace Sigged.CodeHost.Worker
                             var remoteInput = Serializer.DeserializeWithLengthPrefix<RemoteInputDto>(networkStream, PrefixStyle.Fixed32);
                             receivedInput = remoteInput.Input;
 
-                            Logger.AppendLogFile($"CLIENT: received remote input {receivedInput} of length {receivedInput.Length}");
+                            Logger.LogLine($"CLIENT: received remote input {receivedInput} of length {receivedInput.Length}");
                         }
                         else
                         {
-                            Logger.AppendLogFile($"CLIENT: expected msgtype {MessageType.ServerRemoteInput} but got {msgType}");
+                            Logger.LogLine($"CLIENT: expected msgtype {MessageType.ServerRemoteInput} but got {msgType}");
                         }
                         
                     }
@@ -74,7 +74,7 @@ namespace Sigged.CodeHost.Worker
                         Thread.Sleep(100);
                     }
                 }
-                Logger.AppendLogFile($"CLIENT: returing remote input {receivedInput} of length {receivedInput.Length} to execution flow");
+                Logger.LogLine($"CLIENT: returing remote input {receivedInput} of length {receivedInput.Length} to execution flow");
                 return receivedInput;
             }
             finally
