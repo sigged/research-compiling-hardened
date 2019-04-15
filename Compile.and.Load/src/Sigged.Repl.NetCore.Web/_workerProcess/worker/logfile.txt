@@ -1,0 +1,12 @@
+CLIENT: identifying with server...
+CLIENT: waiting for server...
+CLIENT: received BuildRequestDto
+CLIENT: built source code
+CLIENT: sent buid result
+CLIENT: sent execution state Running
+CLIENT: sent remote inputline request
+CLIENT: received remote input mlkmlk
+ of length 7
+CLIENT: returing remote input mlkmlk
+ of length 7 to execution flow
+CLIENT: sent execution state Ended

@@ -149,14 +149,14 @@ namespace Test {
 
                         switch (msgType)
                         {
-                            case MessageType.ClientBuildResult:
+                            case MessageType.WorkerBuildResult:
                                 //wait for build results
                                 Console.WriteLine("SERVER: sent build request, waiting for results...");
                                 var result = Serializer.DeserializeWithLengthPrefix<BuildResultDto>(networkStream, PrefixStyle.Fixed32);
 
                                 Console.WriteLine("SERVER: received build result");
                                 break;
-                            case MessageType.ClientExectionState:
+                            case MessageType.WorkerExecutionState:
                                 var execState = Serializer.DeserializeWithLengthPrefix<ExecutionStateDto>(networkStream, PrefixStyle.Fixed32);
                                 Console.WriteLine($"SERVER: received ExecutionStateDto: {execState?.State}");
 

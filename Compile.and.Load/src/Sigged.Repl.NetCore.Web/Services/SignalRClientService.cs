@@ -19,7 +19,7 @@ namespace Sigged.Repl.NetCore.Web.Services
         {
             httpContext = httpAccessor.HttpContext;
             appBaseUrl = $"{httpContext.Request.Scheme}://{httpContext.Request.Host}{httpContext.Request.PathBase}";
-            hubConnection = new HubConnectionBuilder().WithUrl(appBaseUrl + "/codeHub" /*"https://localhost:44341/codeHub"*/).Build();
+            hubConnection = new HubConnectionBuilder().WithUrl(appBaseUrl + "/codeHub").Build();
         }
 
         public async Task Connect()

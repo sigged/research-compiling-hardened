@@ -46,16 +46,6 @@ namespace Sigged.Repl.NetCore.Web.Services
             clientService.Connect();
         }
 
-        private void Listener_WorkerCompletedBuild(TcpClient workerClient, BuildResultDto result)
-        {
-            clientService.SendBuildResult(result.SessionId, result);
-        }
-        
-        private void Listener_WorderExecutionState(TcpClient workerClient, ExecutionStateDto state)
-        {
-            clientService.SendExecutionState(state.SessionId, state);
-        }
-
         public IEnumerable<RemoteCodeSession> Sessions {
             get
             {
@@ -75,7 +65,7 @@ namespace Sigged.Repl.NetCore.Web.Services
             }
         }
 
-        public async Task<RemoteCodeSession> CreateSession(string uniqueSessionId)
+        public RemoteCodeSession CreateSession(string uniqueSessionId)
         {
             //string sessionid = Guid.NewGuid().ToString();
             string sessionid = uniqueSessionId;
@@ -102,7 +92,7 @@ namespace Sigged.Repl.NetCore.Web.Services
             return sessions.FirstOrDefault(s => s.SessionId == sessionid);
         }
 
-        private async Task CreateWorkerProcess(RemoteCodeSession session)
+        protected async Task CreateWorkerProcess(RemoteCodeSession session)
         {
             if (session == null)
                 throw new ArgumentNullException(nameof(session));
@@ -143,7 +133,7 @@ namespace Sigged.Repl.NetCore.Web.Services
             var session = GetSession(buildRequest.SessionId);
             if (session == null)
             {
-                session = await CreateSession(buildRequest.SessionId);
+                session = CreateSession(buildRequest.SessionId);
                 buildRequest.SessionId = session.SessionId;
             }
 
@@ -151,10 +141,34 @@ namespace Sigged.Repl.NetCore.Web.Services
             session.LastBuildRequest = buildRequest;
             
             await CreateWorkerProcess(session);
-
         }
 
-        private void Listener_WorkerConnected(TcpClient workerClient, string sessionId)
+        /// <summary>
+        /// Forwards user's console input to worker process
+        /// </summary>
+        /// <returns></returns>
+        internal void ForwardConsoleInput(RemoteInputDto remoteInput)
+        {
+            try
+            {
+                var session = GetSession(remoteInput.SessionId);
+                if (session == null)
+                    throw new InvalidOperationException("Can't forward input: Session doesn't exist");
+                if (session.WorkerClient == null)
+                    throw new InvalidOperationException("Can't forward input: Session has no identified worker");
+                if (!session.WorkerClient.Connected)
+                    throw new InvalidOperationException("Can't forward input: Disconnected from session's worker");
+
+                listener.SendWorkerMessage(session.WorkerClient, MessageType.ServerRemoteInput, remoteInput);
+            }
+            catch(Exception ex)
+            {
+                Debug.Fail(ex.Message);
+            }
+            
+        }
+
+        protected void Listener_WorkerConnected(TcpClient workerClient, string sessionId)
         {
             var session = GetSession(sessionId);
             if (session == null)
@@ -175,5 +189,16 @@ namespace Sigged.Repl.NetCore.Web.Services
                 }
             }
         }
+
+        protected void Listener_WorkerCompletedBuild(TcpClient workerClient, BuildResultDto result)
+        {
+            clientService.SendBuildResult(result.SessionId, result);
+        }
+
+        protected void Listener_WorderExecutionState(TcpClient workerClient, ExecutionStateDto state)
+        {
+            clientService.SendExecutionState(state.SessionId, state);
+        }
+
     }
 }

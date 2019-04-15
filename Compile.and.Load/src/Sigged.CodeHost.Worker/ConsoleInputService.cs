@@ -30,7 +30,7 @@ namespace Sigged.CodeHost.Worker
                 SessionId = sessionid,
                 State = RemoteAppState.WaitForInput
             };
-            networkStream.WriteByte((byte)MessageType.ClientExectionState);
+            networkStream.WriteByte((byte)MessageType.WorkerExecutionState);
             Serializer.SerializeWithLengthPrefix(networkStream, execState, PrefixStyle.Fixed32);
 
             var remoteInput = Serializer.DeserializeWithLengthPrefix<RemoteInputDto>(networkStream, PrefixStyle.Fixed32);
@@ -46,9 +46,9 @@ namespace Sigged.CodeHost.Worker
                     SessionId = sessionid,
                     State = RemoteAppState.WaitForInputLine
                 };
-                networkStream.WriteByte((byte)MessageType.ClientExectionState);
+                networkStream.WriteByte((byte)MessageType.WorkerExecutionState);
                 Serializer.SerializeWithLengthPrefix(networkStream, execState, PrefixStyle.Fixed32);
-                Debug.WriteLine($"CLIENT: sent remote inputline request");
+                Logger.AppendLogFile($"CLIENT: sent remote inputline request");
 
                 while (receivedInput == null)
                 {
@@ -61,11 +61,11 @@ namespace Sigged.CodeHost.Worker
                             var remoteInput = Serializer.DeserializeWithLengthPrefix<RemoteInputDto>(networkStream, PrefixStyle.Fixed32);
                             receivedInput = remoteInput.Input;
 
-                            Debug.WriteLine($"CLIENT: received remote input {receivedInput}");
+                            Logger.AppendLogFile($"CLIENT: received remote input {receivedInput} of length {receivedInput.Length}");
                         }
                         else
                         {
-                            Debug.WriteLine($"CLIENT: expected msgtype {MessageType.ServerRemoteInput} but got {msgType}");
+                            Logger.AppendLogFile($"CLIENT: expected msgtype {MessageType.ServerRemoteInput} but got {msgType}");
                         }
                         
                     }
@@ -74,6 +74,7 @@ namespace Sigged.CodeHost.Worker
                         Thread.Sleep(100);
                     }
                 }
+                Logger.AppendLogFile($"CLIENT: returing remote input {receivedInput} of length {receivedInput.Length} to execution flow");
                 return receivedInput;
             }
             finally

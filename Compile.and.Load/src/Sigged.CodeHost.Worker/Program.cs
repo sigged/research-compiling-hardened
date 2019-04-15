@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Sockets;
@@ -57,13 +56,13 @@ namespace Sigged.CodeHost.Worker
 
                     using (networkStream = client.GetStream())
                     {
-                        Console.WriteLine("CLIENT: identifying with server...");
-                        networkStream.WriteByte((byte)MessageType.ClientIdentification);
+                        Logger.AppendLogFile("CLIENT: identifying with server...");
+                        networkStream.WriteByte((byte)MessageType.WorkerIdentification);
                         Serializer.SerializeWithLengthPrefix(networkStream, new IdentificationDto {
                             SessionId = sessionid
                         }, PrefixStyle.Fixed32);
 
-                        Console.WriteLine("CLIENT: waiting for server...");
+                        Logger.AppendLogFile("CLIENT: waiting for server...");
 
                         stopClient = false;
                         while (!stopClient)
@@ -79,7 +78,7 @@ namespace Sigged.CodeHost.Worker
                                     case MessageType.ServerBuildRequest:
                                         //build shit
                                         var buildrequest = Serializer.DeserializeWithLengthPrefix<BuildRequestDto>(networkStream, PrefixStyle.Fixed32);
-                                        Console.WriteLine("CLIENT: received BuildRequestDto");
+                                        Logger.AppendLogFile("CLIENT: received BuildRequestDto");
 
                                         EmitResult results = null;
                                         byte[] assemblyBytes = null;
@@ -90,7 +89,7 @@ namespace Sigged.CodeHost.Worker
 
                                             assemblyBytes = assemblyStream.ToArray();
                                         }
-                                        Console.WriteLine("CLIENT: built source code");
+                                        Logger.AppendLogFile("CLIENT: built source code");
 
                                         BuildResultDto result = new BuildResultDto();
                                         result.SessionId = buildrequest.SessionId;
@@ -106,9 +105,9 @@ namespace Sigged.CodeHost.Worker
 
                                         result.IsSuccess = results.Success;
 
-                                        networkStream.WriteByte((byte)MessageType.ClientBuildResult);
+                                        networkStream.WriteByte((byte)MessageType.WorkerBuildResult);
                                         Serializer.SerializeWithLengthPrefix(networkStream, result, PrefixStyle.Fixed32);
-                                        Console.WriteLine("CLIENT: sent buid result");
+                                        Logger.AppendLogFile("CLIENT: sent buid result");
 
                                         if(buildrequest.RunOnSuccess && result.IsSuccess)
                                         {
@@ -121,7 +120,7 @@ namespace Sigged.CodeHost.Worker
 
                                         break;
                                     default:
-                                        Console.WriteLine($"Unknown server message header: {msgHeader}");
+                                        Logger.AppendLogFile($"Unknown server message header: {msgHeader}");
                                         break;
                                 }
                             }
@@ -159,9 +158,9 @@ namespace Sigged.CodeHost.Worker
                     SessionId = sessionid,
                     State = RemoteAppState.Running
                 };
-                networkStream.WriteByte((byte)MessageType.ClientExectionState);
+                networkStream.WriteByte((byte)MessageType.WorkerExecutionState);
                 Serializer.SerializeWithLengthPrefix(networkStream, execState, PrefixStyle.Fixed32);
-                Debug.WriteLine($"CLIENT: sent execution state {execState.State}");
+                Logger.AppendLogFile($"CLIENT: sent execution state {execState.State}");
 
 
                 //redirect console
@@ -182,14 +181,14 @@ namespace Sigged.CodeHost.Worker
                     SessionId = sessionid,
                     State = RemoteAppState.Ended
                 };
-                networkStream.WriteByte((byte)MessageType.ClientExectionState);
+                networkStream.WriteByte((byte)MessageType.WorkerExecutionState);
                 Serializer.SerializeWithLengthPrefix(networkStream, execState, PrefixStyle.Fixed32);
-                Debug.WriteLine($"CLIENT: sent execution state {execState.State}");
+                Logger.AppendLogFile($"CLIENT: sent execution state {execState.State}");
 
             }
             catch (SocketException socketEx)
             {
-                Debug.WriteLine($"CLIENT Error: {socketEx.Message}");
+                Logger.AppendLogFile($"CLIENT Error: {socketEx.Message}");
             }
             catch (Exception ex)
             {
@@ -199,7 +198,7 @@ namespace Sigged.CodeHost.Worker
                     State = RemoteAppState.Crashed,
                     Exception = ExceptionDto.FromException(ex)
                 };
-                networkStream.WriteByte((byte)MessageType.ClientExectionState);
+                networkStream.WriteByte((byte)MessageType.WorkerExecutionState);
                 Serializer.SerializeWithLengthPrefix(networkStream, execState, PrefixStyle.Fixed32);
             }
             finally
@@ -207,10 +206,7 @@ namespace Sigged.CodeHost.Worker
 
             }
         }
-
-        private static void HandleServerComm(TcpClient tcpClient)
-        {
-            
-        }
+        
+        
     }
 }

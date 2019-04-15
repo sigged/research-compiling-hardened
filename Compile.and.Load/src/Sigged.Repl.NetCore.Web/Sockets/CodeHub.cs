@@ -43,13 +43,12 @@ namespace Sigged.Repl.NetCore.Web.Sockets
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public async Task ClientInput(string input)
+        public void ClientInput(string input)
         {
-            var session = _rcsm.GetSession(Context.ConnectionId);
-            if(session != null)
-            {
-                //session.consoleInputRedirector.ReceiveInput(input);
-            }
+            _rcsm.ForwardConsoleInput(new RemoteInputDto {
+                SessionId = Context.ConnectionId,
+                Input = input
+            });
         }
 
         /// <summary>

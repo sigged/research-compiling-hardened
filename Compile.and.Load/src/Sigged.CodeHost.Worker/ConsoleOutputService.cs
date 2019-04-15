@@ -28,7 +28,7 @@ namespace Sigged.CodeHost.Worker
                 State = RemoteAppState.WriteOutput,
                 Output = HttpUtility.HtmlEncode(value.ToString())
             };
-            networkStream.WriteByte((byte)MessageType.ClientExectionState);
+            networkStream.WriteByte((byte)MessageType.WorkerExecutionState);
             Serializer.SerializeWithLengthPrefix(networkStream, execState, PrefixStyle.Fixed32);
         }
 
@@ -40,7 +40,7 @@ namespace Sigged.CodeHost.Worker
                 State = RemoteAppState.WriteOutput,
                 Output = HttpUtility.HtmlEncode(value.ToString())
             };
-            networkStream.WriteByte((byte)MessageType.ClientExectionState);
+            networkStream.WriteByte((byte)MessageType.WorkerExecutionState);
             Serializer.SerializeWithLengthPrefix(networkStream, execState, PrefixStyle.Fixed32);
         }
 

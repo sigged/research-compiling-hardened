@@ -87,13 +87,21 @@ namespace Sigged.Repl.NetCore.Web.Services
             //networkStream.WriteTimeout = 10;
         }
         
+        /// <summary>
+        /// Sends a message to worker process
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="client">The TCP client object</param>
+        /// <param name="messageType">The message type to send</param>
+        /// <param name="message">Actual message payload, which should match message type</param>
         public void SendWorkerMessage<T>(TcpClient client, MessageType messageType, T message)
         {
             var networkStream = client.GetStream();
             networkStream.WriteByte((byte)messageType);
             Serializer.SerializeWithLengthPrefix(networkStream, message, PrefixStyle.Fixed32);
-        }
 
+            Console.WriteLine($"SERVER: sent {messageType} to worker");
+        }
 
         protected virtual async void ListenLoop() {
             try
@@ -138,7 +146,7 @@ namespace Sigged.Repl.NetCore.Web.Services
                 {
                     byte msgHeader = (byte)networkStream.ReadByte();
                     MessageType msgType = (MessageType)msgHeader;
-                    if (msgType == MessageType.ClientIdentification)
+                    if (msgType == MessageType.WorkerIdentification)
                     {
                         identification = Serializer.DeserializeWithLengthPrefix<IdentificationDto>(networkStream, PrefixStyle.Fixed32);
                         WorkerConnected?.Invoke(tcpClient, identification.SessionId);
@@ -182,14 +190,14 @@ namespace Sigged.Repl.NetCore.Web.Services
 
                             switch (msgType)
                             {
-                                case MessageType.ClientBuildResult:
+                                case MessageType.WorkerBuildResult:
                                     var result = Serializer.DeserializeWithLengthPrefix<BuildResultDto>(networkStream, PrefixStyle.Fixed32);
                                     Console.WriteLine("SERVER: received build result");
 
                                     WorkerCompletedBuild?.Invoke(tcpClient, result);
 
                                     break;
-                                case MessageType.ClientExectionState:
+                                case MessageType.WorkerExecutionState:
                                     var execState = Serializer.DeserializeWithLengthPrefix<ExecutionStateDto>(networkStream, PrefixStyle.Fixed32);
                                     Console.WriteLine($"SERVER: received ExecutionStateDto: {execState?.State}");
 
@@ -218,15 +226,17 @@ namespace Sigged.Repl.NetCore.Web.Services
                                             case RemoteAppState.WaitForInputLine:
                                                 string input = null;
                                                 Console.WriteLine($"SERVER: received remote INPUTLiNE request: ");
-                                                input = Console.ReadLine();
-                                                networkStream.WriteByte((byte)MessageType.ServerRemoteInput);
-                                                Serializer.SerializeWithLengthPrefix(networkStream, new RemoteInputDto
-                                                {
-                                                    SessionId = "blah",
-                                                    Input = input
-                                                }, PrefixStyle.Fixed32);
 
-                                                Console.WriteLine($"SERVER: sent input to client: {input}");
+
+
+                                                //input = Console.ReadLine();
+                                                //networkStream.WriteByte((byte)MessageType.ServerRemoteInput);
+                                                //Serializer.SerializeWithLengthPrefix(networkStream, new RemoteInputDto
+                                                //{
+                                                //    SessionId = "blah",
+                                                //    Input = input
+                                                //}, PrefixStyle.Fixed32);
+                                                //Console.WriteLine($"SERVER: sent input to client: {input}");
 
                                                 break;
                                             default:
