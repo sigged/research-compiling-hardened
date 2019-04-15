@@ -26,6 +26,8 @@ namespace Sigged.Repl.NetCore.Web.Services
         protected IClientService clientService;
         protected List<RemoteCodeSession> sessions;
 
+        protected const int SessionIdleTimeout = 10;
+
         public RemoteCodeSessionManager(IHostingEnvironment henv, IClientService clientservice)
         {
             env = henv;
@@ -55,11 +57,13 @@ namespace Sigged.Repl.NetCore.Web.Services
 
         public void CleanupIdleSessions()
         {
-            var removeSessions = Sessions.Where(s => s.LastActivity < DateTimeOffset.Now.AddMinutes(3)).ToList();
+            var removeSessions = Sessions.Where(s => s.LastActivity.AddSeconds(SessionIdleTimeout) <= DateTimeOffset.Now).ToList();
             foreach (var session in removeSessions)
             {
                 lock (session)
                 {
+                    Debug.WriteLine($"Cleaning up idle session {session.SessionId}, last heartbeat @{session.LastActivity} expired at {session.LastActivity.AddSeconds(SessionIdleTimeout)}");
+                    ResetSessionWorker(session);
                     sessions.Remove(session);
                 }
             }
@@ -75,8 +79,7 @@ namespace Sigged.Repl.NetCore.Web.Services
 
             var session = new RemoteCodeSession()
             {
-                SessionId = sessionid,
-                LastActivity = DateTimeOffset.Now,
+                SessionId = sessionid
             };
             lock (this)
             {
@@ -87,6 +90,8 @@ namespace Sigged.Repl.NetCore.Web.Services
 
         public RemoteCodeSession GetSession(string sessionid)
         {
+            CleanupIdleSessions();
+
             return sessions.FirstOrDefault(s => s.SessionId == sessionid);
         }
 
@@ -129,6 +134,8 @@ namespace Sigged.Repl.NetCore.Web.Services
                 session = CreateSession(buildRequest.SessionId);
                 buildRequest.SessionId = session.SessionId;
             }
+
+            session.Heartbeat();
 
             //set build request so it can be picked up after worker connection
             session.LastBuildRequest = buildRequest;
@@ -219,6 +226,8 @@ namespace Sigged.Repl.NetCore.Web.Services
                 if (!session.WorkerClient.Connected)
                     throw new InvalidOperationException("Can't forward input: Disconnected from session's worker");
 
+                session.Heartbeat();
+
                 listener.SendWorkerMessage(session.WorkerClient, MessageType.ServerRemoteInput, remoteInput);
             }
             catch(Exception ex)
@@ -238,6 +247,7 @@ namespace Sigged.Repl.NetCore.Web.Services
             }
             else
             {
+                session.Heartbeat();
                 session.WorkerClient = workerClient;
                 if (session.LastBuildRequest != null)
                 {
