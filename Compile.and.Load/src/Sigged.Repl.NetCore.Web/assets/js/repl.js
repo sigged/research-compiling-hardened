@@ -61,7 +61,7 @@ let replService = (function () {
         }
     });
 
-    hubconnection.on('ApplicationStateChanged', function(sessionid, appStatus){
+    hubconnection.on('ApplicationStateChanged', function(appStatus){
         console.log("App State Changed", appStatus);
         switch(appStatus.state){
             case APPSTATE.RUNNING:
@@ -130,10 +130,7 @@ let replService = (function () {
                 await this.$requestRun(cEditor.getTextArea().value);
             },
             stopAll: function () {
-                this.isBuilding = false;
-                this.isRunning = false;
-                this.statusCode = STATUSCODE.DEFAULT;
-                this.statusText = "User cancelled";
+                this.$requestStop();
             },
             $buildSuccess: function () {
                 this.isBuilding = false;
@@ -209,7 +206,8 @@ let replService = (function () {
 
                     hubconnection.invoke("Build", {
                         codingSessionId: '',
-                        sourceCode: code
+                        sourceCode: code,
+                        runOnSuccess: false
                     }).catch(err => console.error(err.toString()));
                 });
             },
@@ -219,10 +217,22 @@ let replService = (function () {
                 this.isBuilding = false;
                 this.isRunning = true;
 
-                hubconnection.invoke("BuildAndRunCode", {
+                hubconnection.invoke("Build", {
                     codingSessionId: '',
-                    sourceCode: code
+                    sourceCode: code,
+                    runOnSuccess: true //instructs to run after good build
                 }).catch(err => console.error(err.toString()));
+            },
+            $requestStop: function(){
+                hubconnection.invoke("StopAll")
+                .then(function() {
+                    replApp.isBuilding = false;
+                    replApp.isRunning = false;
+                    replApp.statusText = "User cancelled";
+                    replApp.statusCode = STATUSCODE.DEFAULT;
+                })
+                .catch(err => console.error(err.toString()));
+                
             },
             consoleFocus: function(){
                 var cons = document.getElementById('console');

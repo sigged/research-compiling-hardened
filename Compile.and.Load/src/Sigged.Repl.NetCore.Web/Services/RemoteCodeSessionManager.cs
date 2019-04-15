@@ -3,12 +3,16 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.CodeAnalysis.Emit;
+using ProtoBuf;
+using Sigged.CodeHost.Core.Dto;
 using Sigged.Compiling.Core;
 using Sigged.Repl.NetCore.Web.Extensions;
 using Sigged.Repl.NetCore.Web.Models;
@@ -17,18 +21,31 @@ namespace Sigged.Repl.NetCore.Web.Services
 {
     public class RemoteCodeSessionManager 
     {
-        protected List<RemoteCodeSession> sessions;
-        protected Compiler compiler;
         protected IHostingEnvironment env;
-        protected IRemoteExecutionCallback remoteExecutionCallback;
-            
-        public RemoteCodeSessionManager(IHostingEnvironment henv, IRemoteExecutionCallback executionCaller)
+        protected IWorkerService listener;
+        protected IClientService clientService;
+        protected List<RemoteCodeSession> sessions;
+
+        protected const int SessionIdleTimeout = 10;
+
+        public RemoteCodeSessionManager(IHostingEnvironment henv, IClientService clientservice)
         {
             env = henv;
-            remoteExecutionCallback = executionCaller;
-            string netstandardRefsDirectory = Path.Combine(env.ContentRootPath, "_libs", "netstandard2.0");
-            compiler = new Compiler(netstandardRefsDirectory);
+            clientService = clientservice;
+            listener = new WorkerTcpListener(IPAddress.Any, 2000);
             sessions = new List<RemoteCodeSession>();
+
+            listener.WorkerConnected += Listener_WorkerConnected;
+            listener.WorkerCompletedBuild += Listener_WorkerCompletedBuild;
+            listener.WorkerExecutionStateChanged += Listener_WorderExecutionState;
+
+            if (!listener.IsListening)
+            {
+                bool ok = listener.StartListening();
+                if (!ok)
+                    throw new ApplicationException($"Listener failed to start");
+            }
+            clientService.Connect();
         }
 
         public IEnumerable<RemoteCodeSession> Sessions {
@@ -40,11 +57,13 @@ namespace Sigged.Repl.NetCore.Web.Services
 
         public void CleanupIdleSessions()
         {
-            var removeSessions = Sessions.Where(s => s.LastActivity < DateTimeOffset.Now.AddMinutes(3)).ToList();
+            var removeSessions = Sessions.Where(s => s.LastActivity.AddSeconds(SessionIdleTimeout) <= DateTimeOffset.Now).ToList();
             foreach (var session in removeSessions)
             {
                 lock (session)
                 {
+                    Debug.WriteLine($"Cleaning up idle session {session.SessionId}, last heartbeat @{session.LastActivity} expired at {session.LastActivity.AddSeconds(SessionIdleTimeout)}");
+                    ResetSessionWorker(session);
                     sessions.Remove(session);
                 }
             }
@@ -54,12 +73,13 @@ namespace Sigged.Repl.NetCore.Web.Services
         {
             //string sessionid = Guid.NewGuid().ToString();
             string sessionid = uniqueSessionId;
-            var session = new RemoteCodeSession(remoteExecutionCallback)
+
+            //todo: remove after debug
+            //sessionid = "MYSESSION";
+
+            var session = new RemoteCodeSession()
             {
-                SessionId = sessionid,
-                LastActivity = DateTimeOffset.Now,
-                LastAssembly = null,
-                LastResult = null,
+                SessionId = sessionid
             };
             lock (this)
             {
@@ -70,230 +90,184 @@ namespace Sigged.Repl.NetCore.Web.Services
 
         public RemoteCodeSession GetSession(string sessionid)
         {
+            CleanupIdleSessions();
+
             return sessions.FirstOrDefault(s => s.SessionId == sessionid);
         }
 
-        public async Task<EmitResult> Compile(string sessionid, string code)
+        protected async Task CreateWorkerProcess(RemoteCodeSession session)
         {
-            var session = GetSession(sessionid);
             if (session == null)
+                throw new ArgumentNullException(nameof(session));
+            else
             {
-                throw new InvalidOperationException($"Can't build for non-existing session {sessionid}");
-            }
-            try
-            {
-                session.IsBuilding = true;
-                EmitResult results = null;
-                byte[] assembly = null;
-                using (var stream = new MemoryStream())
-                {
-                    results = await compiler.Compile(code, sessionid.ToString(), stream, outputKind: Microsoft.CodeAnalysis.OutputKind.ConsoleApplication);
-                    assembly = stream.ToArray();
-                }
-                lock (session)
-                {
-                    session.LastResult = results;
-                    session.LastAssembly = assembly;
-                    session.LastActivity = DateTimeOffset.Now;
-                }
-                return results;
-            }
-            finally
-            {
-                session.IsBuilding = false;
+                await Task.Run(() => {
+                    string workerExePath = Path.Combine(env.ContentRootPath, "_workerProcess", "worker", "Sigged.CodeHost.Worker.dll");
+                    
+                    session.WorkerProcess = new Process();
+                    session.WorkerProcess.EnableRaisingEvents = true;
+                    session.WorkerProcess.Exited += (object sender, EventArgs e) => {
+                        ResetSessionWorker(session);
+                    };
+
+                    session.WorkerProcess.StartInfo = new ProcessStartInfo
+                    {
+                        FileName = "dotnet",
+                        Arguments = $"{workerExePath} localhost 2000 {session.SessionId}",
+                        UseShellExecute = true
+                    };
+
+                    session.WorkerProcess.Start();
+                });
             }
         }
-
-        //public void RunLastCompilation_PROCESS(string sessionid)
-        //{
-        //    var session = GetSession(sessionid);
-        //    if (session == null)
-        //        throw new InvalidOperationException($"Can't build for non-existing session {sessionid}");
-        //    if (session.LastAssembly == null || session.LastResult == null)
-        //        throw new InvalidOperationException($"Code for session {sessionid} has not been built yet");
-
-        //    session.IsRunning = true;
-        //    //cancel any previous threads, just to be absolutely sure
-        //    if (session.Process?.HasExited == false)
-        //    {
-        //        Trace.TraceWarning($"Warning! Session {session.SessionId} started a new process while old process still running. Disposing old process...");
-        //        session.Process.Kill();
-        //    }
-
-        //    session.IsRunning = true;
-
-        //    string assemblyDir = Path.Combine(env.ContentRootPath, "_assemblytmp");
-        //    string assemblyFilename = Path.Combine(assemblyDir, Path.GetFileNameWithoutExtension(Path.GetTempFileName()));
-        //    string assemblyConfigFileName = assemblyFilename + ".runtimeconfig.json";
-        //    assemblyFilename += ".dll";
-
-        //    try
-        //    {
-        //        //write assembly file and copy runtimeconfig
-        //        using (var fs = new FileStream(assemblyFilename, FileMode.Create, FileAccess.Write))
-        //        {
-        //            fs.Write(session.LastAssembly, 0, session.LastAssembly.Length);
-        //        }
-        //        File.Copy(Path.Combine(assemblyDir, "templates", "_template_.runtimeconfig.json"), assemblyConfigFileName);
-
-        //        //notify client of running state
-        //        remoteExecutionCallback.SendExecutionStateChanged(session, new RemoteExecutionState
-        //        {
-        //            State = RemoteAppState.Running
-        //        });
-
-        //        //start process
-        //        Process process = new Process();
-        //        process.EnableRaisingEvents = true;
-        //        process.OutputDataReceived += (object sender, DataReceivedEventArgs e) => { process_OutputDataReceived(session, e); };
-        //        process.ErrorDataReceived += (object sender, DataReceivedEventArgs e) => { process_ErrorDataReceived(session, e); }; ;
-        //        process.Exited += (object sender, EventArgs e) => { process_Exited(session, e); }; ;
-
-        //        process.StartInfo = new ProcessStartInfo
-        //        {
-        //            FileName = "dotnet",
-        //            Arguments = assemblyFilename,
-        //            UseShellExecute = false,
-        //            RedirectStandardError = true,
-        //            RedirectStandardOutput = true
-        //        };
-
-        //        process.Start();
-        //        process.BeginOutputReadLine();
-        //        process.BeginErrorReadLine();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        remoteExecutionCallback.SendExecutionStateChanged(session, new RemoteExecutionState
-        //        {
-        //            State = RemoteAppState.Crashed,
-        //            Exception = ExceptionDescriptor.FromException(ex)
-        //        });
-        //        session.IsRunning = false;
-        //        try
-        //        {
-        //            File.Delete(assemblyFilename);
-        //            File.Delete(assemblyConfigFileName);
-        //        }
-        //        catch (Exception fileDelEx)
-        //        {
-        //            Console.WriteLine($"Error while deleting generated assembly file: {ex.Message}");
-        //        }
-        //    }
-        //    finally
-        //    {
-
-
-        //    }
-
-        //}
-
-        //private void process_Exited(object sender, EventArgs e)
-        //{
-        //    var session = (RemoteCodeSession)sender;
-        //    remoteExecutionCallback.SendExecutionStateChanged(session, new RemoteExecutionState
-        //    {
-        //        State = RemoteAppState.Ended,
-        //    });
-        //    session.IsRunning = false;
-        //}
-
-        //private void process_ErrorDataReceived(object sender, DataReceivedEventArgs e)
-        //{
-        //    if (e.Data == null) return;
-        //    var session = (RemoteCodeSession)sender;
-        //    remoteExecutionCallback.SendExecutionStateChanged(session, new RemoteExecutionState
-        //    {
-        //        State = RemoteAppState.Crashed,
-        //        Exception = ExceptionDescriptor.FromException(new Exception(e.Data))
-        //    });
-        //}
-
-        //private void process_OutputDataReceived(object sender, DataReceivedEventArgs e)
-        //{
-        //    if (e.Data == null) return;
-        //    var session = (RemoteCodeSession)sender;
-        //    lock (session)
-        //    {
-        //        remoteExecutionCallback.SendExecutionStateChanged(session, new RemoteExecutionState
-        //        {
-        //            State = RemoteAppState.WriteOutput,
-        //            Output = e.Data
-        //        });
-        //    }
-        //}
-
-        public void RunLastCompilation(string sessionid)
+        
+        /// <summary>
+        /// Processes user's build request by creating a worker process and forwarding request
+        /// </summary>
+        /// <returns></returns>
+        public async Task ProcessUserBuildRequest(BuildRequestDto buildRequest)
         {
-            var session = GetSession(sessionid);
+            var session = GetSession(buildRequest.SessionId);
             if (session == null)
-                throw new InvalidOperationException($"Can't build for non-existing session {sessionid}");
-            if (session.LastAssembly == null || session.LastResult == null)
-                throw new InvalidOperationException($"Code for session {sessionid} has not been built yet");
-
-            session.IsRunning = true;
-            //cancel any previous threads, just to be absolutely sure
-            if (session.ExecutionThread?.IsAlive == true)
             {
-                Trace.TraceWarning($"Warning! Session {session.SessionId} runs new thread while old thread still running. Disposing old thread...");
-                try
-                {
-                    //session.ExecutionThread.Abort();
-                }
-                catch (Exception tae)
-                {
-                    Trace.TraceWarning($"Warning! Disposed of old thread for session {session.SessionId} ");
-                }
+                session = CreateSession(buildRequest.SessionId);
+                buildRequest.SessionId = session.SessionId;
             }
 
-            session.ExecutionThread = new Thread(new ParameterizedThreadStart((object sessionObj) =>
-            {
-                var execSession = (RemoteCodeSession)sessionObj;
-                execSession.IsRunning = true;
+            session.Heartbeat();
 
-                var assemly = Assembly.Load(execSession.LastAssembly);
-                var type = assemly.GetType("Test.Program");
-                //var test = type.FindMembers(MemberTypes.Method, BindingFlags.Static | BindingFlags.Public, null, null);
+            //set build request so it can be picked up after worker connection
+            session.LastBuildRequest = buildRequest;
+            
+            //reuse existing worker process if still running and connected
+            if(session.WorkerProcess != null && session.WorkerProcess.HasExited == false)
+            {
+                if(session.WorkerClient?.Connected == true)
+                {
+                    Debug.WriteLine("Recycling worker process for new build request");
+                    listener.SendWorkerMessage(session.WorkerClient, MessageType.ServerBuildRequest, session.LastBuildRequest);
+                    return;
+                }
+                else
+                {
+                    //worker process has quit or disconnected. Reset references so it can be recreated.
+                    Debug.WriteLine("Resetting stopped/disconnected worker process for new build request");
+                    ResetSessionWorker(session);
+                }
+            }
+            //no worker process, create from scratch so it can connect
+            Debug.WriteLine("Creating new worker process for new build request");
+            await CreateWorkerProcess(session);
+        }
+
+        /// <summary>
+        /// Cancels any active operations for a given session
+        /// </summary>
+        /// <returns></returns>
+        public void CancelSessionActions(string sessionid)
+        {
+            var session = GetSession(sessionid);
+            if (session != null)
+            {
                 try
                 {
-                    remoteExecutionCallback.SendExecutionStateChanged(session, new RemoteExecutionState
-                    {
-                        State = RemoteAppState.Running
-                    });
-
-                    //redirect console
-                    Console.SetOut(session.consoleOutputRedirector);
-                    Console.SetIn(session.consoleInputRedirector);
-
-                    type.InvokeMember("Main",
-                                        BindingFlags.InvokeMethod | BindingFlags.Static | BindingFlags.Public,
-                                        null, null,
-                                        new object[] { new string[] { } });
-
-                    //reset console redirection
-                    Console.SetOut(new StreamWriter(Console.OpenStandardOutput()) { AutoFlush = true });
-                    Console.SetIn(new StreamReader(Console.OpenStandardInput()));
-
-                    remoteExecutionCallback.SendExecutionStateChanged(session, new RemoteExecutionState
-                    {
-                        State = RemoteAppState.Ended
-                    });
-                }
-                catch (Exception ex)
-                {
-                    remoteExecutionCallback.SendExecutionStateChanged(session, new RemoteExecutionState
-                    {
-                        State = RemoteAppState.Crashed,
-                        Exception = ExceptionDescriptor.FromException(ex)
-                    });
+                    //shutdown communication channel
+                    session.WorkerClient?.Close();
+                    session.WorkerClient?.Dispose();
                 }
                 finally
                 {
-                    execSession.IsRunning = false;
+                    try
+                    {
+                        session.WorkerProcess?.Kill();
+                    }
+                    finally
+                    {
+                        session.WorkerClient = null;
+                        session.WorkerProcess = null;
+                    }
                 }
-            }));
-            session.ExecutionThread.Start(session);
+            }
 
+        }
+
+        protected void ResetSessionWorker(RemoteCodeSession session)
+        {
+            session.WorkerClient?.Close();
+            try
+            {
+                if (session.WorkerProcess?.HasExited == false)
+                    session.WorkerProcess?.Kill();
+            }
+            finally
+            {
+                session.WorkerClient?.Dispose();
+                session.WorkerProcess?.Dispose();
+                session.WorkerProcess = null;
+                session.WorkerClient = null;
+            }
+            
+        }
+
+        /// <summary>
+        /// Forwards user's console input to worker process
+        /// </summary>
+        /// <returns></returns>
+        internal void ForwardConsoleInput(RemoteInputDto remoteInput)
+        {
+            try
+            {
+                var session = GetSession(remoteInput.SessionId);
+                if (session == null)
+                    throw new InvalidOperationException("Can't forward input: Session doesn't exist");
+                if (session.WorkerClient == null)
+                    throw new InvalidOperationException("Can't forward input: Session has no identified worker");
+                if (!session.WorkerClient.Connected)
+                    throw new InvalidOperationException("Can't forward input: Disconnected from session's worker");
+
+                session.Heartbeat();
+
+                listener.SendWorkerMessage(session.WorkerClient, MessageType.ServerRemoteInput, remoteInput);
+            }
+            catch(Exception ex)
+            {
+                Debug.Fail(ex.Message);
+            }
+            
+        }
+
+        protected void Listener_WorkerConnected(TcpClient workerClient, string sessionId)
+        {
+            var session = GetSession(sessionId);
+            if (session == null)
+            {
+                //no session found for this client, kill connection
+                workerClient.Close();
+            }
+            else
+            {
+                session.Heartbeat();
+                session.WorkerClient = workerClient;
+                if (session.LastBuildRequest != null)
+                {
+                    listener.SendWorkerMessage(session.WorkerClient, MessageType.ServerBuildRequest, session.LastBuildRequest);
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Session {sessionId} has no LastBuildRequest set");
+                }
+            }
+        }
+
+        protected void Listener_WorkerCompletedBuild(TcpClient workerClient, BuildResultDto result)
+        {
+            clientService.SendBuildResult(result.SessionId, result);
+        }
+
+        protected void Listener_WorderExecutionState(TcpClient workerClient, ExecutionStateDto state)
+        {
+            clientService.SendExecutionState(state.SessionId, state);
         }
 
     }

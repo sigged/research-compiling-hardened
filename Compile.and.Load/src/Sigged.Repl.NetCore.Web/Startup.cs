@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -43,7 +44,7 @@ namespace Sigged.Repl.NetCore.Web
             });
 
             //custom services
-            services.AddTransient<IRemoteExecutionCallback, SignalRRemoteExecutionCallback>();
+            services.AddTransient<IClientService, SignalRClientService>();
             services.AddSingleton<RemoteCodeSessionManager>();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
@@ -66,11 +67,6 @@ namespace Sigged.Repl.NetCore.Web
             app.UseSignalR((configure) => {
                 configure.MapHub<CodeHub>("/codeHub");
             });
-                
-            //    route =>
-            //{
-            //    route.MapHub<CodeHub>("/codeHub");
-            //});
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
