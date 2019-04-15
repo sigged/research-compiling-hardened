@@ -67,14 +67,13 @@ namespace Sigged.CodeHost.Worker
                         {
                             Logger.LogLine($"CLIENT: expected msgtype {MessageType.ServerRemoteInput} but got {msgType}");
                         }
-                        
                     }
                     else
                     {
                         Thread.Sleep(100);
                     }
                 }
-                Logger.LogLine($"CLIENT: returing remote input {receivedInput} of length {receivedInput.Length} to execution flow");
+                Logger.LogLine($"CLIENT: returning remote input \"{receivedInput}\" of length {receivedInput.Length} to execution flow");
                 return receivedInput;
             }
             finally

@@ -96,15 +96,15 @@ namespace Sigged.Repl.NetCore.Web.Services
         {
             if (session == null)
                 throw new ArgumentNullException(nameof(session));
-            if (session.WorkerProcess != null && session.WorkerProcess.HasExited == false)
-            {
-                throw new InvalidOperationException($"Session {session.SessionId} still has a worker process running.");
-            }
+            //if (session.WorkerProcess != null && session.WorkerProcess.HasExited == false)
+            //{
+            //    throw new InvalidOperationException($"Session {session.SessionId} still has a worker process running.");
+            //}
             else
             {
                 await Task.Run(() => {
                     string workerExePath = Path.Combine(env.ContentRootPath, "_workerProcess", "worker", "Sigged.CodeHost.Worker.dll");
-
+                    
                     session.WorkerProcess = new Process();
                     session.WorkerProcess.EnableRaisingEvents = true;
                     session.WorkerProcess.Exited += (object sender, EventArgs e) => {
@@ -140,6 +140,27 @@ namespace Sigged.Repl.NetCore.Web.Services
             //set build request so it can be picked up after worker connection
             session.LastBuildRequest = buildRequest;
             
+            //reuse existing worker process if still running and connected
+            if(session.WorkerProcess != null && session.WorkerProcess.HasExited == false)
+            {
+                if(session.WorkerClient?.Connected == true)
+                {
+                    Debug.WriteLine("Recycling worker process for new build request");
+                    listener.SendWorkerMessage(session.WorkerClient, MessageType.ServerBuildRequest, session.LastBuildRequest);
+                    return;
+                }
+                else
+                {
+                    //worker process has quit or disconnected. Reset references so it can be recreated.
+                    Debug.WriteLine("Resetting stopped/disconnected worker process for new build request");
+                    session.WorkerClient.Close();
+                    session.WorkerClient = null;
+                    session.WorkerProcess?.Kill();
+                    session.WorkerProcess = null;
+                }
+            }
+            //no worker process, create from scratch so it can connect
+            Debug.WriteLine("Creating new worker process for new build request");
             await CreateWorkerProcess(session);
         }
 

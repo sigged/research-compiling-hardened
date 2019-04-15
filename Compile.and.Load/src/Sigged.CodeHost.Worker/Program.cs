@@ -107,7 +107,7 @@ namespace Sigged.CodeHost.Worker
 
                                         networkStream.WriteByte((byte)MessageType.WorkerBuildResult);
                                         Serializer.SerializeWithLengthPrefix(networkStream, result, PrefixStyle.Fixed32);
-                                        Logger.LogLine("CLIENT: sent buid result");
+                                        Logger.LogLine("CLIENT: sent build result");
 
                                         if(buildrequest.RunOnSuccess && result.IsSuccess)
                                         {
@@ -116,7 +116,7 @@ namespace Sigged.CodeHost.Worker
                                         }
 
                                         //done processing the server request
-                                        stopClient = true;
+                                        //stopClient = true;
 
                                         break;
                                     default:
