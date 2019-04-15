@@ -77,8 +77,6 @@ namespace Sigged.Repl.NetCore.Web.Services
             {
                 SessionId = sessionid,
                 LastActivity = DateTimeOffset.Now,
-                LastAssembly = null,
-                LastResult = null,
             };
             lock (this)
             {
@@ -96,10 +94,6 @@ namespace Sigged.Repl.NetCore.Web.Services
         {
             if (session == null)
                 throw new ArgumentNullException(nameof(session));
-            //if (session.WorkerProcess != null && session.WorkerProcess.HasExited == false)
-            //{
-            //    throw new InvalidOperationException($"Session {session.SessionId} still has a worker process running.");
-            //}
             else
             {
                 await Task.Run(() => {
@@ -108,8 +102,7 @@ namespace Sigged.Repl.NetCore.Web.Services
                     session.WorkerProcess = new Process();
                     session.WorkerProcess.EnableRaisingEvents = true;
                     session.WorkerProcess.Exited += (object sender, EventArgs e) => {
-                        session.WorkerProcess = null;
-                        session.WorkerClient = null;
+                        ResetSessionWorker(session);
                     };
 
                     session.WorkerProcess.StartInfo = new ProcessStartInfo
@@ -153,10 +146,7 @@ namespace Sigged.Repl.NetCore.Web.Services
                 {
                     //worker process has quit or disconnected. Reset references so it can be recreated.
                     Debug.WriteLine("Resetting stopped/disconnected worker process for new build request");
-                    session.WorkerClient.Close();
-                    session.WorkerClient = null;
-                    session.WorkerProcess?.Kill();
-                    session.WorkerProcess = null;
+                    ResetSessionWorker(session);
                 }
             }
             //no worker process, create from scratch so it can connect
@@ -193,6 +183,24 @@ namespace Sigged.Repl.NetCore.Web.Services
                 }
             }
 
+        }
+
+        protected void ResetSessionWorker(RemoteCodeSession session)
+        {
+            session.WorkerClient?.Close();
+            try
+            {
+                if (session.WorkerProcess?.HasExited == false)
+                    session.WorkerProcess?.Kill();
+            }
+            finally
+            {
+                session.WorkerClient?.Dispose();
+                session.WorkerProcess?.Dispose();
+                session.WorkerProcess = null;
+                session.WorkerClient = null;
+            }
+            
         }
 
         /// <summary>
