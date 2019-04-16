@@ -8,7 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 
-namespace Sigged.Repl.NetFx.Wpf
+namespace Sigged.CsCNetFx.Wpf
 {
     public class ConsoleOutputWriter : TextWriter
     {

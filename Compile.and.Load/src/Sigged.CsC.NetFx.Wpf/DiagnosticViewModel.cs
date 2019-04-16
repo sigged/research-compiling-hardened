@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.Diagnostics;
 
-namespace Sigged.Repl.NetFx.Wpf
+namespace Sigged.CsCNetFx.Wpf
 {
     public class DiagnosticViewModel
     {

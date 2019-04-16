@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Input;
 
-namespace Sigged.Repl.NetFx.Wpf
+namespace Sigged.CsCNetFx.Wpf
 {
     /// <summary>
     /// A command whose sole purpose is to relay its functionality 

@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Windows.Data;
 using System.Windows.Media.Imaging;
 
-namespace Sigged.Repl.NetFx.Wpf.Converters
+namespace Sigged.CsCNetFx.Wpf.Converters
 {
     public class SeverityToIconConverter : IValueConverter
     {

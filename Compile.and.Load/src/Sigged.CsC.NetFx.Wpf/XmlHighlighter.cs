@@ -6,7 +6,7 @@ using System.Windows;
 using System.Windows.Media;
 using System.Xml.Linq;
 
-namespace Sigged.Repl.NetFx.Wpf
+namespace Sigged.CsCNetFx.Wpf
 {
 
     /// <summary>

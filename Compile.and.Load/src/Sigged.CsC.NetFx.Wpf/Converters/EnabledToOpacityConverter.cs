@@ -2,17 +2,17 @@
 using System.Globalization;
 using System.Windows.Data;
 
-namespace Sigged.Repl.NetFx.Wpf.Converters
+namespace Sigged.CsCNetFx.Wpf.Converters
 {
-    public class InverseBooleanConverter : IValueConverter
+    public class EnabledToOpacityConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value is bool)
             {
-                return !(bool)value;
+                return (bool)value ? 1D : 0.5D;
             }
-            return value;
+            return 1D;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
