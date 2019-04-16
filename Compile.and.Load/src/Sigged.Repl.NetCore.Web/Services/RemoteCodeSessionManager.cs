@@ -14,6 +14,7 @@ using Microsoft.CodeAnalysis.Emit;
 using ProtoBuf;
 using Sigged.CodeHost.Core.Dto;
 using Sigged.Compiling.Core;
+using Sigged.Repl.NetCore.Web.Constants;
 using Sigged.Repl.NetCore.Web.Extensions;
 using Sigged.Repl.NetCore.Web.Models;
 
@@ -25,8 +26,6 @@ namespace Sigged.Repl.NetCore.Web.Services
         protected IWorkerService listener;
         protected IClientService clientService;
         protected List<RemoteCodeSession> sessions;
-
-        protected const int SessionIdleTimeout = 10;
 
         public RemoteCodeSessionManager(IHostingEnvironment henv, IClientService clientservice)
         {
@@ -57,14 +56,14 @@ namespace Sigged.Repl.NetCore.Web.Services
 
         public void CleanupIdleSessions()
         {
-            var removeSessions = Sessions.Where(s => s.LastActivity.AddSeconds(SessionIdleTimeout) <= DateTimeOffset.Now).ToList();
-            Console.Write($"CleanUpIdleSessions() - found {removeSessions.Count}/{Sessions.Count()} expired sessions");
+            var removeSessions = Sessions.Where(s => s.LastActivity.AddSeconds(SessionConstants.SessionIdleTimeout) <= DateTimeOffset.Now).ToList();
+            Console.WriteLine($"CleanUpIdleSessions() - found {removeSessions.Count}/{Sessions.Count()} expired sessions");
             foreach (var session in removeSessions)
             {
                 lock (session)
                 {
-                    Console.WriteLine($"Cleaning up idle session {session.SessionId}, last heartbeat @{session.LastActivity} expired at {session.LastActivity.AddSeconds(SessionIdleTimeout)}");
-                    ResetSessionWorker(session);
+                    Console.WriteLine($"Cleaning up idle session {session.SessionId}, last heartbeat @{session.LastActivity} expired at {session.LastActivity.AddSeconds(SessionConstants.SessionIdleTimeout)}");
+                    ResetSessionWorker(session, WorkerResetReason.Expired);
                     sessions.Remove(session);
                 }
             }
@@ -112,7 +111,7 @@ namespace Sigged.Repl.NetCore.Web.Services
                         session.WorkerProcess.EnableRaisingEvents = true;
                         session.WorkerProcess.Exited += (object sender, EventArgs e) =>
                         {
-                            ResetSessionWorker(session);
+                            ResetSessionWorker(session, WorkerResetReason.WorkerStopped);
                         };
 
                         session.WorkerProcess.StartInfo = new ProcessStartInfo
@@ -168,7 +167,7 @@ namespace Sigged.Repl.NetCore.Web.Services
                 {
                     //worker process has quit or disconnected. Reset references so it can be recreated.
                     Console.WriteLine("Resetting stopped/disconnected worker process for new build request");
-                    ResetSessionWorker(session);
+                    ResetSessionWorker(session, WorkerResetReason.WorkerStopped);
                 }
             }
             //no worker process, create from scratch so it can connect
@@ -185,12 +184,12 @@ namespace Sigged.Repl.NetCore.Web.Services
             var session = GetSession(sessionid);
             if (session != null)
             {
-                ResetSessionWorker(session);
+                ResetSessionWorker(session, WorkerResetReason.UserCancelled);
             }
 
         }
 
-        protected void ResetSessionWorker(RemoteCodeSession session)
+        protected void ResetSessionWorker(RemoteCodeSession session, WorkerResetReason reason)
         {
             Console.WriteLine($"Worker Reset: {session.SessionId}");
             session.WorkerClient?.Close();
@@ -201,6 +200,17 @@ namespace Sigged.Repl.NetCore.Web.Services
                 {
                     session.WorkerProcess?.Kill();
                     Console.WriteLine($"Worker Reset: killed worker process of {session.SessionId}");
+                    //notify client of worker destruction
+                    if(reason == WorkerResetReason.Expired)
+                    {
+                        clientService.SendExecutionState(session.SessionId, new ExecutionStateDto
+                        {
+                            SessionId = session.SessionId,
+                            State = RemoteAppState.Crashed,
+                            Exception = ExceptionDto.FromException(new TimeoutException(
+                                $"Your application takes longer than {SessionConstants.SessionIdleTimeout} seconds to execute and has been terminated."))
+                        });
+                    }
                 }
             }
             finally
@@ -233,7 +243,7 @@ namespace Sigged.Repl.NetCore.Web.Services
             }
             catch(Exception ex)
             {
-                Console.Write(ex.Message);
+                Console.WriteLine(ex.Message);
             }
             
         }

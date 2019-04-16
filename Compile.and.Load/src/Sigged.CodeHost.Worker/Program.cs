@@ -116,7 +116,7 @@ namespace Sigged.CodeHost.Worker
                                         }
 
                                         //done processing the server request
-                                        //stopClient = true;
+                                        stopClient = true;
 
                                         break;
                                     default:

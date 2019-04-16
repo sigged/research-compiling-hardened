@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Quartz;
 using Quartz.Impl;
 using Quartz.Spi;
+using Sigged.Repl.NetCore.Web.Constants;
 using Sigged.Repl.NetCore.Web.Jobs;
 using System;
 using System.Collections.Generic;
@@ -16,7 +17,6 @@ namespace Sigged.Repl.NetCore.Web.Extensions
         public static string SessionCleanupJob = "SessionCleanup.job";
         public static string MaintenanceJobsGroup = "MaintenanceJobs";
         public static string MaintenanceJobsTrigger = "MaintenanceJobs.trigger";
-        public static int SessionCleanupJobInterval = 5; //sconds
 
         public static void AddQuartz(this IServiceCollection services, Type jobType)
         {
@@ -34,7 +34,7 @@ namespace Sigged.Repl.NetCore.Web.Extensions
                     .StartNow()
                     .WithSimpleSchedule
                     (s =>
-                        s.WithInterval(TimeSpan.FromSeconds(SessionCleanupJobInterval))
+                        s.WithInterval(TimeSpan.FromSeconds(SessionConstants.SessionCleanupJobInterval))
                             .RepeatForever()
                     )
                     .Build();

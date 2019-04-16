@@ -131,6 +131,7 @@ let replService = (function () {
                 this.builderrors = null;
                 this.statusCode = STATUSCODE.SUCCESS;
                 this.statusText = "Build succeeded";
+                replApp.$resetConsole();
             },
             $buildFailed: function (errors) {
                 this.isBuilding = false;
@@ -151,6 +152,7 @@ let replService = (function () {
                                 });
                     }
                 }
+                replApp.$resetConsole();
             },
             $appRunning: function () {
                 this.isBuilding = false;
@@ -178,6 +180,7 @@ let replService = (function () {
                 this.isRunning = false;
                 this.statusCode = STATUSCODE.DEFAULT;
                 this.statusText = "Application ended";
+                replApp.$resetConsole();
             },
             $appCrashed: function (exceptionInfo) {
                 this.isBuilding = false;
@@ -192,6 +195,7 @@ let replService = (function () {
                         description: exceptionInfo.message
                     },
                 ]
+                replApp.$resetConsole();
             },
             $requestBuild: function (code) {
                 hubconnection.invoke("Build", {
@@ -215,7 +219,8 @@ let replService = (function () {
                     replApp.statusText = "User cancelled";
                     replApp.statusCode = STATUSCODE.DEFAULT;
                 })
-                .catch(err => console.error(err.toString()));
+                .catch(err => console.error(err.toString()))
+                .finally(() => replApp.$resetConsole());
                 
             },
             consoleFocus: function(){
@@ -230,20 +235,6 @@ let replService = (function () {
                     var inputDiv = cons.querySelector('.consoleInputBox');
                     inputDiv.setAttribute('contenteditable', 'true');
                     var input = null;
-
-                    // inputDiv.onkeypress = function(kbdEvent){
-                    //     if(requestLine){
-                    //         if(kbdEvent.key == "Enter"){
-                    //             kbdEvent.preventDefault();
-                    //             input = this.innerText;
-                    //         }
-                    //     }
-                    //     else{
-                    //         inputDiv.removeAttribute('contenteditable');
-                    //         input = kbdEvent.key;
-                    //     }
-                    //     console.log("Keypress in input", kbdEvent);
-                    // };
 
                     inputDiv.addEventListener('keypress', function(kbdEvent){
                         if(requestLine){
@@ -278,6 +269,16 @@ let replService = (function () {
                             
                         }
                     },100);
+                });
+            },
+            $resetConsole: function(){
+                this.$nextTick(function () {
+                    //remove any input boxes
+                    var cons = document.getElementById('console');
+                    var inputDiv = cons.querySelectorAll('.consoleInputBox').forEach(function(el){
+                        el.remove();
+                    });
+                    replApp.consoleText += "\n";
                 });
             }
         }

@@ -35,7 +35,7 @@ namespace Sigged.Repl.NetCore.Web.Jobs
                 }
                 catch
                 {
-                    //happens 
+                    //will happen when app starts and IHttpAccessor cannot be resolved yet
                     Console.WriteLine("Jobs - SessionCleanup: error resolving a dependency");
                     throw;
                 }
