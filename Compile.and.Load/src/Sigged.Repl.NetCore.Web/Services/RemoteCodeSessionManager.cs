@@ -36,7 +36,7 @@ namespace Sigged.Repl.NetCore.Web.Services
 
             listener.WorkerConnected += Listener_WorkerConnected;
             listener.WorkerCompletedBuild += Listener_WorkerCompletedBuild;
-            listener.WorkerExecutionStateChanged += Listener_WorderExecutionState;
+            listener.WorkerExecutionStateChanged += Listener_WorkerExecutionState;
 
             if (!listener.IsListening)
             {
@@ -71,12 +71,8 @@ namespace Sigged.Repl.NetCore.Web.Services
 
         public RemoteCodeSession CreateSession(string uniqueSessionId)
         {
-            //string sessionid = Guid.NewGuid().ToString();
             string sessionid = uniqueSessionId;
-
-            //todo: remove after debug
-            //sessionid = "MYSESSION";
-
+            
             var session = new RemoteCodeSession()
             {
                 SessionId = sessionid
@@ -201,7 +197,12 @@ namespace Sigged.Repl.NetCore.Web.Services
                     session.WorkerProcess?.Kill();
                     Console.WriteLine($"Worker Reset: killed worker process of {session.SessionId}");
                     //notify client of worker destruction
-                    if(reason == WorkerResetReason.Expired)
+                    if(reason == WorkerResetReason.Expired &&
+                         //don't notify if worker is no longer executing user code
+                         session.LastAppState != RemoteAppState.NotRunning &&
+                         session.LastAppState != RemoteAppState.Ended &&
+                         session.LastAppState != RemoteAppState.Crashed
+                    )
                     {
                         clientService.SendExecutionState(session.SessionId, new ExecutionStateDto
                         {
@@ -275,8 +276,16 @@ namespace Sigged.Repl.NetCore.Web.Services
             clientService.SendBuildResult(result.SessionId, result);
         }
 
-        protected void Listener_WorderExecutionState(TcpClient workerClient, ExecutionStateDto state)
+        protected void Listener_WorkerExecutionState(TcpClient workerClient, ExecutionStateDto state)
         {
+            var session = GetSession(state.SessionId);
+            if(session != null)
+            {
+                session.LastAppState = state.State;
+                if(session.LastAppState == RemoteAppState.Running)
+                    session.Heartbeat(); //idle timer reset on start of user code execution
+            }
+
             clientService.SendExecutionState(state.SessionId, state);
         }
 

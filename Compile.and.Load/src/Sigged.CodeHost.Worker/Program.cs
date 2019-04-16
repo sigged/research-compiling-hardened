@@ -112,11 +112,10 @@ namespace Sigged.CodeHost.Worker
                                         if(buildrequest.RunOnSuccess && result.IsSuccess)
                                         {
                                             RunApplication(sessionid, client, assemblyBytes);
-                                            
                                         }
 
                                         //done processing the server request
-                                        stopClient = true;
+                                        //stopClient = true; //don't do this, worker can stay alive for faster recompilation
 
                                         break;
                                     default:
