@@ -5,7 +5,7 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 
-namespace Sigged.CsCNetCore.Web.Services
+namespace Sigged.CsC.NetCore.Web.Services
 {
     public interface IWorkerService
     {

@@ -6,7 +6,7 @@ using System.Threading;
 using System.Windows.Controls;
 using System.Windows.Input;
 
-namespace Sigged.CsCNetFx.Wpf
+namespace Sigged.CsC.NetFx.Wpf
 {
 
     public class ConsoleInputReader : TextReader

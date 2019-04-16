@@ -2,14 +2,14 @@
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.CodeAnalysis.Emit;
 using Sigged.CodeHost.Core.Dto;
-using Sigged.CsCNetCore.Web.Models;
-using Sigged.CsCNetCore.Web.Services;
+using Sigged.CsC.NetCore.Web.Models;
+using Sigged.CsC.NetCore.Web.Services;
 using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Sigged.CsCNetCore.Web.Sockets
+namespace Sigged.CsC.NetCore.Web.Sockets
 {
     public class CodeHub : Hub
     {

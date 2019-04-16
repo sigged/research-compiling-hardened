@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Windows.Data;
 using System.Windows.Media;
 
-namespace Sigged.CsCNetFx.Wpf.Converters
+namespace Sigged.CsC.NetFx.Wpf.Converters
 {
     public class BooleanToStatusColorConverter : IValueConverter
     {

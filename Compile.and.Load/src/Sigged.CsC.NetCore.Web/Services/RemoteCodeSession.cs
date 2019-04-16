@@ -3,7 +3,7 @@ using System;
 using System.Diagnostics;
 using System.Net.Sockets;
 
-namespace Sigged.CsCNetCore.Web.Services
+namespace Sigged.CsC.NetCore.Web.Services
 {
     public class RemoteCodeSession
     {

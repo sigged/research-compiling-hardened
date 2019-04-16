@@ -1,10 +1,10 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Quartz;
-using Sigged.CsCNetCore.Web.Services;
+using Sigged.CsC.NetCore.Web.Services;
 using System;
 using System.Threading.Tasks;
 
-namespace Sigged.CsCNetCore.Web.Jobs
+namespace Sigged.CsC.NetCore.Web.Jobs
 {
     public class SessionCleanup : IJob
     {

@@ -7,9 +7,9 @@ using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR.Client;
 using Sigged.CodeHost.Core.Dto;
-using Sigged.CsCNetCore.Web.Sockets;
+using Sigged.CsC.NetCore.Web.Sockets;
 
-namespace Sigged.CsCNetCore.Web.Services
+namespace Sigged.CsC.NetCore.Web.Services
 {
     public class SignalRClientService : IClientService
     {

@@ -14,11 +14,11 @@ using Microsoft.CodeAnalysis.Emit;
 using ProtoBuf;
 using Sigged.CodeHost.Core.Dto;
 using Sigged.Compiling.Core;
-using Sigged.CsCNetCore.Web.Constants;
-using Sigged.CsCNetCore.Web.Extensions;
-using Sigged.CsCNetCore.Web.Models;
+using Sigged.CsC.NetCore.Web.Constants;
+using Sigged.CsC.NetCore.Web.Extensions;
+using Sigged.CsC.NetCore.Web.Models;
 
-namespace Sigged.CsCNetCore.Web.Services
+namespace Sigged.CsC.NetCore.Web.Services
 {
     public class RemoteCodeSessionManager 
     {

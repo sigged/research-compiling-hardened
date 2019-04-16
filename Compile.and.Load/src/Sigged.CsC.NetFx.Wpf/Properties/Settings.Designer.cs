@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Sigged.CsCNetFx.Wpf.Properties
+namespace Sigged.CsC.NetFx.Wpf.Properties
 {
 
 

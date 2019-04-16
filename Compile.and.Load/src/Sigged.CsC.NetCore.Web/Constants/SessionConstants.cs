@@ -1,4 +1,4 @@
-﻿namespace Sigged.CsCNetCore.Web.Constants
+﻿namespace Sigged.CsC.NetCore.Web.Constants
 {
     public static class SessionConstants
     {

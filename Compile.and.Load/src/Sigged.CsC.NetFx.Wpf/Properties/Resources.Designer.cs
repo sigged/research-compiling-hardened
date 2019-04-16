@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Sigged.CsCNetFx.Wpf.Properties
+namespace Sigged.CsC.NetFx.Wpf.Properties
 {
 
 
@@ -44,7 +44,7 @@ namespace Sigged.CsCNetFx.Wpf.Properties
             {
                 if ((resourceMan == null))
                 {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Sigged.CsCNetFx.Wpf.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Sigged.CsC.NetFx.Wpf.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

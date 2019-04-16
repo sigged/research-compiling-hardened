@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace Sigged.CsCNetFx.Wpf
+namespace Sigged.CsC.NetFx.Wpf
 {
     /// <summary>
     /// Interaction logic for App.xaml

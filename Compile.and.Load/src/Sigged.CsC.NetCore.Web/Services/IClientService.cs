@@ -1,7 +1,7 @@
 ﻿using Sigged.CodeHost.Core.Dto;
 using System.Threading.Tasks;
 
-namespace Sigged.CsCNetCore.Web.Services
+namespace Sigged.CsC.NetCore.Web.Services
 {
     public interface IClientService
     {

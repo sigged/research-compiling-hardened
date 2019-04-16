@@ -9,10 +9,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Emit;
 using Sigged.Compiling.Core;
-using Sigged.CsCNetCore.Web.Models;
-using Sigged.CsCNetCore.Web.Services;
+using Sigged.CsC.NetCore.Web.Models;
+using Sigged.CsC.NetCore.Web.Services;
 
-namespace Sigged.CsCNetCore.Web.Controllers
+namespace Sigged.CsC.NetCore.Web.Controllers
 {
     public class HomeController : Controller
     {

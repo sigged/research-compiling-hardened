@@ -1,8 +1,8 @@
-﻿<Application x:Class="Sigged.CsCNetFx.Wpf.App"
+﻿<Application x:Class="Sigged.CsC.NetFx.Wpf.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:Sigged.CsCNetFx.Wpf"
-             xmlns:conv="clr-namespace:Sigged.CsCNetFx.Wpf.Converters"
+             xmlns:local="clr-namespace:Sigged.CsC.NetFx.Wpf"
+             xmlns:conv="clr-namespace:Sigged.CsC.NetFx.Wpf.Converters"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVisibility" />

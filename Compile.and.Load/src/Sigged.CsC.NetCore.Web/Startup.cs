@@ -11,12 +11,12 @@ using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Sigged.CsCNetCore.Web.Extensions;
-using Sigged.CsCNetCore.Web.Jobs;
-using Sigged.CsCNetCore.Web.Services;
-using Sigged.CsCNetCore.Web.Sockets;
+using Sigged.CsC.NetCore.Web.Extensions;
+using Sigged.CsC.NetCore.Web.Jobs;
+using Sigged.CsC.NetCore.Web.Services;
+using Sigged.CsC.NetCore.Web.Sockets;
 
-namespace Sigged.CsCNetCore.Web
+namespace Sigged.CsC.NetCore.Web
 {
     public class Startup
     {

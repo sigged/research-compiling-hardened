@@ -2,7 +2,7 @@
 using System.Globalization;
 using System.Windows.Data;
 
-namespace Sigged.CsCNetFx.Wpf.Converters
+namespace Sigged.CsC.NetFx.Wpf.Converters
 {
     public class InverseBooleanConverter : IValueConverter
     {
