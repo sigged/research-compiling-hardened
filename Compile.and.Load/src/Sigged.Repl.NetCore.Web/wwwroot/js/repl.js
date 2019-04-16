@@ -183,7 +183,7 @@ let replService = (function () {
                 this.statusCode = STATUSCODE.BUSY;
                 this.statusText = "App is waiting for input...";
 
-                this.consoleText += '<div class="consoleInputBox"></div>'
+                this.consoleText += '<span class="consoleInputBox"></span>'
                 this.$handleConsoleInput(requestLine);
             },
             $appStopped: function () {
@@ -286,10 +286,11 @@ let replService = (function () {
                 this.$nextTick(function () {
                     //remove any input boxes
                     var cons = document.getElementById('console');
-                    var inputDiv = cons.querySelectorAll('.consoleInputBox').forEach(function(el){
+                    cons.querySelectorAll('.consoleInputBox').forEach(function(el){
                         el.remove();
+                        cons.innerText += '\n'; //todo: no new line if inputbox was not a ReadLine operation
                     });
-                    replApp.consoleText += "\n";
+                    replApp.consoleText = cons.innerText;
                 });
             }
         }
