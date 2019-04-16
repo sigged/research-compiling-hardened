@@ -260,3 +260,5 @@ paket-files/
 __pycache__/
 *.pyc
 src/codealike.json
+Compile.and.Execute/src/herokudeploy.bat
+Compile.and.Execute/src/codealike.json
