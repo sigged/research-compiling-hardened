@@ -10,9 +10,9 @@
     <div class="repl-main-ide-splitter-h gridsplitter-control-h"></div>
     <div class="repl-main-ide-source">
         <div class="repl-main-ide-toolbar">
-            <button class="btn btn-info" v-on:click="buildSource" v-bind:disabled="isRunning || isBuilding === true"><img src="~/images/build.png" />Build</button>
-            <button class="btn btn-success" v-on:click="buildAndRunSource" v-bind:disabled="isRunning || isBuilding === true"><img src="~/images/play.png" />Run</button>
-            <button class="btn btn-danger" v-on:click="stopAll" v-bind:disabled="!(isRunning || isBuilding === true)"><img src="~/images/stop.png" />Stop</button>
+            <button class="btn btn-info" v-on:click="buildSource" v-bind:disabled="isRunning || isBuilding"><img src="~/images/build.png" />Build</button>
+            <button class="btn btn-success" v-on:click="buildAndRunSource" v-bind:disabled="isRunning || isBuilding"><img src="~/images/play.png" />Run</button>
+            <button class="btn btn-danger" v-on:click="stopAll" v-bind:disabled="!(isRunning || isBuilding)"><img src="~/images/stop.png" />Stop</button>
         </div>
         <iframe src="~/Home/CodeView" onload="iframeLoaded()"></iframe>
     </div>
@@ -90,17 +90,5 @@
             }
         });
 
-        //const toolbarButtons = document.querySelectorAll(".repl-main-ide-toolbar button")
-        //const toolbarButtons = document.querySelectorAll(".repl-main-ide-toolbar button")
-
-        //const replSvc = replService.init(
-        //    document.querySelector(".repl-main-ide-console"),
-        //    document.querySelector(".repl-main-ide-console"),
-        //    document.querySelector(".repl-main-ide-errors"),
-        //    document.querySelector(".repl-main-ide-status"),
-        //    toolbarButtons[0],
-        //    toolbarButtons[1],
-        //    toolbarButtons[2]
-        //);
     });
 </script>

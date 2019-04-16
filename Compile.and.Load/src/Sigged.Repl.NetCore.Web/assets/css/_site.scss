@@ -52,6 +52,60 @@ body {
     background:pink;
 }
 
+.navbar-brand {
+    font-size: 1.15rem;
+
+    img {
+        height: 25px;
+        margin-right: 10px;
+    }
+
+    @media (min-width: 576px) {
+        font-size: 1.25rem;
+
+        img {
+            height: 30px;
+            margin-right: 15px;
+        }
+    }
+
+    span {
+        padding: 0 0 0 5px;
+        font-size: 0.8rem;
+    }
+}
+
+@media (min-width: 576px) {
+    .modal-dialog {
+        max-width: 570px;
+        margin: 2.75rem auto;
+    }
+}
+
+@media (min-width: 800px) {
+    .modal-dialog {
+        max-width: 780px;
+        margin: 2.75rem auto;
+    }
+}
+
+ul.dev-sites {
+    list-style: none;
+    padding: 0;
+
+    li {
+        margin: 0;
+        padding: 5px 0;
+
+        img {
+            height: 30px;
+            width: 30px;
+            display: inline-block;
+            margin-right: 10px;
+        }
+    }
+}
+
 /*.footer {
     position: absolute;
     bottom: 0;

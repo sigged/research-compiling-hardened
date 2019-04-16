@@ -103,7 +103,18 @@ let replService = (function () {
         data: {
             isBuilding: false,
             isRunning: false,
-            consoleText: 'Welcome!\nREPL\n<script></script>',
+            consoleText: 
+'============================================\n'+
+'        .NET Standard C# Compiler           \n'+
+'                        by Sigged           \n'+
+'============================================\n'+
+'1. Enter C# code in the editor on the right \n'+
+'2. Press Build or Run                       \n'+
+'3. Watch Roslyn in action!                  \n'+
+'============================================\n'+
+'                                            \n'+
+'Ready.                                      \n'+
+'                                            \n',
             statusCode: STATUSCODE.DEFAULT,
             statusText: "Ready for action...",
             builderrors: []

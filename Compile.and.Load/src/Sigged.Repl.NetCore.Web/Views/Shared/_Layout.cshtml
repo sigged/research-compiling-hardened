@@ -3,58 +3,67 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Sigged.Repl.NetCore.Web</title>
-
+    <title>.NET Standard C# Compiler - by sigged</title>
     <environment include="Development">
+        <script src="~/js/bootstrap.jq.bundle.js"></script>
         <link rel="stylesheet" href="~/css/repl.css" />
     </environment>
     <environment exclude="Development">
+        <script src="~/js/bootstrap.jq.bundle.min.js"></script>
         <link rel="stylesheet" href="~/css/repl.min.css" />
     </environment>
     @RenderSection("head")
 </head>
 <body>
     <div class="repl-wrapper">
-            <header class="repl-header">
-                <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow">
-                    <div class="container-fluid">
-                        <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">.Net Core C# REPL <small><small>by Sigged</small></small></a>
-                        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                                aria-expanded="false" aria-label="Toggle navigation">
-                            <span class="navbar-toggler-icon"></span>
-                        </button>
-                        <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
-                            <ul class="navbar-nav flex-grow-1">
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                                </li>
-                            </ul>
-                        </div>
+        <header class="repl-header">
+            <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow">
+                <div class="container-fluid">
+                    <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index"><img src="~/images/repl.png" height="30" alt="C#" />Net Standard C# Compiler <span class="d-none d-md-inline">by Sigged</span></a>
+                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                            aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="navbar-collapse collapse d-sm-inline-flex flex-row-reverse">
+                        <ul class="navbar-nav">
+                            <li class="nav-item">
+                                <a href="#" class="nav-link text-dark" data-toggle="modal" data-target="#aboutModal">About</a>
+                            </li>
+                        </ul>
                     </div>
-                </nav>
-            </header>
-            <main role="main" class="repl-main">
-                @RenderBody()
-            </main>
-            @*<footer class="border-top footer text-muted">
-                <div class="container">
-                    &copy; 2019 - Sigged.Repl.NetCore.Web
                 </div>
-            </footer>*@
+            </nav>
+        </header>
+        <main role="main" class="repl-main">
+            @RenderBody()
+        </main>
+    </div>
+
+    <div class="modal fade" id="aboutModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">About</h4>
+                    <button type="button" class="close" data-dismiss="modal">×</button>
+                </div>
+                <div class="modal-body">
+                    <p>.NET Standard C# Compiler was developed to research how to compile and execute arbitrary .NET Standard code securely.</p>
+                    <p>This version of the application is the insecure starting point of the research. Any C# code can be executed on the server, which poses a big security threat. </p>
+                    <p><strong>Do not run this webapplication in production. Use at your own risk.</strong></p>
+                    <ul class="dev-sites">
+                        <li><img src="~/images/github.png" alt="Github" />Find the source code on <a href="https://www.github.com/">Github</a></li>
+                        <li><img src="~/images/docker.png" alt="Docker" />Find the docker container on <a href="https://hub.docker.com/r/sigged/insecure-repl">Dockerhub</a></li>
+                    </ul>
+                    <p>Developed by S. Derdeyn &copy;2019</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                </div>
+
+            </div>
         </div>
+    </div>
 
-        @*<environment include="Development">
-            <script src="~/js/bootstrap.jq.bundle.js"></script>
-            <script src="~/js/replbundle.js"></script>
-        </environment>
-        <environment exclude="Development">
-            <script src="~/js/bootstrap.jq.bundle.min.js"></script>
-            <script src="~/js/replbundle.min.js"></script>
-        </environment>*@
-
-        @RenderSection("Scripts", required: false)
+    @RenderSection("Scripts", required: false)
 </body>
 </html>
