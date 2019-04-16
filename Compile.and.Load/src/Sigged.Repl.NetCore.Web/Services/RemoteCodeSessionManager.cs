@@ -58,11 +58,12 @@ namespace Sigged.Repl.NetCore.Web.Services
         public void CleanupIdleSessions()
         {
             var removeSessions = Sessions.Where(s => s.LastActivity.AddSeconds(SessionIdleTimeout) <= DateTimeOffset.Now).ToList();
+            Console.Write($"CleanUpIdleSessions() - found {removeSessions.Count}/{Sessions.Count()} expired sessions");
             foreach (var session in removeSessions)
             {
                 lock (session)
                 {
-                    Debug.WriteLine($"Cleaning up idle session {session.SessionId}, last heartbeat @{session.LastActivity} expired at {session.LastActivity.AddSeconds(SessionIdleTimeout)}");
+                    Console.WriteLine($"Cleaning up idle session {session.SessionId}, last heartbeat @{session.LastActivity} expired at {session.LastActivity.AddSeconds(SessionIdleTimeout)}");
                     ResetSessionWorker(session);
                     sessions.Remove(session);
                 }
@@ -83,6 +84,7 @@ namespace Sigged.Repl.NetCore.Web.Services
             };
             lock (this)
             {
+                session.Heartbeat();
                 sessions.Add(session);
             }
             return session;
@@ -90,9 +92,9 @@ namespace Sigged.Repl.NetCore.Web.Services
 
         public RemoteCodeSession GetSession(string sessionid)
         {
-            CleanupIdleSessions();
-
-            return sessions.FirstOrDefault(s => s.SessionId == sessionid);
+            var session = sessions.FirstOrDefault(s => s.SessionId == sessionid);
+            session?.Heartbeat();
+            return session;
         }
 
         protected async Task CreateWorkerProcess(RemoteCodeSession session)
@@ -150,8 +152,6 @@ namespace Sigged.Repl.NetCore.Web.Services
                 buildRequest.SessionId = session.SessionId;
             }
 
-            session.Heartbeat();
-
             //set build request so it can be picked up after worker connection
             session.LastBuildRequest = buildRequest;
             
@@ -160,19 +160,19 @@ namespace Sigged.Repl.NetCore.Web.Services
             {
                 if(session.WorkerClient?.Connected == true)
                 {
-                    Debug.WriteLine("Recycling worker process for new build request");
+                    Console.WriteLine("Recycling worker process for new build request");
                     listener.SendWorkerMessage(session.WorkerClient, MessageType.ServerBuildRequest, session.LastBuildRequest);
                     return;
                 }
                 else
                 {
                     //worker process has quit or disconnected. Reset references so it can be recreated.
-                    Debug.WriteLine("Resetting stopped/disconnected worker process for new build request");
+                    Console.WriteLine("Resetting stopped/disconnected worker process for new build request");
                     ResetSessionWorker(session);
                 }
             }
             //no worker process, create from scratch so it can connect
-            Debug.WriteLine("Creating new worker process for new build request");
+            Console.WriteLine("Creating new worker process for new build request");
             await CreateWorkerProcess(session);
         }
 
@@ -185,35 +185,23 @@ namespace Sigged.Repl.NetCore.Web.Services
             var session = GetSession(sessionid);
             if (session != null)
             {
-                try
-                {
-                    //shutdown communication channel
-                    session.WorkerClient?.Close();
-                    session.WorkerClient?.Dispose();
-                }
-                finally
-                {
-                    try
-                    {
-                        session.WorkerProcess?.Kill();
-                    }
-                    finally
-                    {
-                        session.WorkerClient = null;
-                        session.WorkerProcess = null;
-                    }
-                }
+                ResetSessionWorker(session);
             }
 
         }
 
         protected void ResetSessionWorker(RemoteCodeSession session)
         {
+            Console.WriteLine($"Worker Reset: {session.SessionId}");
             session.WorkerClient?.Close();
+            Console.WriteLine($"Worker Reset: closed worker socket of {session.SessionId}");
             try
             {
                 if (session.WorkerProcess?.HasExited == false)
+                {
                     session.WorkerProcess?.Kill();
+                    Console.WriteLine($"Worker Reset: killed worker process of {session.SessionId}");
+                }
             }
             finally
             {
@@ -241,8 +229,6 @@ namespace Sigged.Repl.NetCore.Web.Services
                 if (!session.WorkerClient.Connected)
                     throw new InvalidOperationException("Can't forward input: Disconnected from session's worker");
 
-                session.Heartbeat();
-
                 listener.SendWorkerMessage(session.WorkerClient, MessageType.ServerRemoteInput, remoteInput);
             }
             catch(Exception ex)
@@ -262,7 +248,6 @@ namespace Sigged.Repl.NetCore.Web.Services
             }
             else
             {
-                session.Heartbeat();
                 session.WorkerClient = workerClient;
                 if (session.LastBuildRequest != null)
                 {

@@ -13,18 +13,18 @@ namespace Sigged.Repl.NetCore.Web.Extensions
 {
     public static class QuartzExtensions
     {
-        public static string WorkerCleanupJob = "WorkerCleanupJob.job";
+        public static string SessionCleanupJob = "SessionCleanup.job";
         public static string MaintenanceJobsGroup = "MaintenanceJobs";
         public static string MaintenanceJobsTrigger = "MaintenanceJobs.trigger";
-        public static int WorkerCleanupJobInterval = 20; //sconds
+        public static int SessionCleanupJobInterval = 5; //sconds
 
         public static void AddQuartz(this IServiceCollection services, Type jobType)
         {
             services.Add(new ServiceDescriptor(typeof(IJob), jobType, ServiceLifetime.Transient));
             services.AddSingleton<IJobFactory, ScheduledJobFactory>();
 
-            services.AddSingleton<IJobDetail>(provider => JobBuilder.Create<WorkerCleanup>()
-                    .WithIdentity(WorkerCleanupJob, MaintenanceJobsGroup)
+            services.AddSingleton<IJobDetail>(provider => JobBuilder.Create<SessionCleanup>()
+                    .WithIdentity(SessionCleanupJob, MaintenanceJobsGroup)
                     .Build());
 
             services.AddSingleton<ITrigger>(provider =>
@@ -34,7 +34,7 @@ namespace Sigged.Repl.NetCore.Web.Extensions
                     .StartNow()
                     .WithSimpleSchedule
                     (s =>
-                        s.WithInterval(TimeSpan.FromSeconds(WorkerCleanupJobInterval))
+                        s.WithInterval(TimeSpan.FromSeconds(SessionCleanupJobInterval))
                             .RepeatForever()
                     )
                     .Build();

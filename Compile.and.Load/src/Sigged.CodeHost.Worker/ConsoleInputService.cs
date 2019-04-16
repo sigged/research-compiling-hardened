@@ -1,6 +1,7 @@
 ﻿using ProtoBuf;
 using Sigged.CodeHost.Core.Dto;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Sockets;
@@ -15,6 +16,9 @@ namespace Sigged.CodeHost.Worker
         protected Stream networkStream;
 
         public string receivedInput = null;
+
+        private static Queue<ExecutionStateDto> unfinishedRequests = new Queue<ExecutionStateDto>();
+        private static bool isWaitingForInput = false;
 
         public ConsoleInputService(string sessionid, TcpClient client)
         {
@@ -32,14 +36,21 @@ namespace Sigged.CodeHost.Worker
             };
             networkStream.WriteByte((byte)MessageType.WorkerExecutionState);
             Serializer.SerializeWithLengthPrefix(networkStream, execState, PrefixStyle.Fixed32);
-            Logger.LogLine($"CLIENT: sent remote inputchar request");
+            Logger.LogLine($"CLIENT: sent remote inputchar request (unfinished queue: {unfinishedRequests.Count})");
 
-            while (receivedInput == null)
+            unfinishedRequests.Enqueue(execState);
+            isWaitingForInput = true;
+
+            while (isWaitingForInput)
             {
                 if (client.Available > 0)
                 {
                     byte msgHeader = (byte)networkStream.ReadByte();
                     MessageType msgType = (MessageType)msgHeader;
+
+                    unfinishedRequests.Dequeue();
+                    isWaitingForInput = false;
+
                     if (msgType == MessageType.ServerRemoteInput)
                     {
                         var remoteInput = Serializer.DeserializeWithLengthPrefix<RemoteInputDto>(networkStream, PrefixStyle.Fixed32);
@@ -72,15 +83,22 @@ namespace Sigged.CodeHost.Worker
                 };
                 networkStream.WriteByte((byte)MessageType.WorkerExecutionState);
                 Serializer.SerializeWithLengthPrefix(networkStream, execState, PrefixStyle.Fixed32);
-                Logger.LogLine($"CLIENT: sent remote inputline request");
+                Logger.LogLine($"CLIENT: sent remote inputline request (unfinished queue: {unfinishedRequests.Count})");
 
-                while (receivedInput == null)
+                unfinishedRequests.Enqueue(execState);
+                isWaitingForInput = true;
+
+                while (isWaitingForInput)
                 {
                     if (client.Available > 0)
                     {
                         byte msgHeader = (byte)networkStream.ReadByte();
                         MessageType msgType = (MessageType)msgHeader;
-                        if(msgType == MessageType.ServerRemoteInput)
+
+                        unfinishedRequests.Dequeue();
+                        isWaitingForInput = false;
+
+                        if (msgType == MessageType.ServerRemoteInput)
                         {
                             var remoteInput = Serializer.DeserializeWithLengthPrefix<RemoteInputDto>(networkStream, PrefixStyle.Fixed32);
                             receivedInput = remoteInput.Input;
@@ -89,6 +107,8 @@ namespace Sigged.CodeHost.Worker
                         }
                         else
                         {
+
+
                             Logger.LogLine($"CLIENT: expected msgtype {MessageType.ServerRemoteInput} but got {msgType}");
                         }
                     }

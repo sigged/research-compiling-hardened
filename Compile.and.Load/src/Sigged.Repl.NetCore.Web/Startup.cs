@@ -49,8 +49,8 @@ namespace Sigged.Repl.NetCore.Web
             //custom services
             services.AddTransient<IClientService, SignalRClientService>();
             services.AddSingleton<RemoteCodeSessionManager>();
-            services.AddTransient<WorkerCleanup>();
-            services.AddQuartz(typeof(WorkerCleanup));
+            services.AddTransient<SessionCleanup>();
+            services.AddQuartz(typeof(SessionCleanup));
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
