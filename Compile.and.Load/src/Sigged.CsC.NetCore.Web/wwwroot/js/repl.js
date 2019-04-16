@@ -177,14 +177,15 @@ let replService = (function () {
                 this.statusCode = STATUSCODE.BUSY;
                 this.statusText = "Application is running...";
                 this.consoleText += appState.output;
+                this.$scrollDownConsole();
             },
             $appRequestsInput: function (appState, requestLine) {
                 this.isRunning = true;
                 this.statusCode = STATUSCODE.BUSY;
                 this.statusText = "App is waiting for input...";
-
                 this.consoleText += '<span class="consoleInputBox"></span>'
                 this.$handleConsoleInput(requestLine);
+                this.$scrollDownConsole();
             },
             $appStopped: function () {
                 this.isBuilding = false;
@@ -240,6 +241,12 @@ let replService = (function () {
                 if(inputDiv)
                     inputDiv.focus();
             },
+            $scrollDownConsole: function(){
+                this.$nextTick(function () {
+                    var cons = document.getElementById('console');
+                    cons.scrollTop = cons.scrollHeight;
+                });
+            },
             $handleConsoleInput: function(requestLine){
                 this.$nextTick(function () {
                     var cons = document.getElementById('console');
@@ -272,12 +279,12 @@ let replService = (function () {
                             if(requestLine){
                                 replApp.consoleText += "\n";
                             }
+                            replApp.$scrollDownConsole();
                             hubconnection.invoke("ClientInput", inputToSend)
                                 .then(function(){
                                     console.log("Sent Input: " + inputToSend);
                                 })
                                 .catch(err => console.error(err.toString()));
-                            
                         }
                     },100);
                 });
@@ -291,6 +298,7 @@ let replService = (function () {
                         cons.innerText += '\n'; //todo: no new line if inputbox was not a ReadLine operation
                     });
                     replApp.consoleText = cons.innerText;
+                    replApp.$scrollDownConsole();
                 });
             }
         }
