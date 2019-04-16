@@ -4,7 +4,7 @@ using Quartz.Spi;
 using System;
 using System.Collections.Concurrent;
 
-namespace Sigged.Repl.NetCore.Web.Jobs
+namespace Sigged.CsCNetCore.Web.Jobs
 {
     public class ScheduledJobFactory : IJobFactory
     {

@@ -1,6 +1,6 @@
 using System;
 
-namespace Sigged.Repl.NetCore.Web.Models
+namespace Sigged.CsCNetCore.Web.Models
 {
     public class ErrorViewModel
     {

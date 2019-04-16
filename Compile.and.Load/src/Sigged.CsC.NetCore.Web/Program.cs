@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
-namespace Sigged.Repl.NetCore.Web
+namespace Sigged.CsCNetCore.Web
 {
     public class Program
     {

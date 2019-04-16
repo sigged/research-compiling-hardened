@@ -1,4 +1,4 @@
-﻿namespace Sigged.Repl.NetCore.Web.Services
+﻿namespace Sigged.CsCNetCore.Web.Services
 {
     public enum WorkerResetReason
     {

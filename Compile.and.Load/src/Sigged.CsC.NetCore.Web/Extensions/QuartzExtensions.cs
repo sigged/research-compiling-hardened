@@ -3,14 +3,14 @@ using Microsoft.Extensions.DependencyInjection;
 using Quartz;
 using Quartz.Impl;
 using Quartz.Spi;
-using Sigged.Repl.NetCore.Web.Constants;
-using Sigged.Repl.NetCore.Web.Jobs;
+using Sigged.CsCNetCore.Web.Constants;
+using Sigged.CsCNetCore.Web.Jobs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Sigged.Repl.NetCore.Web.Extensions
+namespace Sigged.CsCNetCore.Web.Extensions
 {
     public static class QuartzExtensions
     {

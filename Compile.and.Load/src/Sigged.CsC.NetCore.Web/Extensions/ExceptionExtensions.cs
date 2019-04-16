@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Sigged.Repl.NetCore.Web.Extensions
+namespace Sigged.CsCNetCore.Web.Extensions
 {
     public static class ExceptionExtensions
     {

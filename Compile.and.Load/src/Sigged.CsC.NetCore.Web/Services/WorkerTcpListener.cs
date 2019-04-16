@@ -12,7 +12,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Sigged.Repl.NetCore.Web.Services
+namespace Sigged.CsCNetCore.Web.Services
 {
     static class TaskExtensions
     {
