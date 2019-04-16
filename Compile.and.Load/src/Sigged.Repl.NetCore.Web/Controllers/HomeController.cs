@@ -30,13 +30,13 @@ namespace Sigged.Repl.NetCore.Web.Controllers
 
         public IActionResult CodeView()
         {
-            List<string> themes = new List<string>();
-            var dir = new DirectoryInfo(Path.Combine(env.WebRootPath, "js", "codemirror", "theme"));
-            foreach (var file in dir.GetFiles("*.css"))
-            {
-                themes.Add(Path.GetFileNameWithoutExtension(file.FullName));
-            }
-            ViewBag.Themes = themes;
+            //List<string> themes = new List<string>();
+            //var dir = new DirectoryInfo(Path.Combine(env.WebRootPath, "js", "codemirror", "theme"));
+            //foreach (var file in dir.GetFiles("*.css"))
+            //{
+            //    themes.Add(Path.GetFileNameWithoutExtension(file.FullName));
+            //}
+            //ViewBag.Themes = themes;
             return View();
         }
 

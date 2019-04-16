@@ -11,11 +11,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sigged.Repl.NetFx.Wpf", "Si
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sigged.Repl.NetCore.Web", "Sigged.Repl.NetCore.Web\Sigged.Repl.NetCore.Web.csproj", "{C534FD44-C74E-4694-9B93-9E37A5136114}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sigged.Compling.Core.CodeHost", "Sigged.Compling.Core.CodeHost\Sigged.Compling.Core.CodeHost.csproj", "{3EED921F-CC86-42F7-BF5E-4AEBBBFE4157}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sigged.Compling.Core.CodeHost", "Sigged.Compling.Core.CodeHost\Sigged.Compling.Core.CodeHost.csproj", "{3EED921F-CC86-42F7-BF5E-4AEBBBFE4157}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sigged.CodeHost.Core", "Sigged.CodeHost.Core\Sigged.CodeHost.Core.csproj", "{582814FB-E8DF-4709-AB38-54C1DA60E2DE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sigged.CodeHost.Core", "Sigged.CodeHost.Core\Sigged.CodeHost.Core.csproj", "{582814FB-E8DF-4709-AB38-54C1DA60E2DE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sigged.CodeHost.Worker", "Sigged.CodeHost.Worker\Sigged.CodeHost.Worker.csproj", "{1608B778-D2D3-4B8D-AAFF-5223E1842BF7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sigged.CodeHost.Worker", "Sigged.CodeHost.Worker\Sigged.CodeHost.Worker.csproj", "{1608B778-D2D3-4B8D-AAFF-5223E1842BF7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

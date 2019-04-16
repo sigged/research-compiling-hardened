@@ -102,22 +102,36 @@ namespace Sigged.Repl.NetCore.Web.Services
             else
             {
                 await Task.Run(() => {
-                    string workerExePath = Path.Combine(env.ContentRootPath, "_workerProcess", "worker", "Sigged.CodeHost.Worker.dll");
-                    
-                    session.WorkerProcess = new Process();
-                    session.WorkerProcess.EnableRaisingEvents = true;
-                    session.WorkerProcess.Exited += (object sender, EventArgs e) => {
-                        ResetSessionWorker(session);
-                    };
-
-                    session.WorkerProcess.StartInfo = new ProcessStartInfo
+                    try
                     {
-                        FileName = "dotnet",
-                        Arguments = $"{workerExePath} localhost 2000 {session.SessionId}",
-                        UseShellExecute = true
-                    };
+                        string workerExePath = Path.Combine(env.ContentRootPath, "_workerProcess", "worker", "Sigged.CodeHost.Worker.dll");
+                        Console.WriteLine($"Starting process at {workerExePath}");
+                        session.WorkerProcess = new Process();
+                        session.WorkerProcess.EnableRaisingEvents = true;
+                        session.WorkerProcess.Exited += (object sender, EventArgs e) =>
+                        {
+                            ResetSessionWorker(session);
+                        };
 
-                    session.WorkerProcess.Start();
+                        session.WorkerProcess.StartInfo = new ProcessStartInfo
+                        {
+                            FileName = "dotnet",
+                            Arguments = $"{workerExePath} localhost 2000 {session.SessionId}",
+                            UseShellExecute = false
+                        };
+
+                        session.WorkerProcess.Start();
+                    }
+                    catch(IOException ioex)
+                    {
+                        Console.WriteLine(ioex.Message);
+                        throw;
+                    }
+                    catch(Exception ex)
+                    {
+                        throw;
+                    }
+                    
                 });
             }
         }
