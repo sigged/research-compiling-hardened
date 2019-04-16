@@ -161,6 +161,7 @@ namespace Sigged.Repl.NetCore.Web.Services
                 catch(Exception ex)
                 {
                     //most likely the client didn't response properly
+                    Debug.WriteLine($"LISTENER: {tcpClient.Client.RemoteEndPoint} did not properly identify with a session: {ex.Message}");
                     identification = null;
                 }
                 finally
@@ -223,21 +224,11 @@ namespace Sigged.Repl.NetCore.Web.Services
                                                     .Replace("\n", "\\n"); //simply for visualizing special chars
                                                 Console.WriteLine($"SERVER: received remote output info: {printableOutput}");
                                                 break;
+                                            case RemoteAppState.WaitForInput:
+                                                Console.WriteLine($"SERVER: received remote INPUT request: ");
+                                                break;
                                             case RemoteAppState.WaitForInputLine:
-                                                string input = null;
-                                                Console.WriteLine($"SERVER: received remote INPUTLiNE request: ");
-
-
-
-                                                //input = Console.ReadLine();
-                                                //networkStream.WriteByte((byte)MessageType.ServerRemoteInput);
-                                                //Serializer.SerializeWithLengthPrefix(networkStream, new RemoteInputDto
-                                                //{
-                                                //    SessionId = "blah",
-                                                //    Input = input
-                                                //}, PrefixStyle.Fixed32);
-                                                //Console.WriteLine($"SERVER: sent input to client: {input}");
-
+                                                Console.WriteLine($"SERVER: received remote INPUTLINE request: ");
                                                 break;
                                             default:
                                                 Console.WriteLine($"SERVER: received unsupported ExecutionState: {execState.State}");

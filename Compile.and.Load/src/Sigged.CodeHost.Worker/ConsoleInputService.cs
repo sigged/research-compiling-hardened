@@ -32,9 +32,33 @@ namespace Sigged.CodeHost.Worker
             };
             networkStream.WriteByte((byte)MessageType.WorkerExecutionState);
             Serializer.SerializeWithLengthPrefix(networkStream, execState, PrefixStyle.Fixed32);
+            Logger.LogLine($"CLIENT: sent remote inputchar request");
 
-            var remoteInput = Serializer.DeserializeWithLengthPrefix<RemoteInputDto>(networkStream, PrefixStyle.Fixed32);
-            return remoteInput.Input[0];
+            while (receivedInput == null)
+            {
+                if (client.Available > 0)
+                {
+                    byte msgHeader = (byte)networkStream.ReadByte();
+                    MessageType msgType = (MessageType)msgHeader;
+                    if (msgType == MessageType.ServerRemoteInput)
+                    {
+                        var remoteInput = Serializer.DeserializeWithLengthPrefix<RemoteInputDto>(networkStream, PrefixStyle.Fixed32);
+                        receivedInput = remoteInput.Input;
+
+                        Logger.LogLine($"CLIENT: received remote input {receivedInput} of length {receivedInput.Length}");
+                    }
+                    else
+                    {
+                        Logger.LogLine($"CLIENT: expected msgtype {MessageType.ServerRemoteInput} but got {msgType}");
+                    }
+                }
+                else
+                {
+                    Thread.Sleep(100);
+                }
+            }
+            Logger.LogLine($"CLIENT: returning remote input \"{receivedInput}\" of length {receivedInput.Length} to execution flow");
+            return receivedInput[0];
         }
 
         public override string ReadLine()

@@ -129,6 +129,7 @@ namespace Sigged.Repl.NetCore.Web.Services
                     }
                     catch(Exception ex)
                     {
+                        Console.WriteLine(ex.Message);
                         throw;
                     }
                     

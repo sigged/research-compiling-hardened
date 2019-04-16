@@ -50,7 +50,7 @@ namespace Sigged.Repl.NetCore.Web.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Alert! unable to restart SignalRClientService hubconnection");
+                Console.WriteLine($"Alert! unable to restart SignalRClientService hubconnection: {ex.Message}");
             }
         }
 
