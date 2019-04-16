@@ -10,7 +10,6 @@ namespace Sigged.Repl.NetCore.Web.Services
     public interface IWorkerService
     {
         event WorkerConnectionHandler WorkerConnected;
-        event WorkerConnectionHandler WorkerDisconnected;
         event WorkerMessageReceivedHandler<BuildResultDto> WorkerCompletedBuild;
         event WorkerMessageReceivedHandler<ExecutionStateDto> WorkerExecutionStateChanged;
 

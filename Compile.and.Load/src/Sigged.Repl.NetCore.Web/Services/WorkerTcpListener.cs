@@ -28,18 +28,11 @@ namespace Sigged.Repl.NetCore.Web.Services
         protected List<TcpClient> connectedClients = new List<TcpClient>();
 
         public event WorkerConnectionHandler WorkerConnected;
-        public event WorkerConnectionHandler WorkerDisconnected;
         public event WorkerMessageReceivedHandler<BuildResultDto> WorkerCompletedBuild;
         public event WorkerMessageReceivedHandler<ExecutionStateDto> WorkerExecutionStateChanged;
 
         protected int listenPort;
         protected IPAddress listenIp;
-
-        //public IEnumerable<TcpClient> ConnectedClients {
-        //    get {
-        //        return connectedClients;
-        //    }
-        //}
 
         public bool IsListening {
             get
