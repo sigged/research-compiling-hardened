@@ -70,7 +70,7 @@ namespace Sigged.Repl.NetCore.Web.Sockets
         /// <returns></returns>
         public async Task DispatchAppStateToClient(string targetConnectionId, ExecutionStateDto state)
         {
-            Debug.WriteLine($"Sending Appstate to {targetConnectionId} -- {state.State}");
+            Console.WriteLine($"CodeHub: Sending Appstate to {targetConnectionId} -- {state.State}");
             await Clients.Client(targetConnectionId).SendAsync("ApplicationStateChanged", state);
         }
 
@@ -80,7 +80,7 @@ namespace Sigged.Repl.NetCore.Web.Sockets
         /// <returns></returns>
         public async Task DispatchBuildResultToClient(string targetConnectionId, BuildResultDto result)
         {
-            Debug.WriteLine($"Sending BuildResult to {targetConnectionId} -- {result.IsSuccess}");
+            Console.WriteLine($"CodeHub: Sending BuildResult to {targetConnectionId} -- {result.IsSuccess}");
             await Clients.Client(targetConnectionId).SendAsync("BuildComplete", result);
         }
     }

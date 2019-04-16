@@ -57,20 +57,38 @@ namespace Sigged.Repl.NetCore.Web.Services
         public async Task Connect()
         {
             await hubConnection.StartAsync();
+            Console.WriteLine($"SignalRClientService: connected to {appBaseUrl}/codeHub");
         }
 
         public async Task SendBuildResult(string sessionId, BuildResultDto result)
         {
-            await hubConnection.InvokeAsync(nameof(CodeHub.DispatchBuildResultToClient), sessionId, result);
+            Console.WriteLine($"SignalRClientService.SendBuildResult: Dispatching BuildResultDto to client..");
+            try
+            {
+                await hubConnection.InvokeAsync(nameof(CodeHub.DispatchBuildResultToClient), sessionId, result);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"SignalRClientService: {ex.Message}");
+            }
         }
 
         public async Task SendExecutionState(string sessionId, ExecutionStateDto state)
         {
-            await hubConnection.InvokeAsync(nameof(CodeHub.DispatchAppStateToClient), sessionId, state);
+            Console.WriteLine($"SignalRClientService: Dispatching ExecutionStateDto to client..");
+            try
+            {
+                await hubConnection.InvokeAsync(nameof(CodeHub.DispatchAppStateToClient), sessionId, state);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"SignalRClientService.SendExecutionState: {ex.Message}");
+            }
         }
 
         ~SignalRClientService()
         {
+            Console.WriteLine($"SignalRClientService: Disposing.");
             hubConnection?.DisposeAsync()?.Wait();
         }
     }
