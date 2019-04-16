@@ -3,6 +3,10 @@
 ###############################################################################
 * text=auto
 
+Compile.and.Execute/src/Sigged.CsC.NetCore.Web/wwwroot/js/**/*.js linguist-generated=true
+Compile.and.Execute/src/Sigged.CsC.NetCore.Web/wwwroot/css/**/*.css linguist-generated=true
+Compile.and.Execute/src/Sigged.CsC.NetCore.Web/wwwroot/lib/* linguist-vendored
+
 ###############################################################################
 # Set default behavior for command prompt diff.
 #
@@ -11,6 +15,7 @@
 # Note: This is only used by command line
 ###############################################################################
 #*.cs     diff=csharp
+
 
 ###############################################################################
 # Set the merge driver for project and solution files
