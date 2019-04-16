@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Sigged.Repl.NetCore.Web.Extensions;
+using Sigged.Repl.NetCore.Web.Jobs;
 using Sigged.Repl.NetCore.Web.Services;
 using Sigged.Repl.NetCore.Web.Sockets;
 
@@ -47,6 +49,8 @@ namespace Sigged.Repl.NetCore.Web
             //custom services
             services.AddTransient<IClientService, SignalRClientService>();
             services.AddSingleton<RemoteCodeSessionManager>();
+            services.AddTransient<WorkerCleanup>();
+            services.AddQuartz(typeof(WorkerCleanup));
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
@@ -76,6 +80,8 @@ namespace Sigged.Repl.NetCore.Web
             //app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseCookiePolicy();
+
+            app.UseQuartz();
 
             app.UseMvc(routes =>
             {
