@@ -2,7 +2,7 @@
 
 ### Introduction
 
->.NET Standard C# Compiler was developed to research how to compile and execute arbitrary .NET Standard code securely._
+>.NET Standard C# Compiler was developed to research how to compile and execute arbitrary .NET Standard code securely.
 
 This version of the application is the insecure starting point of the research. Any C# code can be executed on the server, which poses a big security threat.
 
