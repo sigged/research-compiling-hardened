@@ -106,14 +106,7 @@ let replService = (function () {
             consoleText: 'Welcome!\nREPL\n<script></script>',
             statusCode: STATUSCODE.DEFAULT,
             statusText: "Ready for action...",
-            builderrors: [
-                // {
-                //     severity: 'error',
-                //     id: 'CS 00000',
-                //     location: 'Line 15, Col 4',
-                //     description: 'Totally bogus error for testing purproses'
-                // },
-            ]
+            builderrors: []
         },
         // define methods under the `methods` object
         methods: {
@@ -125,7 +118,7 @@ let replService = (function () {
             },
             buildAndRunSource: async function () {
                 this.isBuilding = true;
-                this.statusText = "Running...";
+                this.statusText = "Building...";
                 this.statusCode = STATUSCODE.BUSY;
                 await this.$requestRun(cEditor.getTextArea().value);
             },
@@ -166,10 +159,11 @@ let replService = (function () {
                 this.statusText = "Application is running...";
             },
             $appWritesOutput: function (appState) {
+                this.isBuilding = false;
                 this.isRunning = true;
                 this.statusCode = STATUSCODE.BUSY;
                 this.statusText = "Application is running...";
-                this.consoleText += appState.output; //.replace("\n","<br />");
+                this.consoleText += appState.output;
             },
             $appRequestsInput: function (appState, requestLine) {
                 this.isRunning = true;
@@ -200,23 +194,13 @@ let replService = (function () {
                 ]
             },
             $requestBuild: function (code) {
-                let app = this;
-
-                return new Promise(function (resolve, reject) {
-
-                    hubconnection.invoke("Build", {
-                        codingSessionId: '',
-                        sourceCode: code,
-                        runOnSuccess: false
-                    }).catch(err => console.error(err.toString()));
-                });
+                hubconnection.invoke("Build", {
+                    codingSessionId: '',
+                    sourceCode: code,
+                    runOnSuccess: false
+                }).catch(err => console.error(err.toString()));
             },
             $requestRun: function (code) {
-                console.log("Running..");
-                this.statusText = "Running...";
-                this.isBuilding = false;
-                this.isRunning = true;
-
                 hubconnection.invoke("Build", {
                     codingSessionId: '',
                     sourceCode: code,
@@ -247,10 +231,26 @@ let replService = (function () {
                     inputDiv.setAttribute('contenteditable', 'true');
                     var input = null;
 
-                    inputDiv.addEventListener('keyup', function(kbdEvent){
+                    // inputDiv.onkeypress = function(kbdEvent){
+                    //     if(requestLine){
+                    //         if(kbdEvent.key == "Enter"){
+                    //             kbdEvent.preventDefault();
+                    //             input = this.innerText;
+                    //         }
+                    //     }
+                    //     else{
+                    //         inputDiv.removeAttribute('contenteditable');
+                    //         input = kbdEvent.key;
+                    //     }
+                    //     console.log("Keypress in input", kbdEvent);
+                    // };
+
+                    inputDiv.addEventListener('keypress', function(kbdEvent){
                         if(requestLine){
                             if(kbdEvent.key == "Enter"){
-                                input = inputDiv.innerText;
+                                kbdEvent.preventDefault();
+                                input = this.innerText;
+                                this.innerHTML = input ;
                             }
                         }
                         else{
@@ -263,10 +263,13 @@ let replService = (function () {
                     //wait for enter before sumitting
                     setInterval(function(){
                         if(input !== null){
-                            var inputToSend = input.replace('\n','');
+                            var inputToSend = input;
                             input = null;
                             inputDiv.remove();
                             replApp.consoleText = cons.innerHTML + inputToSend;
+                            if(requestLine){
+                                replApp.consoleText += "\n";
+                            }
                             hubconnection.invoke("ClientInput", inputToSend)
                                 .then(function(){
                                     console.log("Sent Input: " + inputToSend);
