@@ -37,6 +37,21 @@ namespace Sigged.Repl.NetCore.Web.Services
             //}
             hubConnection = new HubConnectionBuilder().WithUrl(appBaseUrl + "/codeHub").Build();
             Console.WriteLine($"SignalRClientService is using {appBaseUrl}/codeHub");
+
+            hubConnection.Closed += HubConnection_Closed;
+        }
+
+        private async Task HubConnection_Closed(Exception arg)
+        {
+            Console.Write("SignalRClientService lost hub connection, reconnecting...");
+            try
+            {
+                await hubConnection?.StartAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Alert! unable to restart SignalRClientService hubconnection");
+            }
         }
 
         public async Task Connect()
