@@ -162,7 +162,17 @@ namespace Sigged.CodeHost.Worker
 
                 //invoke main method
                 var mainParms = assembly.EntryPoint.GetParameters();
-                assembly.EntryPoint.Invoke(null, new string[] { null });
+                if(mainParms.Count() == 0)
+                {
+                    assembly.EntryPoint.Invoke(null, null);
+                }
+                else
+                {
+                    if(mainParms[0].ParameterType == typeof(string[]))
+                        assembly.EntryPoint.Invoke(null, new string[] { null });
+                    else
+                        assembly.EntryPoint.Invoke(null, null);
+                }
 
                 //reset console redirection
                 Console.SetOut(new StreamWriter(Console.OpenStandardOutput()) { AutoFlush = true });

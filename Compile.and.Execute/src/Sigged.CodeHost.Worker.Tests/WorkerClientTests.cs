@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 using Xunit;
 
 namespace Sigged.CodeHost.Worker.Tests
@@ -121,8 +122,9 @@ namespace Sigged.CodeHost.Worker.Tests
             Assert.Equal(RemoteAppState.Ended, nextState.State);
         }
         
-        [Fact]
-        public async void WorkerClient_Build_Fails_When_No_EntryPoint()
+        [Theory]
+        [MemberData(nameof(MockSourceCodeRepository.Get_Bad_MainMethod_Codes), MemberType = typeof(MockSourceCodeRepository))]
+        public async void WorkerClient_Build_Fails_When_Bad_EntryPoint(string source, string expectedErrorCode)
         {
             //arrange
             BuildResultDto actualResult = null; //hold actual result
@@ -131,7 +133,7 @@ namespace Sigged.CodeHost.Worker.Tests
             {
                 SessionId = arrangement.SessionId,
                 RunOnSuccess = true,
-                SourceCode = MockSourceCodeRepository.Get_NoMainMethod_Code()
+                SourceCode = source
             };
 
             //act
@@ -153,8 +155,7 @@ namespace Sigged.CodeHost.Worker.Tests
             //assert 
             Assert.False(actualResult.IsSuccess);
             
-            //CS5001 = Program 'program' does not contain a static 'Main' method suitable for an entry point
-            Assert.Equal("CS5001", actualResult.BuildErrors.First().Id); 
+            Assert.Equal(expectedErrorCode, actualResult.BuildErrors.First().Id); 
         }
 
 
@@ -194,17 +195,19 @@ namespace Sigged.CodeHost.Worker.Tests
         }
 
 
-        [Fact]
-        public async void WorkerClient_Calls_EntryPoint_With_Correct_Arguments()
+        [Theory]
+        [MemberData(nameof(MockSourceCodeRepository.Get_Varying_MainParms_Codes), MemberType = typeof(MockSourceCodeRepository))]
+        public async void WorkerClient_Calls_EntryPoint_With_Correct_Arguments(string source)
         {
             //arrange
-            BuildResultDto actualResult = null; //hold actual result
+            //var arrangement = new WorkerClientArrangement(); //rearrange per theory run (ports!)
+            Queue<ExecutionStateDto> actualStates = new Queue<ExecutionStateDto>(); //hold actual result
 
             var buildRequest = new BuildRequestDto
             {
                 SessionId = arrangement.SessionId,
                 RunOnSuccess = true,
-                SourceCode = MockSourceCodeRepository.Get_AmbiguousMain_Code()
+                SourceCode = source,
             };
 
             //act
@@ -213,20 +216,20 @@ namespace Sigged.CodeHost.Worker.Tests
                 arrangement.WorkerService.SendWorkerMessage(workerClient, MessageType.ServerBuildRequest, buildRequest);
             };
 
-            arrangement.WorkerService.WorkerCompletedBuild += delegate (TcpClient workerClient, BuildResultDto message) {
-                arrangement.Worker?.Stop();
-                arrangement.WorkerService?.StopListening();
-
-                actualResult = message;
+            arrangement.WorkerService.WorkerExecutionStateChanged += delegate (TcpClient workerClient, ExecutionStateDto message) {
+                actualStates.Enqueue(message);
+                if (actualStates.Count >= 2) //if crashed, this will be in the second state
+                {
+                    arrangement.Worker?.Stop();
+                    arrangement.WorkerService?.StopListening();
+                }
             };
 
             await arrangement.Worker.Start(arrangement.ServiceHostName, arrangement.ServicePort, arrangement.SessionId);
-
+            
             //assert 
-            Assert.False(actualResult.IsSuccess);
-
-            //CS0017 = Program has more than one entry point defined. Compile with /main to specify the type that contains the entry point.
-            Assert.Equal("CS0017", actualResult.BuildErrors.First().Id);
+            Assert.Empty(actualStates.Where(s => s.Exception != null));
+            Assert.Empty(actualStates.Where(s => s.State == RemoteAppState.Crashed));
         }
     }
 }
