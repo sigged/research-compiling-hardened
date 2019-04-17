@@ -3,17 +3,17 @@ mono: none
 sudo: required
 dist: xenial
 dotnet: 2.2
-    - dotnet restore Compile.and.Execute/src/Sigged.Compiling.Core
-    - dotnet restore Compile.and.Execute/src/Sigged.CodeHost.Worker
-    - dotnet restore Compile.and.Execute/src/Sigged.Compiling.Core.Tests
-    - dotnet restore Compile.and.Execute/src/Sigged.CodeHost.Worker.Tests
+    - dotnet restore Compile.and.Execute/src/Sigged.Compiling.Core.csproj
+    - dotnet restore Compile.and.Execute/src/Sigged.CodeHost.Worker.csproj
+    - dotnet restore Compile.and.Execute/src/Sigged.Compiling.Core.Tests.csproj
+    - dotnet restore Compile.and.Execute/src/Sigged.CodeHost.Worker.Tests.csproj
 script:
-    - dotnet build Compile.and.Execute/src/Sigged.Compiling.Core -c Release
-    - dotnet build Compile.and.Execute/src/Sigged.CodeHost.Worker -c Release
-    - dotnet build Compile.and.Execute/src/Sigged.Compiling.Core.Tests -c Release
-    - dotnet test Compile.and.Execute/src/Sigged.Compiling.Core.Tests
-    - dotnet build Compile.and.Execute/src/Sigged.CodeHost.Worker.Tests -c Release
-    - dotnet test Compile.and.Execute/src/Sigged.CodeHost.Worker.Tests
+    - dotnet build Compile.and.Execute/src/Sigged.Compiling.Core.csproj -c Release
+    - dotnet build Compile.and.Execute/src/Sigged.CodeHost.Worker.csproj -c Release
+    - dotnet build Compile.and.Execute/src/Sigged.Compiling.Core.Tests.csproj -c Release
+    - dotnet test Compile.and.Execute/src/Sigged.Compiling.Core.Tests.csproj
+    - dotnet build Compile.and.Execute/src/Sigged.CodeHost.Worker.Tests.csproj -c Release
+    - dotnet test Compile.and.Execute/src/Sigged.CodeHost.Worker.Tests.csproj
 global:
     - DOTNET_SKIP_FIRST_TIME_EXPERIENCE=true
     - DOTNET_CLI_TELEMETRY_OPTOUT=1
