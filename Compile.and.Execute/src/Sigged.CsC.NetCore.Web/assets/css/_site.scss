@@ -91,17 +91,23 @@ body {
 
 ul.dev-sites {
     list-style: none;
-    padding: 0;
+    padding: 10px 0 0 0;
 
     li {
         margin: 0;
         padding: 5px 0;
 
         img {
-            height: 30px;
-            width: 30px;
+            height: 40px;
+            width: 40px;
             display: inline-block;
             margin-right: 10px;
+            vertical-align: text-bottom
+        }
+
+        p {
+            display: inline-block;
+            margin: 0;
         }
     }
 }
