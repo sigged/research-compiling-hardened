@@ -1,6 +1,7 @@
 ﻿using ProtoBuf;
 using Sigged.CodeHost.Core.Dto;
 using Sigged.CodeHost.Core.Serialization;
+using Sigged.CodeHost.Core.Worker;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

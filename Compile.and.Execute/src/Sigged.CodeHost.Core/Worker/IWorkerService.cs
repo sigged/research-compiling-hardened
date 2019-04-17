@@ -1,11 +1,7 @@
 ﻿using Sigged.CodeHost.Core.Dto;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Sockets;
-using System.Threading.Tasks;
 
-namespace Sigged.CsC.NetCore.Web.Services
+namespace Sigged.CodeHost.Core.Worker
 {
     public interface IWorkerService
     {
