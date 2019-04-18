@@ -96,11 +96,13 @@ namespace Sigged.CodeHost.Worker.Tests
             };
 
             arrangement.WorkerService.WorkerExecutionStateChanged += delegate (TcpClient workerClient, ExecutionStateDto message) {
-                arrangement.Worker?.Stop();
-                arrangement.WorkerService?.StopListening();
                 var outputtest = message.Output?.Replace("\r", "[CR]")?.Replace("\n", "LF");
-                Console.WriteLine($"\t TEST GOT MESSAGE: {message.State} -- { outputtest }");
                 actualStates.Enqueue(message);
+                if(actualStates.Count >= 4)
+                {
+                    arrangement.Worker?.Stop();
+                    arrangement.WorkerService?.StopListening();
+                }
             };
 
             await arrangement.Worker.Start(arrangement.ServiceHostName, arrangement.ServicePort, arrangement.SessionId);
@@ -119,7 +121,7 @@ namespace Sigged.CodeHost.Worker.Tests
 
             nextState = actualStates.Dequeue();
             Assert.Equal(RemoteAppState.WriteOutput, nextState.State);
-            Assert.Equal("\r\n", nextState.Output);
+            Assert.Contains("\n", nextState.Output);
 
             nextState = actualStates.Dequeue();
             Assert.Equal(RemoteAppState.Ended, nextState.State);
