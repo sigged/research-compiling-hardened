@@ -23,12 +23,17 @@ script:
     - |
       dotnet test --no-build Sigged.Compiling.Core.Tests/Sigged.Compiling.Core.Tests.csproj -c Release --verbosity normal
       dotnet test --no-build Sigged.CodeHost.Worker.Tests/Sigged.CodeHost.Worker.Tests.csproj -c Release --verbosity normal
-#after_success:
+
+    - echo Building Docker image
+    - docker build -f Dockerfile -t "${DOCKERHUB_CONTAINERNAME}" .
+
+after_success:
     # push to docker hub
     - |
-      echo Building Docker image
-      docker build -f Dockerfile -t "${DOCKERHUB_CONTAINERNAME}" .
-    - |
-      echo Pushing to Docker Hub
-      docker login -u "${DOCKERHUB_USER}" -p "${DOCKERHUB_PASS}"
-      docker push "${DOCKERHUB_CONTAINERNAME}"
+      if [[ $TRAVIS_BRANCH == "master" && $TRAVIS_PULL_REQUEST == "false" ]]; then
+        echo Pushing to Docker Hub
+        docker login -u "${DOCKERHUB_USER}" -p "${DOCKERHUB_PASS}"
+        docker push "${DOCKERHUB_CONTAINERNAME}"
+      else
+        echo "Skipping docker push. This build was not a push to master, or is a pull request"
+      fi
