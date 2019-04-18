@@ -110,8 +110,6 @@ namespace Sigged.CodeHost.Worker.Tests
             //assert 
             ExecutionStateDto nextState;
 
-            Console.WriteLine($"Begin Assert of {actualStates.Count} states");
-
             nextState = actualStates.Dequeue();
             Assert.Equal(RemoteAppState.Running, nextState.State);
 

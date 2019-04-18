@@ -7279,7 +7279,7 @@ height: 60px;
     .repl-main-ide-errors table tr {
       border-bottom: 1px solid #efefef; }
       .repl-main-ide-errors table tr th {
-        font-size: medium;
+        font-size: 0.9rem;
         font-weight: normal;
         background-color: #efefef;
         border-right: 1px solid #ccc;
