@@ -1,4 +1,5 @@
 @ECHO OFF
+REM Build and runs docker image (not for CI/CD usage)
 ECHO Building Dockerimage
 docker build -f Dockerfile -t sigged/insecure-csc .
 
