@@ -36,10 +36,9 @@ after_success:
       echo Pushing to Docker Hub
       docker login -u "${DOCKERHUB_USER}" -p "${DOCKERHUB_PASS}"
       docker push "${DOCKERHUB_CONTAINERNAME}"
+
 deploy:
-    # deploy to heroku
-    - |
-      echo Deploying application
-      docker login --username=_ --password=${HEROKU_AUTHKEY} registry.heroku.com
-      docker build -t registry.heroku.com/${HEROKU_APPNAME}/web .
-      docker push registry.heroku.com/${HEROKU_APPNAME}/web
+  provider: script
+  script: bash $TRAVIS_BUILD_DIR/deploy.sh
+  on:
+    branch: master
