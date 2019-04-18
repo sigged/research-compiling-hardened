@@ -29,8 +29,10 @@ script:
       dotnet test --no-build Sigged.CodeHost.Worker.Tests/Sigged.CodeHost.Worker.Tests.csproj -c Release --verbosity normal
 after_success:
     # push to docker
-    - echo Building and Pushing to Docker Hub
     - |
-      docker login -u "${DOCKERHUB_USER}" -p "${DOCKERHUB_PASS}"
+      echo Building Docker image
       docker build -f Dockerfile -t "${DOCKERHUB_CONTAINERNAME}" .
+    - |
+      echo Pushing to Docker Hub
+      docker login -u "${DOCKERHUB_USER}" -p "${DOCKERHUB_PASS}"
       docker push "${DOCKERHUB_CONTAINERNAME}"

@@ -1,8 +1,7 @@
 ﻿using ProtoBuf;
 using Sigged.CodeHost.Core.Dto;
-using System;
+using Sigged.CodeHost.Core.Logging;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Net.Sockets;
 using System.Threading;

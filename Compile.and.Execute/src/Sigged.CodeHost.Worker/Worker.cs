@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis.Emit;
 using ProtoBuf;
 using Sigged.CodeHost.Core.Dto;
 using Sigged.CodeHost.Core.Worker;
+using Sigged.CodeHost.Core.Logging;
 using Sigged.Compiling.Core;
 using System;
 using System.IO;
