@@ -30,7 +30,7 @@ script:
 after_success:
     # push to docker hub
     - |
-      if [ $TRAVIS_BRANCH == "master" && $TRAVIS_PULL_REQUEST == "false" ]; then
+      if [[ $TRAVIS_BRANCH == "master" && $TRAVIS_PULL_REQUEST == "false" ]]; then
         echo Pushing to Docker Hub
         docker login -u "${DOCKERHUB_USER}" -p "${DOCKERHUB_PASS}"
         docker push "${DOCKERHUB_CONTAINERNAME}"
