@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Emit;
+using Newtonsoft.Json;
 using Sigged.Compiling.Core;
 using Sigged.CsC.CodeSamples.Parser;
 using Sigged.CsC.NetCore.Web.Models;
@@ -26,9 +27,26 @@ namespace Sigged.CsC.NetCore.Web.Controllers
 
         public IActionResult Index()
         {
-            var samples = SampleParser.GetSamples().ToList();
-
             return View();
+        }
+
+        public IActionResult GetCodeSamples()
+        {
+            var items = SampleParser.GetSamples().ToList();
+
+            var categories = items.Select(cs => cs.Category).Distinct().ToList();
+            var grouped = new List<CodeSampleCategory>();
+
+            foreach(var cat in categories)
+            {
+                grouped.Add(new CodeSampleCategory
+                {
+                    Category = cat,
+                    Samples = items.Where(cs => cs.Category == cat)
+                });
+            }
+            
+            return Json(grouped);
         }
 
         public IActionResult CodeView()

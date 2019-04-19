@@ -35,6 +35,8 @@ let replService = (function () {
         .configureLogging(signalR.LogLevel.Information)
         .build();
     
+    let codeSamples = {};
+
     //for debugging
     hubconnection.serverTimeoutInMilliseconds = 1000 * 60 * 10; // 10 min timeout!!
 
@@ -47,6 +49,15 @@ let replService = (function () {
             setTimeout(() => connectToHub(), 5000);
         }
     };
+
+    async function pullCodeSamples(){
+        $.ajax({
+            url: "/Home/GetCodeSamples",
+            success: results => {
+                replApp.codeSampleGroups = results
+            }
+        });
+    }
 
     hubconnection.onclose(async () => {
         await connectToHub();
@@ -94,6 +105,8 @@ let replService = (function () {
             this.$nextTick(async function () {
                 await connectToHub();
 
+                await pullCodeSamples();
+
                 var console = document.getElementById("console");
                 consoleDomMutationObserver.observe(
                     console, 
@@ -103,6 +116,8 @@ let replService = (function () {
         data: {
             isBuilding: false,
             isRunning: false,
+            codeSampleGroups: [],
+            selectedCodeSample: null,
             consoleText: 
 '============================================\n'+
 '        .NET Standard C# Compiler           \n'+
@@ -138,6 +153,10 @@ let replService = (function () {
             },
             stopAll: function () {
                 this.$requestStop();
+            },
+            codeSampleSelected: function(event){
+                console.log("Selected", event);
+                console.log("Selected", this.selectedCodeSample);
             },
             $buildSuccess: function () {
                 this.isBuilding = false;
