@@ -117,17 +117,20 @@ let replService = (function () {
 '                                            \n',
             statusCode: STATUSCODE.DEFAULT,
             statusText: "Ready for action...",
-            builderrors: []
+            builderrors: [],
+            textMarkers: [],
         },
         // define methods under the `methods` object
         methods: {
             buildSource: async function () {
+                this.$clearTextMarkers();
                 this.isBuilding = true;
                 this.statusText = "Building...";
                 this.statusCode = STATUSCODE.BUSY;
                 await this.$requestBuild(cEditor.getTextArea().value);
             },
             buildAndRunSource: async function () {
+                this.$clearTextMarkers();
                 this.isBuilding = true;
                 this.statusText = "Building...";
                 this.statusCode = STATUSCODE.BUSY;
@@ -153,14 +156,16 @@ let replService = (function () {
                 //mark errors
                 if (this.builderrors.length > 0) {
                     for (let i = 0; i < this.builderrors.length; i++) {
-                        if (this.builderrors[i].severity === "error" || this.builderrors[i].severity === "warning")
-                            cEditor.markText(
+                        if (this.builderrors[i].severity === "error" || this.builderrors[i].severity === "warning"){
+                            var marker = cEditor.markText(
                                 { line: this.builderrors[i].startPosition.line, ch: this.builderrors[i].startPosition.character },
                                 { line: this.builderrors[i].endPosition.line, ch: this.builderrors[i].endPosition.character },
                                 {
                                     className: "CodeMirror-lint-mark-" + this.builderrors[i].severity,
                                     title: this.builderrors[i].description
                                 });
+                            this.textMarkers.push(marker);
+                        }
                     }
                 }
                 replApp.$resetConsole();
@@ -240,6 +245,12 @@ let replService = (function () {
                 var inputDiv = cons.querySelector('.consoleInputBox');
                 if(inputDiv)
                     inputDiv.focus();
+            },
+            $clearTextMarkers: function(){
+                this.$nextTick(function () {
+                    replApp.textMarkers.forEach((m) => m.clear());
+                    replApp.textMarkers = [];
+                });
             },
             $scrollDownConsole: function(){
                 this.$nextTick(function () {
