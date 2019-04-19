@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Emit;
 using Sigged.Compiling.Core;
+using Sigged.CsC.CodeSamples.Parser;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -32,6 +33,8 @@ namespace Sigged.CsC.NetFx.Wpf
         {
             string netstandardRefsDirectory = Path.Combine(new DirectoryInfo(Environment.CurrentDirectory).Parent.Parent.Parent.Parent.FullName, "libs", "netstandard2.0");
             compiler = new Compiler(netstandardRefsDirectory);
+
+            var samples = SampleParser.GetSamples().ToList();
 
             runThread = null;
 

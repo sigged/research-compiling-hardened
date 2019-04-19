@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Emit;
 using Sigged.Compiling.Core;
+using Sigged.CsC.CodeSamples.Parser;
 using Sigged.CsC.NetCore.Web.Models;
 using Sigged.CsC.NetCore.Web.Services;
 
@@ -25,6 +26,8 @@ namespace Sigged.CsC.NetCore.Web.Controllers
 
         public IActionResult Index()
         {
+            var samples = SampleParser.GetSamples().ToList();
+
             return View();
         }
 

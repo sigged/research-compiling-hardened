@@ -7,8 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sigged.Compiling.Core", "Si
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sigged.Compiling.Core.Tests", "Sigged.Compiling.Core.Tests\Sigged.Compiling.Core.Tests.csproj", "{8AD2153A-7AB5-4E77-B661-00EF4E87648D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sigged.CodeHost.Core", "Sigged.CodeHost.Core\Sigged.CodeHost.Core.csproj", "{582814FB-E8DF-4709-AB38-54C1DA60E2DE}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sigged.CodeHost.Worker", "Sigged.CodeHost.Worker\Sigged.CodeHost.Worker.csproj", "{1608B778-D2D3-4B8D-AAFF-5223E1842BF7}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sigged.CsC.NetCore.Web", "Sigged.CsC.NetCore.Web\Sigged.CsC.NetCore.Web.csproj", "{137E6386-7D5F-4A9F-9236-912CB707FDE9}"
@@ -17,7 +15,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sigged.CsC.NetFx.Wpf", "Sig
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sigged.CodeHost.Worker.Tests", "Sigged.CodeHost.Worker.Tests\Sigged.CodeHost.Worker.Tests.csproj", "{F983BDF1-D51B-447F-99F5-E7B07DC71682}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Sigged.CsC.CodeSamples", "Sigged.CsC.CodeSamples\Sigged.CsC.CodeSamples.shproj", "{B0E9DE2F-02C7-4ED7-9D0D-9A45156B7706}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sigged.CodeHost.Core", "Sigged.CodeHost.Core\Sigged.CodeHost.Core.csproj", "{0EA592F0-57D4-457F-8D7E-FBD92F8873AF}"
+EndProject
 Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		Sigged.CsC.CodeSamples\Sigged.CsC.CodeSamples.projitems*{7d53c020-9ddd-48ed-a51f-1d78b2f1389e}*SharedItemsImports = 4
+		Sigged.CsC.CodeSamples\Sigged.CsC.CodeSamples.projitems*{b0e9de2f-02c7-4ed7-9d0d-9a45156b7706}*SharedItemsImports = 13
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -31,10 +37,6 @@ Global
 		{8AD2153A-7AB5-4E77-B661-00EF4E87648D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8AD2153A-7AB5-4E77-B661-00EF4E87648D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8AD2153A-7AB5-4E77-B661-00EF4E87648D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{582814FB-E8DF-4709-AB38-54C1DA60E2DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{582814FB-E8DF-4709-AB38-54C1DA60E2DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{582814FB-E8DF-4709-AB38-54C1DA60E2DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{582814FB-E8DF-4709-AB38-54C1DA60E2DE}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1608B778-D2D3-4B8D-AAFF-5223E1842BF7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{1608B778-D2D3-4B8D-AAFF-5223E1842BF7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1608B778-D2D3-4B8D-AAFF-5223E1842BF7}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -51,6 +53,10 @@ Global
 		{F983BDF1-D51B-447F-99F5-E7B07DC71682}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F983BDF1-D51B-447F-99F5-E7B07DC71682}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F983BDF1-D51B-447F-99F5-E7B07DC71682}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0EA592F0-57D4-457F-8D7E-FBD92F8873AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0EA592F0-57D4-457F-8D7E-FBD92F8873AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0EA592F0-57D4-457F-8D7E-FBD92F8873AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0EA592F0-57D4-457F-8D7E-FBD92F8873AF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
