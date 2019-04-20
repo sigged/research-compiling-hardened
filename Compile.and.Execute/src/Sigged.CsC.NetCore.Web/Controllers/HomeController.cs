@@ -30,9 +30,9 @@ namespace Sigged.CsC.NetCore.Web.Controllers
             return View();
         }
 
-        public IActionResult GetCodeSamples()
+        public async Task<IActionResult> GetCodeSamples()
         {
-            var items = SampleParser.GetSamples().ToList();
+            var items = await SampleParser.GetSamples(onlyMetaData: true);
 
             var categories = items.Select(cs => cs.Category).Distinct().ToList();
             var grouped = new List<CodeSampleCategory>();
@@ -49,15 +49,14 @@ namespace Sigged.CsC.NetCore.Web.Controllers
             return Json(grouped);
         }
 
+        public async Task<IActionResult> GetCodeSample(string id)
+        {
+            var cs = (await SampleParser.GetSamples()).FirstOrDefault(s => s.Id == id);
+            return Json(cs);
+        }
+
         public IActionResult CodeView()
         {
-            //List<string> themes = new List<string>();
-            //var dir = new DirectoryInfo(Path.Combine(env.WebRootPath, "js", "codemirror", "theme"));
-            //foreach (var file in dir.GetFiles("*.css"))
-            //{
-            //    themes.Add(Path.GetFileNameWithoutExtension(file.FullName));
-            //}
-            //ViewBag.Themes = themes;
             return View();
         }
 

@@ -13,9 +13,9 @@
             <button class="btn btn-info" v-on:click="buildSource" v-bind:disabled="isRunning || isBuilding"><img src="~/images/build.png" />Build</button>
             <button class="btn btn-success" v-on:click="buildAndRunSource" v-bind:disabled="isRunning || isBuilding"><img src="~/images/play.png" />Run</button>
             <button class="btn btn-danger" v-on:click="stopAll" v-bind:disabled="!(isRunning || isBuilding)"><img src="~/images/stop.png" />Stop</button>
-            <select v-model="selectedCodeSample" class="custom-select codesample-picker" @@change="codeSampleSelected($event)">
+            <select v-model="selectedCodeSampleId" class="custom-select codesample-picker" @@change="codeSampleSelected($event)">
                 <optgroup v-for="sampleCategory in codeSampleGroups" :label="sampleCategory.category">
-                    <option v-for="sample in sampleCategory.samples" v-bind:value="sample.name">
+                    <option v-for="sample in sampleCategory.samples" v-bind:value="sample.id">
                         {{ sample.name }}
                     </option>
                 </optgroup>

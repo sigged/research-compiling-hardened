@@ -59,6 +59,20 @@ let replService = (function () {
         });
     }
 
+    async function getCodeSample(){
+        if(replApp.selectedCodeSampleId)
+        {
+            $.ajax({
+                url: "/Home/GetCodeSample/" + replApp.selectedCodeSampleId,
+                success: result => {
+                    cEditor.getDoc().setValue(result.contents);
+                }
+            });
+        }else{
+            replApp.selectedCodeSample = null;
+        }
+    }
+
     hubconnection.onclose(async () => {
         await connectToHub();
     });
@@ -73,7 +87,7 @@ let replService = (function () {
     });
 
     hubconnection.on('ApplicationStateChanged', function(appStatus){
-        console.log("App State Changed", appStatus);
+        //console.log("App State Changed", appStatus);
         switch(appStatus.state){
             case APPSTATE.RUNNING:
                 replApp.$appRunning();
@@ -117,7 +131,7 @@ let replService = (function () {
             isBuilding: false,
             isRunning: false,
             codeSampleGroups: [],
-            selectedCodeSample: null,
+            selectedCodeSampleId: null,
             consoleText: 
 '============================================\n'+
 '        .NET Standard C# Compiler           \n'+
@@ -154,9 +168,9 @@ let replService = (function () {
             stopAll: function () {
                 this.$requestStop();
             },
-            codeSampleSelected: function(event){
-                console.log("Selected", event);
-                console.log("Selected", this.selectedCodeSample);
+            codeSampleSelected: function(event)
+            {
+                getCodeSample(this.selectedCodeSampleId)
             },
             $buildSuccess: function () {
                 this.isBuilding = false;
@@ -190,18 +204,23 @@ let replService = (function () {
                 replApp.$resetConsole();
             },
             $appRunning: function () {
-                this.isBuilding = false;
-                this.isRunning = true;
-                this.statusCode = STATUSCODE.BUSY;
-                this.statusText = "Application is running...";
+                this.$nextTick(function () {
+                    replApp.consoleText = '';
+                    replApp.isBuilding = false;
+                    replApp.isRunning = true;
+                    replApp.statusCode = STATUSCODE.BUSY;
+                    replApp.statusText = "Application is running...";
+                });
             },
             $appWritesOutput: function (appState) {
-                this.isBuilding = false;
-                this.isRunning = true;
-                this.statusCode = STATUSCODE.BUSY;
-                this.statusText = "Application is running...";
-                this.consoleText += appState.output;
-                this.$scrollDownConsole();
+                setTimeout((appState) => {
+                    replApp.isBuilding = false;
+                    replApp.isRunning = true;
+                    replApp.statusCode = STATUSCODE.BUSY;
+                    replApp.statusText = "Application is running...";
+                    replApp.consoleText += appState.output;
+                    replApp.$scrollDownConsole();
+                }, 0, appState);
             },
             $appRequestsInput: function (appState, requestLine) {
                 this.isRunning = true;
@@ -212,11 +231,13 @@ let replService = (function () {
                 this.$scrollDownConsole();
             },
             $appStopped: function () {
-                this.isBuilding = false;
-                this.isRunning = false;
-                this.statusCode = STATUSCODE.DEFAULT;
-                this.statusText = "Application ended";
-                replApp.$resetConsole();
+                setTimeout(() => {
+                    this.isBuilding = false;
+                    this.isRunning = false;
+                    this.statusCode = STATUSCODE.DEFAULT;
+                    this.statusText = "Application ended";
+                    replApp.$resetConsole();
+                }, 0);
             },
             $appCrashed: function (exceptionInfo) {
                 this.isBuilding = false;

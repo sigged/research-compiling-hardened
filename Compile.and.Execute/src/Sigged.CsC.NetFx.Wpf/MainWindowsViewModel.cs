@@ -34,7 +34,7 @@ namespace Sigged.CsC.NetFx.Wpf
             string netstandardRefsDirectory = Path.Combine(new DirectoryInfo(Environment.CurrentDirectory).Parent.Parent.Parent.Parent.FullName, "libs", "netstandard2.0");
             compiler = new Compiler(netstandardRefsDirectory);
 
-            var samples = SampleParser.GetSamples().ToList();
+            var samples = SampleParser.GetSamples().Result.ToList();
 
             runThread = null;
 
