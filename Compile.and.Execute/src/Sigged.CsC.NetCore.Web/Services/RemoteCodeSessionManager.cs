@@ -49,6 +49,7 @@ namespace Sigged.CsC.NetCore.Web.Services
 
         public void CleanupIdleSessions()
         {
+            
             var removeSessions = Sessions.Where(s => s.LastActivity.AddSeconds(SessionConstants.SessionIdleTimeout) <= DateTimeOffset.Now).ToList();
             Console.WriteLine($"CleanUpIdleSessions() - found {removeSessions.Count}/{Sessions.Count()} expired sessions");
             foreach (var session in removeSessions)
