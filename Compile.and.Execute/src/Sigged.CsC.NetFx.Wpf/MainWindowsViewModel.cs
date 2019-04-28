@@ -11,6 +11,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Data;
 using System.Windows.Input;
 
 namespace Sigged.CsC.NetFx.Wpf
@@ -25,16 +26,12 @@ namespace Sigged.CsC.NetFx.Wpf
         }
 
         private Compiler compiler;
-
         private Thread runThread;
-
 
         public MainWindowsViewModel()
         {
             string netstandardRefsDirectory = Path.Combine(new DirectoryInfo(Environment.CurrentDirectory).Parent.Parent.Parent.Parent.FullName, "libs", "netstandard2.0");
             compiler = new Compiler(netstandardRefsDirectory);
-
-            var samples = SampleParser.GetSamples().Result.ToList();
 
             runThread = null;
 
@@ -154,6 +151,36 @@ Ready.
             }
         }
 
+        private CodeSample selectedCodeSample;
+        public CodeSample SelectedCodeSample
+        {
+            get { return selectedCodeSample; }
+            set
+            {
+                selectedCodeSample = value;
+                RaisePropertyChanged();
+                SourceCode = selectedCodeSample.Contents;
+            }
+        }
+
+        private ObservableCollection<CodeSample> codeSamples;
+        public ObservableCollection<CodeSample> CodeSamples
+        {
+            get { return codeSamples; }
+            set
+            {
+                codeSamples = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        public ICommand LoadSamples => new RelayCommand(
+            async () => {
+                CodeSamples = new ObservableCollection<CodeSample>(
+                    await SampleParser.GetSamples());
+            }
+        );
+
         public ICommand Build => new RelayCommand(
             async () => {
                 using (var stream = new MemoryStream())
@@ -189,21 +216,34 @@ Ready.
                         Status = "Building...";
                         IsBuilding = true;
 
-                        var result = await compiler.Compile(sourceCode, "REPLAssembly", stream);
-                        var assemly = Assembly.Load(stream.ToArray());
-                        var type = assemly.GetType("Test.Program");
-                        //var test = type.FindMembers(MemberTypes.Method, BindingFlags.Static | BindingFlags.Public, null, null);
+                        var result = await compiler.Compile(sourceCode, "REPLAssembly", stream, outputKind: OutputKind.ConsoleApplication);
+                        var assembly = Assembly.Load(stream.ToArray());
+
                         try
                         {
                             IsBuilding = false;
                             Status = "Running";
 
-                            type.InvokeMember("Main",
-                                                BindingFlags.InvokeMethod | BindingFlags.Static | BindingFlags.Public,
-                                                null, null,
-                                                new object[] { new string[] { } });
-
-                            Status = "Application stopped";
+                            try
+                            {
+                                //invoke main method
+                                var mainParms = assembly.EntryPoint.GetParameters();
+                                if (mainParms.Count() == 0)
+                                {
+                                    assembly.EntryPoint.Invoke(null, null);
+                                }
+                                else
+                                {
+                                    if (mainParms[0].ParameterType == typeof(string[]))
+                                        assembly.EntryPoint.Invoke(null, new string[] { null });
+                                    else
+                                        assembly.EntryPoint.Invoke(null, null);
+                                }
+                            }
+                            finally
+                            {
+                                Status = "Application stopped";
+                            }
                         }
                         catch (Exception ex)
                         {

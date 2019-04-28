@@ -138,5 +138,10 @@ namespace Sigged.CsC.NetFx.Wpf
         {
 
         }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            (DataContext as MainWindowsViewModel)?.LoadSamples?.Execute(null);
+        }
     }
 }
