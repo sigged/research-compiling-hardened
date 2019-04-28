@@ -22,6 +22,7 @@ namespace Threats.Processes.CreateProc
                 process.StartInfo.Arguments = @"-c ""ls""";
             }
 
+            process.StartInfo.UseShellExecute = false;
             process.StartInfo.RedirectStandardOutput = true;
             process.StartInfo.RedirectStandardInput = true;
             process.StartInfo.RedirectStandardError = true;
@@ -29,10 +30,7 @@ namespace Threats.Processes.CreateProc
             process.Start();
             process.BeginOutputReadLine();
 
-            while (true)
-            {
-
-            }
+            System.Threading.Thread.Sleep(1000);
         }
 
         private static void Process_OutputDataReceived(object sender, DataReceivedEventArgs e)

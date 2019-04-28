@@ -10,7 +10,8 @@ namespace Threats.Filesystem.CreateFile
 
         static Program()
         {
-            execPath = Path.GetDirectoryName(new Uri(typeof(Program).Assembly.GetName().CodeBase).LocalPath);
+            execPath = Environment.CurrentDirectory;
+            //execPath = Path.GetDirectoryName(new Uri(typeof(Program).Assembly.GetName().CodeBase).LocalPath);
             rootPath = Path.GetPathRoot(execPath);
         }
 
@@ -30,7 +31,6 @@ namespace Threats.Filesystem.CreateFile
             Console.WriteLine($"Deleting {filePath}");
             Console.WriteLine("-------------------------------");
             File.Delete(filePath);
-            Console.Clear();
         }
 
         static void AppendText(string filePath, string contents)

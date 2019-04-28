@@ -9,8 +9,8 @@ namespace Threats.Filesystem.Enumeration
         {
             Console.WriteLine("Files in current directory...");
             Console.WriteLine("-----------------------------");
-            //var path = Environment.CurrentDirectory;
-            var path = Path.GetDirectoryName(new Uri(typeof(Program).Assembly.GetName().CodeBase).LocalPath);
+            var path = Environment.CurrentDirectory;
+            //var path = Path.GetDirectoryName(new Uri(typeof(Program).Assembly.GetName().CodeBase).AbsolutePath);
             ListFilesAndFolders(path);
             Console.Write("");
             Console.WriteLine("Files in root directory...");
