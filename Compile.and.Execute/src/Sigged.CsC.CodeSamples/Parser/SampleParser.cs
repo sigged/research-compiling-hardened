@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
@@ -47,7 +48,9 @@ namespace Sigged.CsC.CodeSamples.Parser
                 {
                     Debug.WriteLine($"Sample Error: Sample directory {sampleDir.FullName} not found.");
                 }
-                return samples;
+                return samples
+                    .OrderBy(s =>s.Category)
+                    .ThenBy(s => s.Name);
             });
         }
     }
