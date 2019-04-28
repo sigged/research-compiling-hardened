@@ -121,9 +121,8 @@ let replService = (function () {
 
                 await pullCodeSamples();
 
-                var console = document.getElementById("console");
                 consoleDomMutationObserver.observe(
-                    console, 
+                    replApp.$refs.console, 
                     { attributes: true, childList: true, characterData: true });
             });
         },
@@ -204,13 +203,11 @@ let replService = (function () {
                 replApp.$resetConsole();
             },
             $appRunning: function () {
-                this.$nextTick(function () {
-                    replApp.consoleText = '';
-                    replApp.isBuilding = false;
-                    replApp.isRunning = true;
-                    replApp.statusCode = STATUSCODE.BUSY;
-                    replApp.statusText = "Application is running...";
-                });
+                replApp.consoleText = '';
+                replApp.isBuilding = false;
+                replApp.isRunning = true;
+                replApp.statusCode = STATUSCODE.BUSY;
+                replApp.statusText = "Application is running...";
             },
             $appWritesOutput: function (appState) {
                 setTimeout((appState) => {
@@ -223,12 +220,13 @@ let replService = (function () {
                 }, 0, appState);
             },
             $appRequestsInput: function (appState, requestLine) {
-                this.isRunning = true;
-                this.statusCode = STATUSCODE.BUSY;
-                this.statusText = "App is waiting for input...";
-                this.consoleText += '<span class="consoleInputBox"></span>'
-                this.$handleConsoleInput(requestLine);
-                this.$scrollDownConsole();
+                setTimeout(() => {
+                    this.isRunning = true;
+                    this.statusCode = STATUSCODE.BUSY;
+                    this.statusText = "App is waiting for input...";
+                    this.$handleConsoleInput(requestLine);
+                    this.$scrollDownConsole();
+                }, 0);
             },
             $appStopped: function () {
                 setTimeout(() => {
@@ -281,10 +279,10 @@ let replService = (function () {
                 
             },
             consoleFocus: function(){
-                var cons = document.getElementById('console');
-                var inputDiv = cons.querySelector('.consoleInputBox');
-                if(inputDiv)
-                    inputDiv.focus();
+                var cons = replApp.$refs.console;
+                var inputBox = cons.querySelector('.consoleInputBox');
+                if(inputBox)
+                    inputBox.focus();
             },
             $clearTextMarkers: function(){
                 this.$nextTick(function () {
@@ -294,18 +292,26 @@ let replService = (function () {
             },
             $scrollDownConsole: function(){
                 this.$nextTick(function () {
-                    var cons = document.getElementById('console');
+                    var cons = replApp.$refs.console;
                     cons.scrollTop = cons.scrollHeight;
                 });
             },
+            $ensureInputBox(consoleElement){
+                consoleElement.querySelectorAll('.consoleInputBox')
+                    .forEach(e => e.parentNode.removeChild(e));
+                var inputBox = document.createElement("span");
+                inputBox.classList.add("consoleInputBox");
+                consoleElement.appendChild(inputBox);
+                inputBox.setAttribute('contenteditable', 'true');
+                return inputBox;
+            },
             $handleConsoleInput: function(requestLine){
                 this.$nextTick(function () {
-                    var cons = document.getElementById('console');
-                    var inputDiv = cons.querySelector('.consoleInputBox');
-                    inputDiv.setAttribute('contenteditable', 'true');
+                    var cons = replApp.$refs.console;
+                    var inputBox = replApp.$ensureInputBox(cons);
                     var input = null;
 
-                    inputDiv.addEventListener('keypress', function(kbdEvent){
+                    inputBox.addEventListener('keypress', function(kbdEvent){
                         if(requestLine){
                             if(kbdEvent.key == "Enter"){
                                 kbdEvent.preventDefault();
@@ -314,7 +320,7 @@ let replService = (function () {
                             }
                         }
                         else{
-                            inputDiv.removeAttribute('contenteditable');
+                            inputBox.removeAttribute('contenteditable');
                             input = kbdEvent.key;
                         }
                         console.log("Keypress in input", kbdEvent);
@@ -325,7 +331,7 @@ let replService = (function () {
                         if(input !== null){
                             var inputToSend = input;
                             input = null;
-                            inputDiv.remove();
+                            inputBox.remove();
                             replApp.consoleText = cons.innerHTML + inputToSend;
                             if(requestLine){
                                 replApp.consoleText += "\n";
@@ -341,16 +347,15 @@ let replService = (function () {
                 });
             },
             $resetConsole: function(){
-                this.$nextTick(function () {
-                    //remove any input boxes
-                    var cons = document.getElementById('console');
-                    cons.querySelectorAll('.consoleInputBox').forEach(function(el){
-                        el.remove();
-                        cons.innerText += '\n'; //todo: no new line if inputbox was not a ReadLine operation
-                    });
-                    replApp.consoleText = cons.innerText;
-                    replApp.$scrollDownConsole();
+                console.log("Reset Console");
+                //remove any input boxes
+                var cons = replApp.$refs.console;
+                cons.querySelectorAll('.consoleInputBox').forEach(function(el){
+                    el.remove();
+                    cons.innerText += '\n'; //todo: no new line if inputbox was not a ReadLine operation
                 });
+                replApp.consoleText = cons.innerText;
+                replApp.$scrollDownConsole();
             }
         }
     });
