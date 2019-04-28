@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Sigged.CodeHost.Core.Dto;
+using Sigged.CodeHost.Core.Logging;
 using Sigged.CodeHost.Core.Worker;
 using Sigged.CsC.NetCore.Web.Constants;
 using System;
@@ -51,12 +52,12 @@ namespace Sigged.CsC.NetCore.Web.Services
         {
             
             var removeSessions = Sessions.Where(s => s.LastActivity.AddSeconds(SessionConstants.SessionIdleTimeout) <= DateTimeOffset.Now).ToList();
-            Console.WriteLine($"CleanUpIdleSessions() - found {removeSessions.Count}/{Sessions.Count()} expired sessions");
+            Logger.LogLine($"CleanUpIdleSessions() - found {removeSessions.Count}/{Sessions.Count()} expired sessions");
             foreach (var session in removeSessions)
             {
                 lock (session)
                 {
-                    Console.WriteLine($"Cleaning up idle session {session.SessionId}, last heartbeat @{session.LastActivity} expired at {session.LastActivity.AddSeconds(SessionConstants.SessionIdleTimeout)}");
+                    Logger.LogLine($"Cleaning up idle session {session.SessionId}, last heartbeat @{session.LastActivity} expired at {session.LastActivity.AddSeconds(SessionConstants.SessionIdleTimeout)}");
                     ResetSessionWorker(session, WorkerResetReason.Expired);
                     sessions.Remove(session);
                 }
@@ -96,7 +97,7 @@ namespace Sigged.CsC.NetCore.Web.Services
                     try
                     {
                         string workerExePath = Path.Combine(env.ContentRootPath, "_workerProcess", "worker", "Sigged.CodeHost.Worker.dll");
-                        Console.WriteLine($"Starting process at {workerExePath}");
+                        Logger.LogLine($"Starting process at {workerExePath}");
                         session.WorkerProcess = new Process();
                         session.WorkerProcess.EnableRaisingEvents = true;
                         session.WorkerProcess.Exited += (object sender, EventArgs e) =>
@@ -115,12 +116,12 @@ namespace Sigged.CsC.NetCore.Web.Services
                     }
                     catch(IOException ioex)
                     {
-                        Console.WriteLine(ioex.Message);
+                        Logger.LogLine(ioex.Message);
                         throw;
                     }
                     catch(Exception ex)
                     {
-                        Console.WriteLine(ex.Message);
+                        Logger.LogLine(ex.Message);
                         throw;
                     }
                     
@@ -149,19 +150,19 @@ namespace Sigged.CsC.NetCore.Web.Services
             {
                 if(session.WorkerClient?.Connected == true)
                 {
-                    Console.WriteLine("Recycling worker process for new build request");
+                    Logger.LogLine("Recycling worker process for new build request");
                     listener.SendWorkerMessage(session.WorkerClient, MessageType.ServerBuildRequest, session.LastBuildRequest);
                     return;
                 }
                 else
                 {
                     //worker process has quit or disconnected. Reset references so it can be recreated.
-                    Console.WriteLine("Resetting stopped/disconnected worker process for new build request");
+                    Logger.LogLine("Resetting stopped/disconnected worker process for new build request");
                     ResetSessionWorker(session, WorkerResetReason.WorkerStopped);
                 }
             }
             //no worker process, create from scratch so it can connect
-            Console.WriteLine("Creating new worker process for new build request");
+            Logger.LogLine("Creating new worker process for new build request");
             await CreateWorkerProcess(session);
         }
 
@@ -181,15 +182,15 @@ namespace Sigged.CsC.NetCore.Web.Services
 
         protected void ResetSessionWorker(RemoteCodeSession session, WorkerResetReason reason)
         {
-            Console.WriteLine($"Worker Reset: {session.SessionId}");
+            Logger.LogLine($"Worker Reset: {session.SessionId}");
             session.WorkerClient?.Close();
-            Console.WriteLine($"Worker Reset: closed worker socket of {session.SessionId}");
+            Logger.LogLine($"Worker Reset: closed worker socket of {session.SessionId}");
             try
             {
                 if (session.WorkerProcess?.HasExited == false)
                 {
                     session.WorkerProcess?.Kill();
-                    Console.WriteLine($"Worker Reset: killed worker process of {session.SessionId}");
+                    Logger.LogLine($"Worker Reset: killed worker process of {session.SessionId}");
                     //notify client of worker destruction
                     if(reason == WorkerResetReason.Expired &&
                          //don't notify if worker is no longer executing user code
@@ -238,7 +239,7 @@ namespace Sigged.CsC.NetCore.Web.Services
             }
             catch(Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Logger.LogLine(ex.Message);
             }
             
         }

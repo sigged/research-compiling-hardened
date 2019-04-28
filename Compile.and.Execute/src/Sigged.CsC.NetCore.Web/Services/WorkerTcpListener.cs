@@ -1,5 +1,6 @@
 ﻿using ProtoBuf;
 using Sigged.CodeHost.Core.Dto;
+using Sigged.CodeHost.Core.Logging;
 using Sigged.CodeHost.Core.Serialization;
 using Sigged.CodeHost.Core.Worker;
 using System;
@@ -51,7 +52,7 @@ namespace Sigged.CsC.NetCore.Web.Services
         {
             if (!stopListening)
             {
-                Debug.WriteLine("Listener running already");
+                Logger.LogLine("Listener running already");
                 return false;
             }
             stopListening = false;
@@ -69,7 +70,7 @@ namespace Sigged.CsC.NetCore.Web.Services
                 return true;
             }
             catch (Exception ex) {
-                Debug.WriteLine(ex.Message);
+                Logger.LogLine(ex.Message);
             }
             return false;
         }
@@ -93,7 +94,7 @@ namespace Sigged.CsC.NetCore.Web.Services
             networkStream.WriteByte((byte)messageType);
             Serializer.SerializeWithLengthPrefix(networkStream, message, PrefixStyle.Fixed32);
 
-            Console.WriteLine($"SERVER: sent {messageType} to worker");
+            Logger.LogLine($"SERVER: sent {messageType} to worker");
         }
 
         protected virtual async void ListenLoop() {
@@ -101,9 +102,9 @@ namespace Sigged.CsC.NetCore.Web.Services
             {
                 while (!stopListening)
                 {
-                    Debug.WriteLine("LISTENER: Waiting for new connection...");
+                    Logger.LogLine("LISTENER: Waiting for new connection...");
                     var tcpClient = await listener.AcceptTcpClientAsync();
-                    Debug.WriteLine($"LISTENER: connection from {tcpClient.Client.RemoteEndPoint}");
+                    Logger.LogLine($"LISTENER: connection from {tcpClient.Client.RemoteEndPoint}");
 
                     Task.Run(() => {
                         HandleWorker(tcpClient);
@@ -113,7 +114,7 @@ namespace Sigged.CsC.NetCore.Web.Services
             }
             catch (Exception ex)
             {
-                Debug.WriteLine(ex.Message);
+                Logger.LogLine($"LISTENER: ERROR! {ex.Message}");
             }
             finally
             {
@@ -128,7 +129,7 @@ namespace Sigged.CsC.NetCore.Web.Services
             try
             {
                 networkStream = tcpClient.GetStream();
-                Debug.WriteLine("LISTENER: waiting for worker identification");
+                Logger.LogLine("LISTENER: waiting for worker identification");
 
                 int originalReadTimeout = networkStream.ReadTimeout;
                 networkStream.ReadTimeout = workerIdentificationTimeout;
@@ -144,7 +145,7 @@ namespace Sigged.CsC.NetCore.Web.Services
                         identification = Serializer.DeserializeWithLengthPrefix<IdentificationDto>(networkStream, PrefixStyle.Fixed32);
                         WorkerConnected?.Invoke(tcpClient, identification.SessionId);
 
-                        Debug.WriteLine($"LISTENER: {tcpClient.Client.RemoteEndPoint} identified as session {identification.SessionId}");
+                        Logger.LogLine($"LISTENER: {tcpClient.Client.RemoteEndPoint} identified as session {identification.SessionId}");
                     }
                     else
                     {
@@ -154,7 +155,7 @@ namespace Sigged.CsC.NetCore.Web.Services
                 catch(Exception ex)
                 {
                     //most likely the client didn't response properly
-                    Debug.WriteLine($"LISTENER: {tcpClient.Client.RemoteEndPoint} did not properly identify with a session: {ex.Message}");
+                    Logger.LogLine($"LISTENER: {tcpClient.Client.RemoteEndPoint} did not properly identify with a session: {ex.Message}");
                     identification = null;
                 }
                 finally
@@ -186,14 +187,14 @@ namespace Sigged.CsC.NetCore.Web.Services
                             {
                                 case MessageType.WorkerBuildResult:
                                     var result = Serializer.DeserializeWithLengthPrefix<BuildResultDto>(networkStream, PrefixStyle.Fixed32);
-                                    Console.WriteLine("SERVER: received build result");
+                                    Logger.LogLine("SERVER: received build result");
 
                                     WorkerCompletedBuild?.Invoke(tcpClient, result);
 
                                     break;
                                 case MessageType.WorkerExecutionState:
                                     var execState = Serializer.DeserializeWithLengthPrefix<ExecutionStateDto>(networkStream, PrefixStyle.Fixed32);
-                                    Console.WriteLine($"SERVER: received ExecutionStateDto: {execState?.State}");
+                                    Logger.LogLine($"SERVER: received ExecutionStateDto: {execState?.State}");
 
                                     if (execState != null)
                                     {
@@ -209,34 +210,34 @@ namespace Sigged.CsC.NetCore.Web.Services
                                             case RemoteAppState.NotRunning:
                                                 break;
                                             case RemoteAppState.Crashed:
-                                                Console.WriteLine($"SERVER: received remote crash info: {execState.Exception.Name}");
+                                                Logger.LogLine($"SERVER: received remote crash info: {execState.Exception.Name}");
                                                 break;
                                             case RemoteAppState.WriteOutput:
                                                 string printableOutput = execState.Output?
                                                     .Replace("\r", "\\r")?
                                                     .Replace("\n", "\\n"); //simply for visualizing special chars
-                                                Console.WriteLine($"SERVER: received remote output info: {printableOutput}");
+                                                Logger.LogLine($"SERVER: received remote output info: {printableOutput}");
                                                 break;
                                             case RemoteAppState.WaitForInput:
-                                                Console.WriteLine($"SERVER: received remote INPUT request: ");
+                                                Logger.LogLine($"SERVER: received remote INPUT request: ");
                                                 break;
                                             case RemoteAppState.WaitForInputLine:
-                                                Console.WriteLine($"SERVER: received remote INPUTLINE request: ");
+                                                Logger.LogLine($"SERVER: received remote INPUTLINE request: ");
                                                 break;
                                             default:
-                                                Console.WriteLine($"SERVER: received unsupported ExecutionState: {execState.State}");
+                                                Logger.LogLine($"SERVER: received unsupported ExecutionState: {execState.State}");
                                                 break;
                                         }
                                     }
                                     else
                                     {
                                         stopClient = true;
-                                        Console.WriteLine("SERVER: client send execstate NULL, STOPPING comms");
+                                        Logger.LogLine("SERVER: client send execstate NULL, STOPPING comms");
                                     }
 
                                     break;
                                 default:
-                                    Console.WriteLine($"SERVER: received client message header: {msgHeader}");
+                                    Logger.LogLine($"SERVER: received client message header: {msgHeader}");
                                     break;
                             }
                         }
@@ -245,12 +246,12 @@ namespace Sigged.CsC.NetCore.Web.Services
             }
             catch(Exception ex)
             {
-                Debug.WriteLine($"LISTENER: Exception: {ex.Message}");
+                Logger.LogLine($"LISTENER: Exception: {ex.Message}");
             }
             finally
             {
                 networkStream.Close();
-                Console.WriteLine("LISTENER: Ended client connection");
+                Logger.LogLine("LISTENER: Ended client connection");
             }
         }
 

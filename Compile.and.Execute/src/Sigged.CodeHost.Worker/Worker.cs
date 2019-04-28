@@ -85,10 +85,12 @@ namespace Sigged.CodeHost.Worker
                                         var buildrequest = Serializer.DeserializeWithLengthPrefix<BuildRequestDto>(networkStream, PrefixStyle.Fixed32);
                                         Logger.LogLine("CLIENT: received BuildRequestDto");
 
+                                        EmitResult results = null;
+                                        byte[] assemblyBytes = null;
+
                                         try
                                         {
-                                            EmitResult results = null;
-                                            byte[] assemblyBytes = null;
+                                            
                                             using (var assemblyStream = new MemoryStream())
                                             {
                                                 results = compiler.Compile(buildrequest.SourceCode, buildrequest.SessionId, assemblyStream,

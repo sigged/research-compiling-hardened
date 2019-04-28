@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.CodeAnalysis.Emit;
 using Sigged.CodeHost.Core.Dto;
+using Sigged.CodeHost.Core.Logging;
 using Sigged.CsC.NetCore.Web.Jobs;
 using Sigged.CsC.NetCore.Web.Models;
 using Sigged.CsC.NetCore.Web.Services;
@@ -77,7 +78,7 @@ namespace Sigged.CsC.NetCore.Web.Sockets
         /// <returns></returns>
         public async Task DispatchAppStateToClient(string targetConnectionId, ExecutionStateDto state)
         {
-            Console.WriteLine($"CodeHub: Sending Appstate to {targetConnectionId} -- {state.State}");
+            Logger.LogLine($"CodeHub: Sending Appstate to {targetConnectionId} -- {state.State}");
             await Clients.Client(targetConnectionId).SendAsync("ApplicationStateChanged", state);
         }
 
@@ -87,7 +88,7 @@ namespace Sigged.CsC.NetCore.Web.Sockets
         /// <returns></returns>
         public async Task DispatchBuildResultToClient(string targetConnectionId, BuildResultDto result)
         {
-            Console.WriteLine($"CodeHub: Sending BuildResult to {targetConnectionId} -- {result.IsSuccess}");
+            Logger.LogLine($"CodeHub: Sending BuildResult to {targetConnectionId} -- {result.IsSuccess}");
             await Clients.Client(targetConnectionId).SendAsync("BuildComplete", result);
         }
     }

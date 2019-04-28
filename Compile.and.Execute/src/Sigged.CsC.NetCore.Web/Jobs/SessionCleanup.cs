@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Quartz;
+using Sigged.CodeHost.Core.Logging;
 using Sigged.CsC.NetCore.Web.Services;
 using System;
 using System.Threading.Tasks;
@@ -15,7 +16,7 @@ namespace Sigged.CsC.NetCore.Web.Jobs
 
         public static void Enable()
         {
-            Console.WriteLine($"Jobs - SessionCleanup: signalled for execution");
+            Logger.LogLine($"Jobs - SessionCleanup: signalled for execution");
             canRun = true;
         }
 
@@ -30,7 +31,7 @@ namespace Sigged.CsC.NetCore.Web.Jobs
             if (canRun) //postponed until first browser->hub connection! (httpcontext issue)
             {
                 await Task.Delay(0);
-                Console.WriteLine("Jobs - SessionCleanup: Executing");
+                Logger.LogLine("Jobs - SessionCleanup: Executing");
                 RemoteCodeSessionManager rcsm = null;
                 try
                 {
@@ -39,12 +40,12 @@ namespace Sigged.CsC.NetCore.Web.Jobs
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Jobs - SessionCleanup: {ex.Message}");
+                    Logger.LogLine($"Jobs - SessionCleanup: {ex.Message}");
                 }
             }
             else
             {
-                Console.WriteLine("Jobs - SessionCleanup: Skipping until signal");
+                Logger.LogLine("Jobs - SessionCleanup: Skipping until signal");
             }
         }
 
