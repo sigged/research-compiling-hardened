@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.CodeAnalysis.Emit;
 using Sigged.CodeHost.Core.Dto;
+using Sigged.CsC.NetCore.Web.Jobs;
 using Sigged.CsC.NetCore.Web.Models;
 using Sigged.CsC.NetCore.Web.Services;
 using System;
@@ -18,6 +19,12 @@ namespace Sigged.CsC.NetCore.Web.Sockets
         public CodeHub(RemoteCodeSessionManager rcsm)
         {
             _rcsm = rcsm;
+        }
+
+        public override Task OnConnectedAsync()
+        {
+            SessionCleanup.Enable();
+            return base.OnConnectedAsync();
         }
 
         protected override void Dispose(bool disposing)

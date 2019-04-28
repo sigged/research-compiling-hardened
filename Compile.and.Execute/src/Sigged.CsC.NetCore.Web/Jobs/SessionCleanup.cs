@@ -10,36 +10,41 @@ namespace Sigged.CsC.NetCore.Web.Jobs
     {
         private readonly IConfiguration configuration;
         private readonly IServiceProvider serviceProvider;
-        private readonly string baseUri;
-        private bool canRun;
+
+        private static bool canRun = false;
+
+        public static void Enable()
+        {
+            Console.WriteLine($"Jobs - SessionCleanup: signalled for execution");
+            canRun = true;
+        }
 
         public SessionCleanup(IConfiguration configuration, IServiceProvider serviceProvider)
         {
             this.configuration = configuration;
             this.serviceProvider = serviceProvider;
-            baseUri = this.configuration.GetSection("ApiBaseUri").Value;
-            canRun = true;
         }
 
         public async Task Execute(IJobExecutionContext context)
         {
-            if (canRun)
+            if (canRun) //postponed until first browser->hub connection! (httpcontext issue)
             {
-                canRun = false;
                 await Task.Delay(0);
                 Console.WriteLine("Jobs - SessionCleanup: Executing");
                 RemoteCodeSessionManager rcsm = null;
                 try
                 {
-                    rcsm = serviceProvider.GetService(typeof(RemoteCodeSessionManager)) as RemoteCodeSessionManager;   
+                    rcsm = serviceProvider.GetService(typeof(RemoteCodeSessionManager)) as RemoteCodeSessionManager;
+                    rcsm?.CleanupIdleSessions();
                 }
-                catch
+                catch (Exception ex)
                 {
-                    //will happen when app starts and IHttpAccessor cannot be resolved yet
-                    Console.WriteLine("Jobs - SessionCleanup: error resolving a dependency");
-                    throw;
+                    Console.WriteLine($"Jobs - SessionCleanup: {ex.Message}");
                 }
-                rcsm?.CleanupIdleSessions();
+            }
+            else
+            {
+                Console.WriteLine("Jobs - SessionCleanup: Skipping until signal");
             }
         }
 

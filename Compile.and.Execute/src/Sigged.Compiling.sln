@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sigged.CsC.NetCore.Web", "S
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sigged.CsC.NetFx.Wpf", "Sigged.CsC.NetFx.Wpf\Sigged.CsC.NetFx.Wpf.csproj", "{7D53C020-9DDD-48ED-A51F-1D78B2F1389E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sigged.CodeHost.Worker.Tests", "Sigged.CodeHost.Worker.Tests\Sigged.CodeHost.Worker.Tests.csproj", "{F983BDF1-D51B-447F-99F5-E7B07DC71682}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sigged.CodeHost.Worker.Tests", "Sigged.CodeHost.Worker.Tests\Sigged.CodeHost.Worker.Tests.csproj", "{F983BDF1-D51B-447F-99F5-E7B07DC71682}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Sigged.CsC.CodeSamples", "Sigged.CsC.CodeSamples\Sigged.CsC.CodeSamples.shproj", "{B0E9DE2F-02C7-4ED7-9D0D-9A45156B7706}"
 EndProject

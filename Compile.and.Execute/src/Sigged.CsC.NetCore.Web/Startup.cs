@@ -58,10 +58,6 @@ namespace Sigged.CsC.NetCore.Web
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            //store local listening addresses 
-            //var addressFeature = app.ServerFeatures.Get<IServerAddressesFeature>();
-            //ServerInfoService.LocalAddresses = addressFeature?.Addresses;
-
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

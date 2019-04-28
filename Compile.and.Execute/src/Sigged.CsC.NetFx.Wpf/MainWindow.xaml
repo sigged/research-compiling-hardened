@@ -6,7 +6,15 @@
         xmlns:syntaxBox="clr-namespace:AurelienRibon.Ui.SyntaxHighlightBox;assembly=AurelienRibon.Ui.SyntaxHighlightBox"
         xmlns:local="clr-namespace:Sigged.CsC.NetFx.Wpf"
         mc:Ignorable="d"
+        Loaded="Window_Loaded"
         Title=".NET Framework C# REPL by Sigged" Height="450" Width="800">
+    <Window.Resources>
+        <CollectionViewSource x:Key="CodeSamplesCvs" Source="{Binding CodeSamples}">
+            <CollectionViewSource.GroupDescriptions>
+                <PropertyGroupDescription PropertyName="Category" />
+            </CollectionViewSource.GroupDescriptions>
+        </CollectionViewSource>
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="3*"/>
@@ -31,7 +39,27 @@
             </ScrollViewer>
             <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
             <DockPanel Grid.Column="2">
-                <ToolBarTray DockPanel.Dock="Top" Height="35">
+                <ToolBarTray DockPanel.Dock="Top" Height="35" Width="Auto">
+                    <ToolBar HorizontalContentAlignment="Stretch">
+                        <ComboBox Width="200" 
+                            SelectedItem="{Binding SelectedCodeSample}"
+                            ItemsSource="{Binding Source={StaticResource CodeSamplesCvs}}">
+                            <ItemsControl.GroupStyle>
+                                <GroupStyle>
+                                    <GroupStyle.HeaderTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Margin="5,0,0,0" FontStyle="Italic" FontWeight="DemiBold" Text="{Binding Name}"/>
+                                        </DataTemplate>
+                                    </GroupStyle.HeaderTemplate>
+                                </GroupStyle>
+                            </ItemsControl.GroupStyle>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Margin="10,0,0,0" Text="{Binding Name}"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ComboBox>
+                    </ToolBar>
                     <ToolBar>
                         <Button Command="{Binding Build}" ToolTip="Build" 
                                 Opacity="{Binding Path=IsEnabled, RelativeSource={RelativeSource Self}, Converter={StaticResource EnabledToOpacity}}"
@@ -64,6 +92,7 @@
                             </Button.Content>
                         </Button>
                     </ToolBar>
+                   
                 </ToolBarTray>
                 <syntaxBox:SyntaxHighlightBox x:Name="txtSource"
                                       PreviewKeyDown="TxtSource_PreviewKeyDown"

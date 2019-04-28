@@ -16,16 +16,16 @@ In the /src/ folder you will find that this repository consists of several proje
 - ![Build Status][travis-unknown] **<span>Sigged.CsC.NetFx.Wpf</span>** -- 
   Windows application to compile and run arbitrary C# code. Uses .NET Framework, compiles code to .NET Standard.
  
-- ![Build Status][travis-realtime] **<span>Sigged.CsC.NetCore.Web</span>** -- 
+- [![Build Status][travis-realtime]](https://travis-ci.com/sigged/research-compiling) **<span>Sigged.CsC.NetCore.Web</span>** -- 
   Web application to compile and run arbitrary C# code. Uses .NET Core, compiles code to .NET Standard.
 
-- ![Build Status][travis-realtime] **<span>Sigged.Compiling.Core</span>** -- 
+- [![Build Status][travis-realtime]](https://travis-ci.com/sigged/research-compiling) **<span>Sigged.Compiling.Core</span>** -- 
   .NET Standard library which exposes a Roslyn-based compiler API for the web and desktop apps.
 
-- ![Build Status][travis-realtime] **<span>Sigged.CodeHost.Worker</span>** -- 
+- [![Build Status][travis-realtime]](https://travis-ci.com/sigged/research-compiling) **<span>Sigged.CodeHost.Worker</span>** -- 
   .NET Core Console application, which is run inside the web application to allow for compilation and execution in a multi-user environment.
 
-- ![Build Status][travis-realtime] **<span>Sigged.CodeHost.Core</span>** -- 
+- [![Build Status][travis-realtime]](https://travis-ci.com/sigged/research-compiling) **<span>Sigged.CodeHost.Core</span>** -- 
   .NET Standard library which exposes common features and protocols between the web application and he worker application
 
 
