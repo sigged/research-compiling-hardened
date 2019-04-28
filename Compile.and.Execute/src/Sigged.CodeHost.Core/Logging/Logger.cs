@@ -15,7 +15,7 @@ namespace Sigged.CodeHost.Core.Logging
                 if(logmode?.ToUpper() == "NULL")
                     Mode = LogMode.Null;
                 else if (logmode?.ToUpper() == "DEBUG")
-                    Mode = LogMode.Console;
+                    Mode = LogMode.Debug;
                 else
                     Mode = LogMode.Console;
             }

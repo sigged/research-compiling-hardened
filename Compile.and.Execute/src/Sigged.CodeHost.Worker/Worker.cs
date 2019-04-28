@@ -85,15 +85,24 @@ namespace Sigged.CodeHost.Worker
                                         var buildrequest = Serializer.DeserializeWithLengthPrefix<BuildRequestDto>(networkStream, PrefixStyle.Fixed32);
                                         Logger.LogLine("CLIENT: received BuildRequestDto");
 
-                                        EmitResult results = null;
-                                        byte[] assemblyBytes = null;
-                                        using (var assemblyStream = new MemoryStream())
+                                        try
                                         {
-                                            results = compiler.Compile(buildrequest.SourceCode, buildrequest.SessionId, assemblyStream,
-                                                outputKind: OutputKind.ConsoleApplication).Result;
+                                            EmitResult results = null;
+                                            byte[] assemblyBytes = null;
+                                            using (var assemblyStream = new MemoryStream())
+                                            {
+                                                results = compiler.Compile(buildrequest.SourceCode, buildrequest.SessionId, assemblyStream,
+                                                    outputKind: OutputKind.ConsoleApplication).Result;
 
-                                            assemblyBytes = assemblyStream.ToArray();
+                                                assemblyBytes = assemblyStream.ToArray();
+                                            }
                                         }
+                                        catch(Exception ex)
+                                        {
+                                            Logger.LogLine($"CLIENT: Error! {ex.Message}");
+                                            throw;
+                                        }
+                                        
                                         Logger.LogLine("CLIENT: built source code");
 
                                         BuildResultDto result = new BuildResultDto();
