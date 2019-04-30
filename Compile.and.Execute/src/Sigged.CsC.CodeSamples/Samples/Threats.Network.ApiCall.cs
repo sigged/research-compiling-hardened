@@ -26,15 +26,14 @@ namespace Threats.Network.CallRemoteService
             }
             Console.WriteLine();
 
-            //https://www.metaweather.com/api/location/968019/2019/4/17/
-            Console.WriteLine("Temp in Brussels today:  ");
+            Console.WriteLine("Bored? Try this activity:  ");
             Console.WriteLine("----------------------------");
             using (HttpClient client = new HttpClient())
             {
-                client.BaseAddress = new Uri("https://api.chucknorris.io/");
+                client.BaseAddress = new Uri("https://www.boredapi.com/api/");
                 client.DefaultRequestHeaders.Accept.Clear();
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                Console.WriteLine(GetContent<NorrisJoke>(client, "jokes/random").Result?.Value);
+                Console.WriteLine(GetContent<BoredActivity>(client, "activity").Result?.Activity);
             }
             Console.WriteLine();
         }
@@ -57,6 +56,10 @@ namespace Threats.Network.CallRemoteService
         public string Value { get; set; }
     }
 
+    public class BoredActivity
+    {
+        public string Activity { get; set; }
+    }
 
 
     /// Copyright(c) 2018 Alex Parker

@@ -14,6 +14,6 @@
         /// <remarks>
         /// 
         /// </remarks>
-        public const int SessionIdleTimeout = 10; //seconds
+        public const int SessionIdleTimeout = 60; //seconds
     }
 }
