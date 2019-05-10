@@ -6,7 +6,7 @@
 
 This version of the application is the insecure starting point of the research. Any C# code can be executed on the server, which poses a big security threat.
 
-> **Do not run this webapplication in production. Use at your own risk.**
+> **Do not run this application in production. Use at your own risk.**
 
 ### Project guide
 
