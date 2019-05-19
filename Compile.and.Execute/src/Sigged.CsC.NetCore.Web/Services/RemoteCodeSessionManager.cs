@@ -68,6 +68,22 @@ namespace Sigged.CsC.NetCore.Web.Services
             }
         }
 
+        public void KillAllSessions()
+        {
+
+            var removeSessions = Sessions.ToList();
+            Logger.LogLine($"KillAllSessions() - found {removeSessions.Count}/{Sessions.Count()} sessions to kill");
+            foreach (var session in removeSessions)
+            {
+                lock (session)
+                {
+                    Logger.LogLine($"Cleaning up session {session.SessionId}");
+                    ResetSessionWorker(session, WorkerResetReason.Expired);
+                    sessions.Remove(session);
+                }
+            }
+        }
+
         public RemoteCodeSession CreateSession(string uniqueSessionId)
         {
             string sessionid = uniqueSessionId;

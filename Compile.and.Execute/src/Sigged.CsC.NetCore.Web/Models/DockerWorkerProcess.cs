@@ -1,4 +1,5 @@
 ﻿using Sigged.CodeHost.Core.Logging;
+using Sigged.CsC.NetCore.Web.Constants;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -25,7 +26,7 @@ namespace Sigged.CsC.NetCore.Web.Models
                 {
                     Kill();
                     Logger.LogLine($"Worker Control: (docker) starting container {_containerName}");
-                    process.StartInfo = CreateDefaultStartInfo("docker", $"run --detach --name {_containerName} --link insecure-csc-hardened:{host} sigged/insecure-csc-worker {host} {port} {sessionid}");
+                    process.StartInfo = CreateDefaultStartInfo("docker", $"run --detach --rm --name {_containerName} --link insecure-csc-hardened:{host} sigged/insecure-csc-worker {host} {port} {sessionid}");
                     process.Start();
                 }
             }
@@ -48,17 +49,16 @@ namespace Sigged.CsC.NetCore.Web.Models
                 process.BeginOutputReadLine();
                 process.BeginErrorReadLine();
 
-                process.WaitForExit(30 * 1000);
+                process.WaitForExit(SessionConstants.DockerCommandIdleTimeout * 1000);
                 if (!process.HasExited)
                     process.Kill();
 
                 process.Close();
 
-                Console.WriteLine("HasExited STDOUT follows:");
-                Console.Write(outputData);
-                Console.WriteLine("HasExited STDERR follows:");
-                Console.Write(errorData);
-
+                //Console.WriteLine("HasExited STDOUT follows:");
+                //Console.Write(outputData);
+                //Console.WriteLine("HasExited STDERR follows:");
+                //Console.Write(errorData);
                 return outputData.StartsWith("true");
             }
         }
@@ -70,7 +70,7 @@ namespace Sigged.CsC.NetCore.Web.Models
             {
                 process.StartInfo = CreateDefaultStartInfo("docker", $"rm -f {_containerName}");
                 process.Start();
-                process.WaitForExit(30 * 1000);
+                process.WaitForExit(SessionConstants.DockerCommandIdleTimeout * 1000);
                 if (!process.HasExited)
                     process.Kill();
                 process.Close();
