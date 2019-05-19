@@ -70,7 +70,6 @@ namespace Sigged.CodeHost.Worker
                                 stopClient = true;
                                 break;
                             }
-                                
 
                             //check if server sent data
                             if (client.Available > 0)
@@ -132,7 +131,9 @@ namespace Sigged.CodeHost.Worker
 
                                         break;
                                     default:
-                                        Logger.LogLine($"Unknown server message header: {msgHeader}");
+                                        Logger.LogLine($"CLIENT: ERROR! Unknown server message header: {msgHeader}");
+                                        Logger.LogLine($"CLIENT: Shutting down due to unexpected server message.");
+                                        stopClient = true;
                                         break;
                                 }
                             }

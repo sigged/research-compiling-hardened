@@ -1,6 +1,6 @@
 ﻿using Sigged.CodeHost.Core.Dto;
+using Sigged.CsC.NetCore.Web.Models;
 using System;
-using System.Diagnostics;
 using System.Net.Sockets;
 
 namespace Sigged.CsC.NetCore.Web.Services
@@ -16,7 +16,7 @@ namespace Sigged.CsC.NetCore.Web.Services
         public string SessionId { get; set; }
         public BuildRequestDto LastBuildRequest { get; set; }
         public RemoteAppState LastAppState { get; set; }
-        public Process WorkerProcess { get; set; }
+        public IWorkerProcess WorkerProcess { get; set; }
         public TcpClient WorkerClient { get; set; }
         public DateTimeOffset LastActivity { get; private set; }
 

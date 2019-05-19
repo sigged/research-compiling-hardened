@@ -3,6 +3,7 @@ using Sigged.CodeHost.Core.Dto;
 using Sigged.CodeHost.Core.Logging;
 using Sigged.CodeHost.Core.Worker;
 using Sigged.CsC.NetCore.Web.Constants;
+using Sigged.CsC.NetCore.Web.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -21,11 +22,14 @@ namespace Sigged.CsC.NetCore.Web.Services
         protected IClientService clientService;
         protected List<RemoteCodeSession> sessions;
 
+        public const int LISTENPORT = 2000;
+        public const string WEBCONTAINERALIAS = "mainweb";
+
         public RemoteCodeSessionManager(IHostingEnvironment henv, IClientService clientservice)
         {
             env = henv;
             clientService = clientservice;
-            listener = new WorkerTcpListener(IPAddress.Any, 2000);
+            listener = new WorkerTcpListener(IPAddress.Any, LISTENPORT);
             sessions = new List<RemoteCodeSession>();
 
             listener.WorkerConnected += Listener_WorkerConnected;
@@ -96,25 +100,15 @@ namespace Sigged.CsC.NetCore.Web.Services
                 await Task.Run(() => {
                     try
                     {
-                        string workerExePath = Path.Combine(env.ContentRootPath, "_workerProcess", "worker", "Sigged.CodeHost.Worker.dll");
-                        Logger.LogLine($"Starting process at {workerExePath}");
-                        session.WorkerProcess = new Process();
-                        session.WorkerProcess.EnableRaisingEvents = true;
-                        session.WorkerProcess.Exited += (object sender, EventArgs e) =>
-                        {
-                            ResetSessionWorker(session, WorkerResetReason.WorkerStopped);
-                        };
+                        //string workerExePath = Path.Combine(env.ContentRootPath, "_workerProcess", "worker", "Sigged.CodeHost.Worker.dll");
+                        //Logger.LogLine($"Starting process at {workerExePath}");
+                        //session.WorkerProcess = new NativeWorkerProcess(workerExePath);
 
-                        session.WorkerProcess.StartInfo = new ProcessStartInfo
-                        {
-                            FileName = "dotnet",
-                            Arguments = $"{workerExePath} localhost 2000 {session.SessionId}",
-                            UseShellExecute = false
-                        };
-
-                        session.WorkerProcess.Start();
+                        
+                        session.WorkerProcess = new DockerWorkerProcess();
+                        session.WorkerProcess.Start(WEBCONTAINERALIAS, LISTENPORT, session.SessionId);
                     }
-                    catch(IOException ioex)
+                    catch (IOException ioex)
                     {
                         Logger.LogLine(ioex.Message);
                         throw;
@@ -146,7 +140,7 @@ namespace Sigged.CsC.NetCore.Web.Services
             session.LastBuildRequest = buildRequest;
             
             //reuse existing worker process if still running and connected
-            if(session.WorkerProcess != null && session.WorkerProcess.HasExited == false)
+            if(session.WorkerProcess != null && session.WorkerProcess.HasExited() == false)
             {
                 if(session.WorkerClient?.Connected == true)
                 {
@@ -182,12 +176,12 @@ namespace Sigged.CsC.NetCore.Web.Services
 
         protected void ResetSessionWorker(RemoteCodeSession session, WorkerResetReason reason)
         {
-            Logger.LogLine($"Worker Reset: {session.SessionId}");
+            Logger.LogLine($"Worker Reset: {session.SessionId} because {reason}");
             session.WorkerClient?.Close();
             Logger.LogLine($"Worker Reset: closed worker socket of {session.SessionId}");
             try
             {
-                if (session.WorkerProcess?.HasExited == false)
+                if (session.WorkerProcess?.HasExited() == false)
                 {
                     session.WorkerProcess?.Kill();
                     Logger.LogLine($"Worker Reset: killed worker process of {session.SessionId}");
