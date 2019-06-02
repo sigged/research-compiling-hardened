@@ -11,6 +11,7 @@ namespace Sigged.CsC.NetCore.Web.Models
     public class DockerWorkerProcess : IWorkerProcess
     {
         protected string _containerName;
+        protected const string WORKERNETWORK = "workernet";
         protected const string CONTAINER_PREFIX = "worker";
 
         public DockerWorkerProcess()
@@ -26,7 +27,8 @@ namespace Sigged.CsC.NetCore.Web.Models
                 {
                     Kill();
                     Logger.LogLine($"Worker Control: (docker) starting container {_containerName}");
-                    process.StartInfo = CreateDefaultStartInfo("docker", $"run --detach --rm --name {_containerName} --link insecure-csc-hardened:{host} sigged/insecure-csc-worker {host} {port} {sessionid}");
+                    //process.StartInfo = CreateDefaultStartInfo("docker", $"run --detach --rm --name {_containerName} --link insecure-csc-hardened:{host} sigged/insecure-csc-worker {host} {port} {sessionid}");
+                    process.StartInfo = CreateDefaultStartInfo("docker", $"run --detach --rm --name {_containerName} --net {WORKERNETWORK} sigged/insecure-csc-worker {host} {port} {sessionid}");
                     process.Start();
                 }
             }
