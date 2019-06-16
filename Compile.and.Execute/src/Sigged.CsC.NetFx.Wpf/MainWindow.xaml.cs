@@ -22,6 +22,9 @@ namespace Sigged.CsC.NetFx.Wpf
     /// </summary>
     public partial class MainWindow : Window
     {
+        private VirtualConsoleController virtualConsoleController;
+        private InputAggregator inputAggregator;
+
         public MainWindow()
         {
             Thread.CurrentThread.Name = "UI Thread";
@@ -31,7 +34,10 @@ namespace Sigged.CsC.NetFx.Wpf
             InitializeHighlighters();
             txtSource.CurrentHighlighter = HighlighterManager.Instance.Highlighters["CSharp"];
 
-            DataContext = new MainWindowsViewModel();
+            inputAggregator = new InputAggregator();
+            virtualConsoleController = new VirtualConsoleController(txtConsoleOut, inputAggregator);
+
+            DataContext = new MainWindowsViewModel(inputAggregator);
 
             var dp = DependencyPropertyDescriptor.FromProperty(TextBlock.TextProperty, typeof(TextBlock));
             dp.AddValueChanged(txtConsoleOut, (sender, args) =>
@@ -39,10 +45,10 @@ namespace Sigged.CsC.NetFx.Wpf
                 consoleScroller.ScrollToBottom();
             });
 
-            ConsoleOutputWriter outputRedirector = new ConsoleOutputWriter(txtConsoleOut);
-            ConsoleInputReader inputRedirector = new ConsoleInputReader(txtConsoleOut);
-            Console.SetOut(outputRedirector);
-            Console.SetIn(inputRedirector);
+            //ConsoleOutputWriter outputRedirector = new ConsoleOutputWriter(txtConsoleOut);
+            //ConsoleInputReader inputRedirector = new ConsoleInputReader(txtConsoleOut);
+            //Console.SetOut(outputRedirector);
+            //Console.SetIn(inputRedirector);
         }
 
         private void InitializeHighlighters()

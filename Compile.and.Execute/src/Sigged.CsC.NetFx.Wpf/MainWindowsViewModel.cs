@@ -11,6 +11,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
 
@@ -27,9 +28,12 @@ namespace Sigged.CsC.NetFx.Wpf
 
         private Compiler compiler;
         private Thread runThread;
+        private InputAggregator inputAggregator;
 
-        public MainWindowsViewModel()
+        public MainWindowsViewModel(InputAggregator inputaggregator)
         {
+            inputAggregator = inputaggregator;
+
             string netstandardRefsDirectory = Path.Combine(new DirectoryInfo(Environment.CurrentDirectory).Parent.Parent.Parent.Parent.FullName, "libs", "netstandard2.0");
             compiler = new Compiler(netstandardRefsDirectory);
 
@@ -207,6 +211,13 @@ Ready.
 
                 await Task.Delay(0);
 
+                AppDomainSetup appDomainSetup = new AppDomainSetup
+                {
+                    ShadowCopyFiles = "true",
+                    LoaderOptimization = LoaderOptimization.MultiDomainHost
+                };
+                AppDomain domain = AppDomain.CreateDomain("HardenedDomain", null, appDomainSetup);
+
                 runThread = new Thread(new ThreadStart(async () =>
                 {
                     IsRunning = true;
@@ -215,34 +226,31 @@ Ready.
                     {
                         Status = "Building...";
                         IsBuilding = true;
-
-                        var result = await compiler.Compile(sourceCode, "REPLAssembly", stream, outputKind: OutputKind.ConsoleApplication);
-                        var assembly = Assembly.Load(stream.ToArray());
-
                         try
                         {
+                            var result = await compiler.Compile(sourceCode, "REPLAssembly", stream, outputKind: OutputKind.ConsoleApplication);
+
+                            
+
+                            Type assemblyLoaderType = typeof(AssemblyLoader);
+                            AssemblyLoader loader = (AssemblyLoader)domain.CreateInstanceFromAndUnwrap(assemblyLoaderType.Assembly.Location, assemblyLoaderType.FullName);
+
+                            AssemblyLoaderProxy loaderProxy = new AssemblyLoaderProxy(loader, inputAggregator);
+                            loaderProxy.OnConsoleOutput += LoaderProxy_OnConsoleOutput;
+
                             IsBuilding = false;
                             Status = "Running";
 
                             try
                             {
-                                //invoke main method
-                                var mainParms = assembly.EntryPoint.GetParameters();
-                                if (mainParms.Count() == 0)
-                                {
-                                    assembly.EntryPoint.Invoke(null, null);
-                                }
-                                else
-                                {
-                                    if (mainParms[0].ParameterType == typeof(string[]))
-                                        assembly.EntryPoint.Invoke(null, new string[] { null });
-                                    else
-                                        assembly.EntryPoint.Invoke(null, null);
-                                }
+                                //load and run assembly in remote AppDomain, using the proxy object
+                                loaderProxy.LoadAndRun(stream.ToArray(), inputAggregator);
                             }
                             finally
                             {
                                 Status = "Application stopped";
+                                
+                                //todo: find a way to safely unload Appdomain (thread problems)
                             }
                         }
                         catch (Exception ex)
@@ -254,15 +262,18 @@ Ready.
                     IsRunning = false;
                 }));
                 runThread.Start();
-
-
-                
-
             }, 
             () => {
                 return !isRunning && !IsBuilding;
             }
         );
+
+        private void LoaderProxy_OnConsoleOutput(object sender, string output)
+        {
+            Application.Current.Dispatcher.Invoke(() => {
+                ConsoleOutput += output;
+            });
+        }
         
         public ICommand Stop => new RelayCommand(
             () => {
