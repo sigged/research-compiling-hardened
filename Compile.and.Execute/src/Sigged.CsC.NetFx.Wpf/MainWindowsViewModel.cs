@@ -7,8 +7,11 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Security;
+using System.Security.Permissions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -177,6 +180,7 @@ Ready.
                 RaisePropertyChanged();
             }
         }
+        
 
         public ICommand LoadSamples => new RelayCommand(
             async () => {
@@ -211,12 +215,27 @@ Ready.
 
                 await Task.Delay(0);
 
+                //string tmpAssemblyPath = Path.GetTempFileName();
+                //string tmpAssemblyDir = Path.GetDirectoryName(tmpAssemblyPath);
+                //string tmpAssemblyName = Path.GetDirectoryName(tmpAssemblyPath);
+
+                var permissions = new PermissionSet(PermissionState.Unrestricted);
+                //var permissions = new PermissionSet(null);
+                //var permissions = new PermissionSet(PermissionState.None);
+
+                permissions.AddPermission(new SecurityPermission(SecurityPermissionFlag.Execution | SecurityPermissionFlag.UnmanagedCode));
+                permissions.AddPermission(new FileIOPermission(FileIOPermissionAccess.Read | FileIOPermissionAccess.PathDiscovery, AppDomain.CurrentDomain.SetupInformation.ApplicationBase));
+                //permissions.AddPermission(new ReflectionPermission(ReflectionPermissionFlag.AllFlags));
+                permissions.AddPermission(new ReflectionPermission(PermissionState.Unrestricted));
+                permissions.AddPermission(new WebPermission(PermissionState.None));
+
                 AppDomainSetup appDomainSetup = new AppDomainSetup
                 {
-                    ShadowCopyFiles = "true",
-                    LoaderOptimization = LoaderOptimization.MultiDomainHost
+                    ApplicationBase = AppDomain.CurrentDomain.SetupInformation.ApplicationBase
+                    //ShadowCopyFiles = "true",
+                    //LoaderOptimization = LoaderOptimization.MultiDomainHost
                 };
-                AppDomain domain = AppDomain.CreateDomain("HardenedDomain", null, appDomainSetup);
+                AppDomain domain = AppDomain.CreateDomain("HardenedDomain", null, appDomainSetup, permissions);
 
                 runThread = new Thread(new ThreadStart(async () =>
                 {
@@ -228,9 +247,21 @@ Ready.
                         IsBuilding = true;
                         try
                         {
-                            var result = await compiler.Compile(sourceCode, "REPLAssembly", stream, outputKind: OutputKind.ConsoleApplication);
+                            //var result = await compiler.Compile(sourceCode, tmpAssemblyName, stream, outputKind: OutputKind.ConsoleApplication);
 
-                            
+                            //using (var fs = new FileStream(tmpAssemblyPath, FileMode.Create, FileAccess.Write, FileShare.ReadWrite))
+                            //{
+                            //    stream.CopyTo(fs);
+                            //}
+
+                            ////var assembly = AppDomain.CurrentDomain.Load(stream.ToArray());
+                            ////Type entryClass = assembly.EntryPoint.DeclaringType;
+
+
+                            //var handle = Activator.CreateInstance(domain, tmpAssemblyPath, "Harmless.HelloWorld.Program");
+                            //var o = handle.Unwrap();
+
+                            var result = await compiler.Compile(sourceCode, "REPLAssembly", stream, outputKind: OutputKind.ConsoleApplication);
 
                             Type assemblyLoaderType = typeof(AssemblyLoader);
                             AssemblyLoader loader = (AssemblyLoader)domain.CreateInstanceFromAndUnwrap(assemblyLoaderType.Assembly.Location, assemblyLoaderType.FullName);
@@ -246,6 +277,10 @@ Ready.
                                 //load and run assembly in remote AppDomain, using the proxy object
                                 loaderProxy.LoadAndRun(stream.ToArray(), inputAggregator);
                             }
+                            catch(Exception ex)
+                            {
+                                throw;
+                            }
                             finally
                             {
                                 Status = "Application stopped";
@@ -256,6 +291,10 @@ Ready.
                         catch (Exception ex)
                         {
                             System.Windows.MessageBox.Show(ex.Message);
+                        }
+                        finally
+                        {
+                            //File.Delete(tmpAssemblyPath);
                         }
                     }
 

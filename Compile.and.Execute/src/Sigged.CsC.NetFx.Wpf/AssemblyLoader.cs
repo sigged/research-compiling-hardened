@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,7 +10,7 @@ namespace Sigged.CsC.NetFx.Wpf
 
     public delegate void ConsoleOutputHandler(object sender, string output);
 
-    internal  class AssemblyLoaderProxy: AssemblyLoader
+    internal class AssemblyLoaderProxy: AssemblyLoader
     {
         public readonly AssemblyLoader Instance;
         protected InputAggregator inputAggregator;
@@ -23,13 +24,25 @@ namespace Sigged.CsC.NetFx.Wpf
 
         public override void LoadAndRun(byte[] assemblyBytes, InputAggregator inputAggregator)
         {
-            this.Instance.LoadAndRun(assemblyBytes, inputAggregator);
+            try
+            {
+                this.Instance.LoadAndRun(assemblyBytes, inputAggregator);
+            }
+            catch(Exception ex)
+            {
+                throw;
+            }
         }
     }
 
     internal class AssemblyLoader : MarshalByRefObject
     {
         public event ConsoleOutputHandler OnConsoleOutput;
+
+        public AssemblyLoader()
+        {
+
+        }
 
         protected void RaiseOnConsoleOutput(AssemblyLoader loader, string output)
         {
@@ -38,31 +51,36 @@ namespace Sigged.CsC.NetFx.Wpf
 
         public virtual void LoadAndRun(byte[] assemblyBytes, InputAggregator inputAggregator)
         {
-            CrossDomainConsoleOutputWriter outputRedirector = new CrossDomainConsoleOutputWriter();
-            outputRedirector.OnConsoleOutput += OutputRedirector_OnConsoleOutput;
-
-            CrossDomainConsoleInputReader inputRedirector = new CrossDomainConsoleInputReader(inputAggregator);
-            
-            Console.SetOut(outputRedirector);
-            Console.SetIn(inputRedirector);
-
-
-            var assembly = AppDomain.CurrentDomain.Load(assemblyBytes);
-
-            //invoke main method
-            var mainParms = assembly.EntryPoint.GetParameters();
-            if (mainParms.Count() == 0)
+            try
             {
-                assembly.EntryPoint.Invoke(null, null);
-            }
-            else
-            {
-                if (mainParms[0].ParameterType == typeof(string[]))
-                    assembly.EntryPoint.Invoke(null, new string[] { null });
-                else
+                CrossDomainConsoleOutputWriter outputRedirector = new CrossDomainConsoleOutputWriter();
+                outputRedirector.OnConsoleOutput += OutputRedirector_OnConsoleOutput;
+
+                CrossDomainConsoleInputReader inputRedirector = new CrossDomainConsoleInputReader(inputAggregator);
+
+                Console.SetOut(outputRedirector);
+                Console.SetIn(inputRedirector);
+
+                var assembly = AppDomain.CurrentDomain.Load(assemblyBytes);
+
+                //invoke main method
+                var mainParms = assembly.EntryPoint.GetParameters();
+                if (mainParms.Count() == 0)
+                {
                     assembly.EntryPoint.Invoke(null, null);
+                }
+                else
+                {
+                    if (mainParms[0].ParameterType == typeof(string[]))
+                        assembly.EntryPoint.Invoke(null, new string[] { null });
+                    else
+                        assembly.EntryPoint.Invoke(null, null);
+                }
             }
-
+            catch(Exception ex)
+            {
+                throw;
+            }
         }
 
         protected void OutputRedirector_OnConsoleOutput(object sender, string output)
