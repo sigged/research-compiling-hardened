@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -56,8 +58,12 @@ namespace Sigged.CsC.NetCore.Web
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IApplicationLifetime applicationLifetime)
         {
+            applicationLifetime.ApplicationStopped.Register(() => { OnShutdown(app); });
+
+            Console.WriteLine($"Running as : {Environment.UserName}");
+            
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -85,6 +91,13 @@ namespace Sigged.CsC.NetCore.Web
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
+        }
+
+        private void OnShutdown(IApplicationBuilder app)
+        {
+            var rcsm = app.ApplicationServices.GetService<RemoteCodeSessionManager>();
+            rcsm.KillAllSessions();
+            
         }
     }
 }

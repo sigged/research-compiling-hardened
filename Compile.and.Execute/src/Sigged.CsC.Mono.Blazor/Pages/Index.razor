@@ -1,0 +1,76 @@
+﻿@page "/"
+@layout MainLayout
+@inherits IndexModel
+
+<div class="repl-main-ide" id="repl-main-ide"
+     style="grid-template-columns: 1fr 10px 2fr; grid-template-rows: 3fr 10px 1fr 0px 30px;">
+    <pre class="repl-main-ide-console" id="console" ref="console"
+         v-on:click="consoleFocus()"
+         >@ConsoleOutput</pre>
+    <div class="repl-main-ide-splitter-h gridsplitter-control-h"></div>
+    <div class="repl-main-ide-source">
+        <div class="repl-main-ide-toolbar">
+            <button class="btn btn-info" @onclick="@Build" disabled="@(IsBuilding || IsRunning)"><img src="images/build.png" />Build</button>
+            <button class="btn btn-success" @onclick="@BuildAndRun" disabled="@(IsBuilding || IsRunning)"><img src="images/play.png" />Run</button>
+            <button class="btn btn-danger" @onclick="@Stop" disabled="@(IsBuilding || IsRunning)"><img src="images/stop.png" />Stop</button>
+            <select id="selectCodeSample" @bind="@SelectedCodeSampleId" class="custom-select codesample-picker" disabled="@(IsBuilding || IsRunning)">
+                @foreach (var category in CodeSamples.Select(cs => cs.Category).Distinct().OrderBy(catname => catname))
+                {
+                    <optgroup label="@category"></optgroup>
+                    @foreach (var sample in CodeSamples.Where(cs => cs.Category == category).OrderBy(s => s.Name))
+                    {
+                        <option value="@sample.Id">
+                            @sample.Name
+                        </option>
+                    }
+                }
+            </select>
+        </div>
+        <iframe src="codeview.html" onload="iframeLoaded()"></iframe>
+    </div>
+    <div class="repl-main-ide-splitter-v-err gridsplitter-control-v"></div>
+    <div class="repl-main-ide-errors">
+        <table>
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Id</th>
+                    <th>Location</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            @foreach (var diag in Diagnostics)
+            {
+                <tr>
+                    <td><img src="images/@(diag.Diagnostic.Severity.ToString().ToLower()).png" /></td>
+                    <td>@diag.Diagnostic.Id</td>
+                    <td>@diag.Location</td>
+                    <td>@diag.Message</td>
+                </tr>
+            }
+            @foreach (var exception in Exceptions)
+            {
+                Exception realException = exception;
+                while(realException.InnerException != null)
+                {
+                    realException = exception.InnerException;
+                }
+                <tr>
+                    <td><img src="images/error.png" /></td>
+                    <td>@realException.GetType().ToString()</td>
+                    <td></td>
+                    <td>@realException.Message</td>
+                </tr>
+            }
+        </table>
+    </div>
+    <div></div><!-- empty gutter -->
+    <div class="repl-main-ide-status
+         @(StatusCode == "error" ? "status-error" : 
+            StatusCode == "success" ? "status-success" :
+             StatusCode == "busy" ? "status-busy" : "status-default"
+         )">
+        <div class="repl-main-ide-status-progressbar progress" style="display: @(IsBuilding || IsRunning ? "block" : "none")"><div class="indeterminate"></div></div>
+        <div class="repl-main-ide-status-label">@Status</div>
+    </div>
+</div>

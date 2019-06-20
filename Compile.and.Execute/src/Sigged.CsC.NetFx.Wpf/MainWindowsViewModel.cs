@@ -7,10 +7,14 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Security;
+using System.Security.Permissions;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
 
@@ -27,9 +31,12 @@ namespace Sigged.CsC.NetFx.Wpf
 
         private Compiler compiler;
         private Thread runThread;
+        private InputAggregator inputAggregator;
 
-        public MainWindowsViewModel()
+        public MainWindowsViewModel(InputAggregator inputaggregator)
         {
+            inputAggregator = inputaggregator;
+
             string netstandardRefsDirectory = Path.Combine(new DirectoryInfo(Environment.CurrentDirectory).Parent.Parent.Parent.Parent.FullName, "libs", "netstandard2.0");
             compiler = new Compiler(netstandardRefsDirectory);
 
@@ -173,6 +180,7 @@ Ready.
                 RaisePropertyChanged();
             }
         }
+        
 
         public ICommand LoadSamples => new RelayCommand(
             async () => {
@@ -207,6 +215,28 @@ Ready.
 
                 await Task.Delay(0);
 
+                //string tmpAssemblyPath = Path.GetTempFileName();
+                //string tmpAssemblyDir = Path.GetDirectoryName(tmpAssemblyPath);
+                //string tmpAssemblyName = Path.GetDirectoryName(tmpAssemblyPath);
+
+                var permissions = new PermissionSet(PermissionState.Unrestricted);
+                //var permissions = new PermissionSet(null);
+                //var permissions = new PermissionSet(PermissionState.None);
+
+                permissions.AddPermission(new SecurityPermission(SecurityPermissionFlag.Execution | SecurityPermissionFlag.UnmanagedCode));
+                permissions.AddPermission(new FileIOPermission(FileIOPermissionAccess.Read | FileIOPermissionAccess.PathDiscovery, AppDomain.CurrentDomain.SetupInformation.ApplicationBase));
+                //permissions.AddPermission(new ReflectionPermission(ReflectionPermissionFlag.AllFlags));
+                permissions.AddPermission(new ReflectionPermission(PermissionState.Unrestricted));
+                permissions.AddPermission(new WebPermission(PermissionState.None));
+
+                AppDomainSetup appDomainSetup = new AppDomainSetup
+                {
+                    ApplicationBase = AppDomain.CurrentDomain.SetupInformation.ApplicationBase
+                    //ShadowCopyFiles = "true",
+                    //LoaderOptimization = LoaderOptimization.MultiDomainHost
+                };
+                AppDomain domain = AppDomain.CreateDomain("HardenedDomain", null, appDomainSetup, permissions);
+
                 runThread = new Thread(new ThreadStart(async () =>
                 {
                     IsRunning = true;
@@ -215,54 +245,74 @@ Ready.
                     {
                         Status = "Building...";
                         IsBuilding = true;
-
-                        var result = await compiler.Compile(sourceCode, "REPLAssembly", stream, outputKind: OutputKind.ConsoleApplication);
-                        var assembly = Assembly.Load(stream.ToArray());
-
                         try
                         {
+                            //var result = await compiler.Compile(sourceCode, tmpAssemblyName, stream, outputKind: OutputKind.ConsoleApplication);
+
+                            //using (var fs = new FileStream(tmpAssemblyPath, FileMode.Create, FileAccess.Write, FileShare.ReadWrite))
+                            //{
+                            //    stream.CopyTo(fs);
+                            //}
+
+                            ////var assembly = AppDomain.CurrentDomain.Load(stream.ToArray());
+                            ////Type entryClass = assembly.EntryPoint.DeclaringType;
+
+
+                            //var handle = Activator.CreateInstance(domain, tmpAssemblyPath, "Harmless.HelloWorld.Program");
+                            //var o = handle.Unwrap();
+
+                            var result = await compiler.Compile(sourceCode, "REPLAssembly", stream, outputKind: OutputKind.ConsoleApplication);
+
+                            Type assemblyLoaderType = typeof(AssemblyLoader);
+                            AssemblyLoader loader = (AssemblyLoader)domain.CreateInstanceFromAndUnwrap(assemblyLoaderType.Assembly.Location, assemblyLoaderType.FullName);
+
+                            AssemblyLoaderProxy loaderProxy = new AssemblyLoaderProxy(loader, inputAggregator);
+                            loaderProxy.OnConsoleOutput += LoaderProxy_OnConsoleOutput;
+
                             IsBuilding = false;
                             Status = "Running";
 
                             try
                             {
-                                //invoke main method
-                                var mainParms = assembly.EntryPoint.GetParameters();
-                                if (mainParms.Count() == 0)
-                                {
-                                    assembly.EntryPoint.Invoke(null, null);
-                                }
-                                else
-                                {
-                                    if (mainParms[0].ParameterType == typeof(string[]))
-                                        assembly.EntryPoint.Invoke(null, new string[] { null });
-                                    else
-                                        assembly.EntryPoint.Invoke(null, null);
-                                }
+                                //load and run assembly in remote AppDomain, using the proxy object
+                                loaderProxy.LoadAndRun(stream.ToArray(), inputAggregator);
+                            }
+                            catch(Exception ex)
+                            {
+                                throw;
                             }
                             finally
                             {
                                 Status = "Application stopped";
+                                
+                                //todo: find a way to safely unload Appdomain (thread problems)
                             }
                         }
                         catch (Exception ex)
                         {
                             System.Windows.MessageBox.Show(ex.Message);
                         }
+                        finally
+                        {
+                            //File.Delete(tmpAssemblyPath);
+                        }
                     }
 
                     IsRunning = false;
                 }));
                 runThread.Start();
-
-
-                
-
             }, 
             () => {
                 return !isRunning && !IsBuilding;
             }
         );
+
+        private void LoaderProxy_OnConsoleOutput(object sender, string output)
+        {
+            Application.Current.Dispatcher.Invoke(() => {
+                ConsoleOutput += output;
+            });
+        }
         
         public ICommand Stop => new RelayCommand(
             () => {

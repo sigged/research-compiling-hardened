@@ -96,15 +96,20 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="AssemblyLoader.cs" />
+    <Compile Include="CrossDomainConsoleInputReader.cs" />
     <Compile Include="ConsoleInputReader.cs" />
     <Compile Include="ConsoleOutputWriter.cs" />
     <Compile Include="Converters\BooleanToStatusColorConverter.cs" />
     <Compile Include="Converters\EnabledToOpacityConverter.cs" />
     <Compile Include="Converters\InverseBooleanConverter.cs" />
     <Compile Include="Converters\SeverityToIconConverter.cs" />
+    <Compile Include="CrossDomainConsoleOutputWriter.cs" />
     <Compile Include="DiagnosticViewModel.cs" />
+    <Compile Include="InputAggregator.cs" />
     <Compile Include="MainWindowsViewModel.cs" />
     <Compile Include="RelayCommand.cs" />
+    <Compile Include="VirtualConsoleController.cs" />
     <Compile Include="XmlHighlighter.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

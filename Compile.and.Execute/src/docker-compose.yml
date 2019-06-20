@@ -1,0 +1,35 @@
+version: '3.7'
+services: 
+  insecure-csc-hardened:
+    image: sigged/insecure-csc-hardened
+    ports:
+      - "80:8000"
+    environment:
+      - PORT=8000
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "/usr/bin/docker:/usr/bin/docker"
+    networks:
+      app-network:
+      worker-network:
+        aliases:
+          - mainweb
+networks:
+  app-network:
+    name: appnet
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.enable_icc: "true"
+      com.docker.network.bridge.enable_ip_masquerade: "true"
+    internal: false
+    ipam:
+      driver: default
+  worker-network:
+    name: workernet
+    driver: bridge
+    internal: true
+    driver_opts:
+      com.docker.network.bridge.enable_icc: "true"
+      com.docker.network.bridge.enable_ip_masquerade: "true"
+    ipam:
+      driver: default

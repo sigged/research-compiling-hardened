@@ -1,0 +1,52 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Code View - Sigged.CsC.Mono.Blazor</title>
+    <script src="js/codemirror/codemirror-bundle.js"></script>
+    <link href="css/codeview-bundle.min.css" rel="stylesheet" />
+    <link href="js/codemirror/theme/ssms.css" rel="stylesheet" />
+    <link href="js/codemirror/theme/eclipse.css" rel="stylesheet" />
+    <script>
+
+window.cEditor = null;
+document.addEventListener("DOMContentLoaded", function () {
+    window.cEditor = CodeMirror.fromTextArea(document.getElementById("source-input"), {
+        mode: 'text/x-csharp',
+        theme: 'eclipse',
+        lineNumbers: true,
+        matchBrackets: true
+    });
+
+    function changeCodeStyle() {
+        cEditor.setOption('theme', themeselect.value);
+    }
+
+    function updateTextArea() {
+        cEditor.save();
+    }
+    cEditor.on('change', updateTextArea);
+
+
+});
+    </script>
+</head>
+<body>
+    <textarea id="source-input">
+using System;
+
+namespace Test {
+
+    public class Program {
+    
+        public static void Main(string[] args) 
+        {
+            //write awesomeness here
+            Console.Write("Hello World!");
+        }
+    }
+}
+</textarea>
+</body>
+</html>
