@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Emit;
 using Microsoft.JSInterop;
 using Sigged.CsC.CodeSamples.Parser;
@@ -24,9 +25,11 @@ namespace Sigged.CsC.Mono.Blazor.Pages
 
         public string ConsoleOutput = "";
         public string Status = "Ready";
+        public string StatusCode = "";
         public bool IsRunning = false;
         public bool IsBuilding = false;
         public IEnumerable<DiagnosticViewModel> Diagnostics = new List<DiagnosticViewModel>();
+        public IEnumerable<Exception> Exceptions = new List<Exception>();
 
         private string selectedCodeSampleId;
         public string SelectedCodeSampleId {
@@ -82,6 +85,7 @@ namespace Sigged.CsC.Mono.Blazor.Pages
 
                 ConsoleOutput = "";
                 Status = "Building...";
+                StatusCode = "busy";
                 IsBuilding = true;
                 base.StateHasChanged();
 
@@ -108,6 +112,7 @@ namespace Sigged.CsC.Mono.Blazor.Pages
                     Console.WriteLine($"Build time: {sw.ElapsedMilliseconds} ms");
 
                     Status = (emitResult?.Success == true) ? "Build succeeded" : "Build failed";
+                    StatusCode = (emitResult?.Success == true) ? "success" : "error";
                     IsBuilding = false;
                     base.StateHasChanged();
 
@@ -116,6 +121,7 @@ namespace Sigged.CsC.Mono.Blazor.Pages
                     if (emitResult?.Success == true && runOnSuccess)
                     {
                         IsRunning = true;
+                        StatusCode = "busy";
                         base.StateHasChanged();
 
                         Console.WriteLine("Running...");
@@ -142,6 +148,7 @@ namespace Sigged.CsC.Mono.Blazor.Pages
 
                             //output console writes
                             ConsoleOutput = consoleOutputWriter.ToString();
+                            StatusCode = "";
                             base.StateHasChanged();
                         }
                         catch
@@ -159,6 +166,8 @@ namespace Sigged.CsC.Mono.Blazor.Pages
                 }
                 catch (Exception ex)
                 {
+                    Status = "Application crashed";
+                    StatusCode = "error";
                     exception = ex;
                 }
                 finally
@@ -168,7 +177,7 @@ namespace Sigged.CsC.Mono.Blazor.Pages
 
                 if (exception != null)
                 {
-                    ConsoleOutput += "\r\n" + exception.ToString();
+                    Exceptions = new List<Exception> { exception };
                 }
 
                 base.StateHasChanged();
