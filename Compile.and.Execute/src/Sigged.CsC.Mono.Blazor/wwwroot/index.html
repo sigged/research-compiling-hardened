@@ -1,0 +1,94 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>.NET Standard C# Compiler - by sigged</title>
+    <base href="/" />
+    <link rel="stylesheet" href="css/repl.css" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Mono" rel="stylesheet">
+    <script src="js/split-grid.min.js"></script>
+    <script src="js/bootstrap.jq.bundle.js"></script>
+</head>
+<body>
+    <div class="repl-wrapper">
+        <header class="repl-header">
+            <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow">
+                <div class="container-fluid">
+                    <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index"><img src="images/repl.png" height="30" alt="C#" />Net Standard C# Compiler <span class="d-none d-md-inline">by Sigged</span></a>
+                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                            aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="navbar-collapse collapse d-sm-inline-flex flex-row-reverse">
+                        <ul class="navbar-nav">
+                            <li class="nav-item">
+                                <a href="#" class="nav-link text-dark" data-toggle="modal" data-target="#aboutModal">About</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+        </header>
+        <app>Loading...</app>
+
+        <!--<script src="js/repl.js"></script>-->
+
+
+    </div>
+    <div class="modal fade" id="aboutModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">About</h4>
+                    <button type="button" class="close" data-dismiss="modal">×</button>
+                </div>
+                <div class="modal-body">
+                    <p>.NET Standard C# Compiler was developed to research how to compile and execute arbitrary .NET Standard code securely.</p>
+                    <p>This version of the application is the insecure starting point of the research. Any C# code can be executed on the server, which poses a big security threat. </p>
+                    <p><strong>Do not run this webapplication in production. Use at your own risk.</strong></p>
+                    <ul class="dev-sites">
+                        <li><img src="images/github.png" alt="Github" /><p>It's open sourced on:<br /><a href="https://github.com/sigged/research-compiling">https://github.com/sigged/research-compiling</a></p></li>
+                        <li><img src="images/docker.png" alt="Docker" /><p>It's containerized on:<br /><a href="https://hub.docker.com/r/sigged/insecure-csc">https://hub.docker.com/r/sigged/insecure-csc</a></p></li>
+                    </ul>
+                    <div>Developed by S. Derdeyn &copy;2019 - MIT Licensed</div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <script>
+        let cEditor = null;
+        function iframeLoaded() {
+            console.log("Iframe loaded");
+            cEditor = document.querySelector(".repl-main-ide-source iframe")
+                .contentWindow.cEditor;
+        }
+
+        window.appLoaded = function () {
+            const split = Split({ // gutters specified in options
+                columnGutters: [{
+                    track: 1,
+                    element: document.querySelector(".repl-main-ide-splitter-h"),
+                }],
+                rowGutters: [{
+                    track: 1,
+                    element: document.querySelector(".repl-main-ide-splitter-v-err"),
+                }],
+                columnMinSizes: {
+                    0: 100,
+                    2: 30
+                },
+                rowMinSizes: {
+                    0: 100,
+                    2: 45
+                }
+            });
+        }
+    </script>
+    <script src="_framework/blazor.webassembly.js"></script>
+</body>
+</html>

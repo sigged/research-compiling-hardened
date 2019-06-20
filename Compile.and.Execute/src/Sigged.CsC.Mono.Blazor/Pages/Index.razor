@@ -1,0 +1,86 @@
+﻿@page "/"
+@layout MainLayout
+@inherits IndexModel
+
+<div class="repl-main-ide" id="repl-main-ide"
+     style="grid-template-columns: 1fr 10px 2fr; grid-template-rows: 3fr 10px 1fr 0px 30px;">
+    <pre class="repl-main-ide-console" id="console" ref="console"
+         v-on:click="consoleFocus()"
+         v-html="consoleText"></pre>
+    <div class="repl-main-ide-splitter-h gridsplitter-control-h"></div>
+    <div class="repl-main-ide-source">
+        <div class="repl-main-ide-toolbar">
+            <button class="btn btn-info" v-on:click="buildSource" v-bind:disabled="isRunning || isBuilding"><img src="images/build.png" />Build</button>
+            <button class="btn btn-success" v-on:click="buildAndRunSource" v-bind:disabled="isRunning || isBuilding"><img src="images/play.png" />Run</button>
+            <button class="btn btn-danger" v-on:click="stopAll" v-bind:disabled="!(isRunning || isBuilding)"><img src="images/stop.png" />Stop</button>
+            <select id="selectCodeSample" v-model="selectedCodeSampleId" class="custom-select codesample-picker" @@change="codeSampleSelected($event)" v-bind:disabled="isRunning || isBuilding" v-cloak>
+                <optgroup v-for="sampleCategory in codeSampleGroups" :label="sampleCategory.category">
+                    <option v-for="sample in sampleCategory.samples" v-bind:value="sample.id">
+                        {{ sample.name }}
+                    </option>
+                </optgroup>
+            </select>
+        </div>
+        <iframe src="codeview.html" onload="iframeLoaded()"></iframe>
+    </div>
+    <div class="repl-main-ide-splitter-v-err gridsplitter-control-v"></div>
+    <div class="repl-main-ide-errors">
+        <table>
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Id</th>
+                    <th>Location</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tr v-cloak v-for="err in builderrors">
+                <td><img v-bind:src="'/images/' + err.severity + '.png'" /></td>
+                <td>{{ err.id }}</td>
+                <td>{{ (err.startPosition) ? 'ln' + err.startPosition.line + ', ch' + err.startPosition.character : '' }}</td>
+                <td>{{ err.description }}</td>
+            </tr>
+        </table>
+    </div>
+    <div></div><!-- empty gutter -->
+    <div class="repl-main-ide-status" v-cloak
+         v-bind:class="{
+         'status-error': statusCode === 'error',
+         'status-success': statusCode === 'success',
+         'status-busy': statusCode === 'busy',
+         'status-default': statusCode === ''
+         }">
+        <div class="repl-main-ide-status-progressbar progress" v-if="isBuilding === true"><div class="indeterminate"></div></div>
+        <div class="repl-main-ide-status-label" v-cloak>{{ statusText }}</div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+<div style="display:none;">
+
+<textarea @bind="@SourceCode" rows="10" cols="100"></textarea>
+    <button class="btn" @onclick="@Build">Build</button>
+    <button class="btn" @onclick="@BuildAndRun">Build &amp; Run</button>
+<textarea @bind="@ConsoleOutput" rows="10" cols="100"></textarea>
+
+    <div>
+        @Status
+    </div>
+    <div>
+        @if (Diagnostics?.Count() > 0)
+        {
+            @foreach (var diag in Diagnostics)
+            {
+                <div>@diag.Message</div>
+            }
+        }
+    </div>
+</div>
