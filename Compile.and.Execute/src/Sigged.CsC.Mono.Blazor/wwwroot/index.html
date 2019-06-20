@@ -30,7 +30,7 @@
                 </div>
             </nav>
         </header>
-        <app>Loading...</app>
+        <app class="repl-main">Loading...</app>
 
         <!--<script src="js/repl.js"></script>-->
 
@@ -87,6 +87,17 @@
                     2: 45
                 }
             });
+        }
+
+        window.getSourceCode = function () {
+            if (cEditor)
+                return cEditor.getTextArea().value;
+            else
+                return null;
+        }
+        
+        window.setCodeSample = function (sampleSourceCode) {
+            cEditor.getDoc().setValue(sampleSourceCode);
         }
     </script>
     <script src="_framework/blazor.webassembly.js"></script>

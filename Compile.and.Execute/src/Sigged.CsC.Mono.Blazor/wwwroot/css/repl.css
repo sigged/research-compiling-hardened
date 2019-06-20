@@ -7218,7 +7218,7 @@ height: 60px;
       height: 57px; } }
 
 .repl-main {
-  background-color: yellow;
+  background-color: #fff;
   height: calc(100% - 50px); }
   @media only screen and (min-width: 768px) {
     .repl-main {
